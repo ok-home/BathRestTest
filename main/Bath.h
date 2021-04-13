@@ -6,7 +6,7 @@
 #include <freertos/queue.h>
 #include <freertos/semphr.h>
 /*
-* branch
+* branch tst
 */
 
 #define SOCKSTARTMSG "sstrt" // при получении по WS - новый сокет.
