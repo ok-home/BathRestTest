@@ -5,7 +5,9 @@
 #include <freertos/task.h>
 #include <freertos/queue.h>
 #include <freertos/semphr.h>
-/**/////
+/*
+* branch
+*/
 
 #define SOCKSTARTMSG "sstrt" // при получении по WS - новый сокет.
 #define MAXJSONSTRING 64 // Буфер JSON
