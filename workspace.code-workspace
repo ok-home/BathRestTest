@@ -1,0 +1,23 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"idf.portWin": "COM3",
+		"files.associations": {
+			"esp_wifi.h": "c",
+			"esp_wifi_types.h": "c",
+			"esp_wifi_types_private.h": "c",
+			"esp_http_server.h": "c",
+			"task.h": "c",
+			"stdio.h": "c",
+			"esp_log.h": "c",
+			"ctype.h": "c",
+			"protocol_examples_common.h": "c",
+			"freertos.h": "c"
+		},
+		"idf.flashType": "UART"
+	}
+}
