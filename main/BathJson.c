@@ -169,12 +169,14 @@ void SendWsData(void *p)
     struct WsDataToSend req;
     httpd_ws_frame_t ws_pkt;
     uint8_t buff[64];
+    int timeout = 5000 / portTICK_RATE_MS); // обновление статусов раз в 5 секунд
+    int cntsock = 0;
 
     for (;;)
     {
         if (xQueueReceive(SendWsQueue, &req, 5000 / portTICK_RATE_MS) == pdTRUE) // до таймаута
         {
-
+            timeout = 5000 / portTICK_RATE_MS); // видимо появился сокет - начинаем обновление статусов
             if (req.idx > MAX_IDX_PARM_TABLE)
                 continue; // ошибка данных
             if (req.idx < 0)
@@ -210,22 +212,24 @@ void SendWsData(void *p)
             }
         }
         else // таймаут - отправляем данные статусов из таблицы
-        {
-            for (int p = 0; p <= IDX_MVVOL; p++)
+        { 
+
+          for (int  f = 0; f < CONFIG_LWIP_MAX_SOCKETS; f++)
             {
-                req.idx = p;
-                for (int f = 0; f < CONFIG_LWIP_MAX_SOCKETS; f++)
+                if (SocketArgDb[f].fd == 0)
+                    continue;   // пустой сокет в таблице
+                cntsock++;       // есть сокеты на отправку     
+             for (int p = 0; p <= IDX_MVVOL; p++)   
                 {
-                    if (SocketArgDb[f].fd == 0)
-                        continue; // пустой сокет в таблице
-                    else
-                    {
+                        req.idx = p;   
                         req.fd = SocketArgDb[f].fd;
                         req.hd = SocketArgDb[f].hd;
                         SendSocket(req);
-                    }
+                    
                 }
             }
+            if(cntsock == 0)
+                timeout = portMAX_DELAY; //таблица сокетов пустая, ждем появления хотя бы одного запроса в очереди
         }
     }
 }

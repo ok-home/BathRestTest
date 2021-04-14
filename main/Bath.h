@@ -37,7 +37,6 @@ struct WsDataToSend
 {
     httpd_handle_t hd;
     int fd ;
-    //uint8_t data[64];
     int idx; // 0-32 индекс, <0 - ничего не отправляем.
 };
 
