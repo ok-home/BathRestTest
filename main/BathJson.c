@@ -169,12 +169,12 @@ void SendWsData(void *p)
     struct WsDataToSend req;
     httpd_ws_frame_t ws_pkt;
     uint8_t buff[64];
-    int timeout = 5000 / portTICK_RATE_MS); // обновление статусов раз в 5 секунд
+    int timeout = portMAX_DELAY; // на старте ждем первый сокет
     int cntsock = 0;
 
     for (;;)
     {
-        if (xQueueReceive(SendWsQueue, &req, 5000 / portTICK_RATE_MS) == pdTRUE) // до таймаута
+        if (xQueueReceive(SendWsQueue, &req, timeout) == pdTRUE) // до таймаута
         {
             timeout = 5000 / portTICK_RATE_MS); // видимо появился сокет - начинаем обновление статусов
             if (req.idx > MAX_IDX_PARM_TABLE)

@@ -265,7 +265,7 @@ void CheckDistMove(void *p)
 }
 
 /*
-*  Включение/вылдючение вентиляции по 2 параметрам влажность включения и выключения ( гистерезис )
+*  Включение/выключение вентиляции по 2 параметрам влажность включения и выключения ( гистерезис )
 *  порог включения должен быть больше порога выключения
 */
 void CheckRestHum(void *p)
@@ -276,7 +276,7 @@ void CheckRestHum(void *p)
     ud.HumData.sender = IDX_QHD_HumData;
     ventOnOff = 0;
     flag = 0;
- 
+
     for (;;)
     {
         xQueueReceive(HumIsrQueue, &hum, portMAX_DELAY);
@@ -284,9 +284,9 @@ void CheckRestHum(void *p)
         xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
         humOn = DataParmTable[IDX_BATHHUMONPARM].val;
         humOff = DataParmTable[IDX_BATHHUMOFFPARM].val;
-        if(humOn <= humOff)
+        if (humOn <= humOff)
         {
-            humOff = humOn-1;
+            humOff = humOn - 1;
             DataParmTable[IDX_BATHHUMOFFPARM].val = humOff;
         }
         xSemaphoreGive(DataParmTableMutex);
@@ -310,7 +310,70 @@ void CheckRestHum(void *p)
         {
             ud.HumData.HumStatus = ventOnOff;
             flag = 0;
-            ESP_LOGI("Before Send BathVent","humon %d humoff %d hum %d ventOnOff ",humOn,humOff, hum ,lightOnOff );
+            ESP_LOGI("Before Send BathVent", "humon %d humoff %d hum %d ventOnOff ", humOn, humOff, hum, lightOnOff);
+            xQueueSend(CtrlQueueTab[Q_RESTVENT_IDX], &ud, 0);
+        }
+    }
+}
+/*
+*  Включение/выключение вентиляции по 2 параметрам задержка включения и выключения - относительно включеня света в ванной
+*  включение вентиляции относительно включения света в ванной, выключение относительно выключения света в ванной
+*  если свет выключен раньше задержки включения - вентиляция не включается
+*  порог включения должен быть больше порога выключения
+*/
+void CheckRestLightOnOff(void *p)
+{
+    union QueueHwData ud;
+    int lightOnOff = 0;
+    int ventOnOff = 0;
+    int ventOnDelay, ventOffDelay;
+    ud.LightData.sender = IDX_QHD_LightData;
+    int delay = portMAX_DELAY; // меняется в зависимости от состояния света
+    int timer = 0;
+    int timeout = pdTRUE;
+
+    for (;;)
+    {
+        timeout = xQueueReceive(HumIsrQueue, &LightOnOff, delay); // нужно формировать другую очередь
+        //ESP_LOGI("Light->Vent", "hum %d sender %d", , ud.LightData.sender);
+        xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
+        ventOnDelay = DataParmTable[IDX_BATHVENTONDELAY].val;
+        ventOffDelay = DataParmTable[IDX_BATHVENTOFFDELAY].val;
+        xSemaphoreGive(DataParmTableMutex);
+        if (timeout == pdTRUE) // есть данные в очереди
+        {
+            if (lightOnOff == 1) // включили свет - ждем задержку включения вентилятора
+            {
+                delay = (ventOnDelay * 1000) / portTICK_RATE_MS;
+                continue;
+            }
+            else // выключили свет
+            {
+                if (ventOnOff == 0) //вентилятор еще не включили в свет уже выключили
+                {
+                    delay = portMAX_DELAY; // долго ждем очередного включения света
+                }
+                else // вентилятор включен ждем задержку выключения
+                {
+                    delay = (ventOffDelay * 1000) / portTICK_RATE_MS;
+                }
+                continue;
+            }
+        }
+        else // таймаут - сработали задержки включения или выключения
+        {
+            if (ventOnOff == 0) // вентилятор выключен - включаем
+            {
+                ventOnOff = 1;
+                delay = portMAX_DELAY; // долго ждем выключения света
+            }
+            else // вентилятор включен - выключаем
+            {
+                ventOnOff = 0;
+                delay = portMAX_DELAY; // долго ждем включения света
+            }
+            ud.LightData.LightData = ventOnOff;
+            ESP_LOGI("Before Send BathVent -> from Light", "onDelay %d offDelay %d ventOnOff %d", ventOnDelay, ventOffDelay, ventOnOff);
             xQueueSend(CtrlQueueTab[Q_RESTVENT_IDX], &ud, 0);
         }
     }

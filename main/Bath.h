@@ -69,9 +69,9 @@ union QueueHwData
         int HumData;
         int NumDelay; // ??
     } HumData;
-    struct LightData
+    struct LightRestData
     {
-        int sender; // 4 - send from dist
+        int sender; // 5 - send from dist
         int LightData;
         int LightDelay; // ??
     } LightData;
