@@ -5,9 +5,7 @@
 #include <freertos/task.h>
 #include <freertos/queue.h>
 #include <freertos/semphr.h>
-/*
-* branch tst
-*/
+
 
 #define SOCKSTARTMSG "sstrt" // при получении по WS - новый сокет.
 #define MAXJSONSTRING 64 // Буфер JSON
@@ -71,15 +69,23 @@ union QueueHwData
         int HumData;
         int NumDelay; // ??
     } HumData;
+    struct LightData
+    {
+        int sender; // 4 - send from dist
+        int LightData;
+        int LightDelay; // ??
+    } LightData;
 };
 /*
 * union QueueHwData - sender IDX
 */
 #define IDX_QHD_HTTP 0     // отправитель HTTP
-#define IDX_QHD_IrStatus 1 // отправитель HTTP
-#define IDX_QHD_MvStatus 2 // отправитель HTTP
-#define IDX_QHD_DistData 3 // отправитель HTTP
-#define IDX_QHD_HumData 4  // отправитель HTTP
+#define IDX_QHD_IrStatus 1 // отправитель датчик ИК
+#define IDX_QHD_MvStatus 2 // отправитель датчик МВ
+#define IDX_QHD_DistData 3 // отправитель датчик расстояния
+#define IDX_QHD_HumData 4  // отправитель датчик влажности
+#define IDX_QHD_LightData 5  // отправитель состояние света в ванной или в туалете ( в разные очереди );
+
 
 /*
 *  Индекс в таблице для параметров
@@ -161,6 +167,7 @@ SemaphoreHandle_t DataParmTableMutex;
 xQueueHandle IrIsrQueue; // пррывание от ИК датчика
 xQueueHandle MvIsrQueue; // прерывание от МВ датчика
 xQueueHandle DistIsrQueue; // прерывания от Датчика расстояния
+xQueueHandle HumIsrQueue; // прерывания от Датчика влажности
 
 void CheckIrMove(void *p);
 void CheckMvMove(void *p);

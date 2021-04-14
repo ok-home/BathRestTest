@@ -146,7 +146,7 @@ void RestLightControl(void *p)
                 req.hd = NULL;
                 req.idx = IDX_RESTLIGHTSTATUS;
                 xQueueSend(SendWsQueue, &req, 0);
-                ESP_LOGI("СВЕТ В Туалете", "Свет %d idx %d\n", LightOnOff,  req.idx);
+                ESP_LOGI("СВЕТ В Туалете", "Свет %d idx %d\n", LightOnOff, req.idx);
                 // сюда ставим информирование о состоянии света и собственно само включени !!
             }
         }
@@ -266,49 +266,52 @@ void CheckDistMove(void *p)
 
 /*
 *  Включение/вылдючение вентиляции по 2 параметрам влажность включения и выключения ( гистерезис )
-*  Задержка выключения фиксированная - REstLightDelay
+*  порог включения должен быть больше порога выключения
 */
 void CheckRestHum(void *p)
 {
     uint16_t hum;
-    int humOn, humOff, humDelay, ventOnOff, flag;
+    int humOn, humOff, ventOnOff, flag;
     union QueueHwData ud;
     ud.HumData.sender = IDX_QHD_HumData;
     ventOnOff = 0;
     flag = 0;
-    //HumDelay = RestLightDelay;
+ 
     for (;;)
     {
         xQueueReceive(HumIsrQueue, &hum, portMAX_DELAY);
         ESP_LOGI("HUM", "hum %d sender %d", hum, ud.HumData.sender);
         xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
-        humOn = DataParmTable[IDX_BATHLIGHTONHUM].val;
-        humOff = DataParmTable[IDX_BATHLIGHTOFFHUM].val;
-        xSemaphoreGive(DataParmTableMutex);
-        if (hum > humOn)
+        humOn = DataParmTable[IDX_BATHHUMONPARM].val;
+        humOff = DataParmTable[IDX_BATHHUMOFFPARM].val;
+        if(humOn <= humOff)
         {
-            if( ventOnOff = 0)
-              {
-                  flag=1;
-              }
-            ventOnOff = 1;
-            
+            humOff = humOn-1;
+            DataParmTable[IDX_BATHHUMOFFPARM].val = humOff;
         }
-        else if(hum < humOff)
+        xSemaphoreGive(DataParmTableMutex);
+        if (ventOnOff == 0)
         {
-            if(ventOnOff = 1)
+            if (hum > humOn)
             {
-                flag=1;
+                ventOnOff = 1;
+                flag = 1;
             }
-            ventOnOff = 0;
+        }
+        else
+        {
+            if (hum < humOff)
+            {
+                ventOnOff = 0;
+                flag = 1;
+            }
         }
         if (flag)
         {
             ud.HumData.HumStatus = ventOnOff;
             flag = 0;
-            //   ESP_LOGI("Before Send Rest Light","diston %d dist %d onoff %d ",distOn,dist,lightOnOff );
+            ESP_LOGI("Before Send BathVent","humon %d humoff %d hum %d ventOnOff ",humOn,humOff, hum ,lightOnOff );
             xQueueSend(CtrlQueueTab[Q_RESTVENT_IDX], &ud, 0);
         }
     }
 }
-

@@ -259,6 +259,7 @@ void CreateTaskAndQueue()
     IrIsrQueue = xQueueCreate(2, sizeof(uint8_t));
     MvIsrQueue = xQueueCreate(2, sizeof(uint8_t));
     DistIsrQueue = xQueueCreate(5, sizeof(uint16_t)); // длина очереди в секундах
+    HumIsrQueue = xQueueCreate(5, sizeof(uint16_t)); // длина очереди в секундах
 
     // обработчики прерываний
     xTaskCreate(CheckIrMove, "IrMove", 2000, NULL, 1, NULL);
