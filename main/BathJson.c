@@ -59,7 +59,7 @@ int JsonDigitBool(char *jsonStr, char *nameStr, int maxNameSize)
 * формимирует строку Json из 2-х пар имя:значение
 * dest - указатель на строку получатель ( размер не контролируется, может быть превышение)
 */
-void StrToJson(char *dest, char *name1, char *vol1, char *name2, char *vol2)
+inline void StrToJson(char *dest, char *name1, char *vol1, char *name2, char *vol2)
 {
     strcpy(dest, "{");
     strcat(dest, name1);
@@ -87,8 +87,70 @@ void ParmTableToJson(char *jsonStr, int i)
     }
     else
         itoa(DataParmTable[i].val, valstr, 10);
-    xSemaphoreGive(DataParmTableMutex); // освободить блокировку
+    
     StrToJson(jsonStr, "\"name\"", DataParmTable[i].name, "\"msg\"", valstr);
+    xSemaphoreGive(DataParmTableMutex); // освободить блокировку
+}
+
+
+/*
+* AddSocket, RemSocket, SendSocket - все вызываются только из одного потока SendWsData
+* блокировка таблицы сокетов не требуется
+*/
+
+// Добавить сокет в таблицу сокетов
+inline void AddSocket(struct WsDataToSend req)
+{
+    for (int flag = 0, sock_idx = 0; sock_idx < CONFIG_LWIP_MAX_SOCKETS; sock_idx++)
+    {
+        if (SocketArgDb[sock_idx].fd == req.fd) // есть в таблице сокетов
+            break;
+        if (SocketArgDb[sock_idx].fd == 0) // есть пустая запись в таблице
+        {
+            if (flag == 0) //такой сокет еще не добавляли
+            {
+                SocketArgDb[sock_idx].fd = req.fd;
+                SocketArgDb[sock_idx].hd = req.hd;
+                flag++; // добавили сокет
+                continue;
+            }
+        }
+        if (SocketArgDb[sock_idx].fd == req.fd) // проходим дальше конца таблицы, если есть дубль - убираем
+        {
+            SocketArgDb[sock_idx].fd = 0;
+            SocketArgDb[sock_idx].hd = NULL;
+            break;
+        }
+    }
+}
+// убрать сокет из таблицы сокетов
+inline void RemoveSocket(struct WsDataToSend req)
+{
+
+    for (int i = 0; i < CONFIG_LWIP_MAX_SOCKETS; i++)
+        if (SocketArgDb[i].fd == req.fd)
+        { // сокет закрыт - убрать из таблицы
+            SocketArgDb[i].fd = 0;
+            SocketArgDb[i].hd = NULL;
+            break;
+        }
+}
+// отправить в сокет данные из таблицы параметров ( удалиь сокет из таблицы если была ошибка отправки ) 
+inline void SendSocket(struct WsDataToSend req)
+{
+    httpd_ws_frame_t ws_pkt;
+    uint8_t buff[64];
+
+    ParmTableToJson((char *)buff, req.idx); // строка данных в HTTP
+    memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
+    ws_pkt.payload = buff;
+    ws_pkt.len = strlen((char *)buff);
+    ws_pkt.type = HTTPD_WS_TYPE_TEXT;
+    if (httpd_ws_send_frame_async(req.hd, req.fd, &ws_pkt) != ESP_OK)
+    {
+        // отправлено с ошибкой - убрать сокет из таблицы сокетов
+        RemoveSocket(req);
+    }
 }
 /*
 * отправка данных в сокет
@@ -116,66 +178,22 @@ void SendWsData(void *p)
             if (req.idx > MAX_IDX_PARM_TABLE)
                 continue; // ошибка данных
             if (req.idx < 0)
-            { // новый сокет
-
-                xSemaphoreTake(SocketTableMutex, portMAX_DELAY);
-                for (int flag = 0, sock_idx = 0; sock_idx < CONFIG_LWIP_MAX_SOCKETS; sock_idx++)
-                {
-                    if (SocketArgDb[sock_idx].fd == req.fd) // есть в таблице сокетов
-                        break;
-                    if (SocketArgDb[sock_idx].fd == 0) // есть пустая запись в таблице
-                    {
-                        if (flag == 0) //такой сокет еще не добавляли
-                        {
-                            SocketArgDb[sock_idx].fd = req.fd;
-                            SocketArgDb[sock_idx].hd = req.hd;
-                            flag++; // добавили сокет
-                            continue;
-                        }
-                    }
-                    if (SocketArgDb[sock_idx].fd == req.fd) // проходим дальше конца таблицы, если есть дубль - убираем
-                    {
-                        SocketArgDb[sock_idx].fd = 0;
-                        SocketArgDb[sock_idx].hd = NULL;
-                        break;
-                    }
-                }
-                xSemaphoreGive(SocketTableMutex);
-
-                // и здесь отправить всю таблицу параметров в сокет
+            {                   // новый сокет
+                AddSocket(req); // добавим сокет в таблицу
+                // здесь отправим всю таблицу параметров в этот сокет
                 for (int p = 0; p < MAX_IDX_PARM_TABLE; p++)
                 {
-                    ParmTableToJson((char *)buff, p); // строка данных в HTTP
-                    memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
-                    ws_pkt.payload = buff;
-                    ws_pkt.len = strlen((char *)buff);
-                    ws_pkt.type = HTTPD_WS_TYPE_TEXT;
-                    httpd_ws_send_frame_async(req.hd, req.fd, &ws_pkt);
+                    req.idx = p;
+                    SendSocket(req);
                 }
                 continue;
             }
 
-            //строку по индексу из таблицы - отправить в сокет
-            ParmTableToJson((char *)buff, req.idx); // строка данных в HTTP
-            memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
-            ws_pkt.payload = buff;
-            ws_pkt.len = strlen((char *)buff);
-            ws_pkt.type = HTTPD_WS_TYPE_TEXT;
+            // req.idx - индекс в таблице параметров
+
             if (req.fd != 0) // отправить в сокет из запроса
             {
-                if (httpd_ws_send_frame_async(req.hd, req.fd, &ws_pkt) != ESP_OK)
-                {
-                    // отправлено с ошибкой - убрать сокет из таблицы сокетов
-                    xSemaphoreTake(SocketTableMutex, portMAX_DELAY);
-                    for (int i = 0; i < CONFIG_LWIP_MAX_SOCKETS; i++)
-                        if (SocketArgDb[i].fd == req.fd)
-                        { // сокет закрыт - убрать из таблицы
-                            SocketArgDb[i].fd = 0;
-                            SocketArgDb[i].hd = NULL;
-                            break;
-                        }
-                    xSemaphoreGive(SocketTableMutex);
-                }
+                SendSocket(req);
             }
             else // отправить во все сокеты
             {
@@ -183,12 +201,10 @@ void SendWsData(void *p)
                 {
                     if (SocketArgDb[f].fd == 0)
                         continue; // пустой сокет в таблице
-                    if (httpd_ws_send_frame_async(SocketArgDb[f].hd, SocketArgDb[f].fd, &ws_pkt) != ESP_OK)
-                    { // сокет закрыт - убрать из таблицы
-                        xSemaphoreTake(SocketTableMutex, portMAX_DELAY);
-                        SocketArgDb[f].fd = 0;
-                        SocketArgDb[f].hd = NULL;
-                        xSemaphoreGive(SocketTableMutex);
+                    else
+                    {
+                        req.fd = SocketArgDb[f].fd;
+                        SendSocket(req);
                     }
                 }
             }
@@ -197,21 +213,16 @@ void SendWsData(void *p)
         {
             for (int p = 0; p <= IDX_MVVOL; p++)
             {
-                ParmTableToJson((char *)buff, p); // строка данных в HTTP
-                memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
-                ws_pkt.payload = buff;
-                ws_pkt.len = strlen((char *)buff);
-                ws_pkt.type = HTTPD_WS_TYPE_TEXT;
+                req.idx = p;
                 for (int f = 0; f < CONFIG_LWIP_MAX_SOCKETS; f++)
                 {
                     if (SocketArgDb[f].fd == 0)
                         continue; // пустой сокет в таблице
-                    if (httpd_ws_send_frame_async(SocketArgDb[f].hd, SocketArgDb[f].fd, &ws_pkt) != ESP_OK)
-                    { // сокет закрыт - убрать из таблицы
-                        xSemaphoreTake(SocketTableMutex, portMAX_DELAY);
-                        SocketArgDb[f].fd = 0;
-                        SocketArgDb[f].hd = NULL;
-                        xSemaphoreGive(SocketTableMutex);
+                    else
+                    {
+                        req.fd = SocketArgDb[f].fd;
+                        req.hd = SocketArgDb[f].hd;
+                        SendSocket(req);
                     }
                 }
             }
@@ -260,7 +271,7 @@ void CreateTaskAndQueue()
     //обновить страницы активных сокетов
     //xTaskCreate(AllDataSendToWS, "SendStartHTML", 4000, NULL, 1, NULL);
 
-    // очередь отправки в сокет 
+    // очередь отправки в сокет
     SendWsQueue = xQueueCreate(10, sizeof(struct WsDataToSend));
     // отправка в сокет
     xTaskCreate(SendWsData, "Socket Send", 4000, NULL, 1, NULL);

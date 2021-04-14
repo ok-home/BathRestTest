@@ -263,3 +263,52 @@ void CheckDistMove(void *p)
         }
     }
 }
+
+/*
+*  Включение/вылдючение вентиляции по 2 параметрам влажность включения и выключения ( гистерезис )
+*  Задержка выключения фиксированная - REstLightDelay
+*/
+void CheckRestHum(void *p)
+{
+    uint16_t hum;
+    int humOn, humOff, humDelay, ventOnOff, flag;
+    union QueueHwData ud;
+    ud.HumData.sender = IDX_QHD_HumData;
+    ventOnOff = 0;
+    flag = 0;
+    //HumDelay = RestLightDelay;
+    for (;;)
+    {
+        xQueueReceive(HumIsrQueue, &hum, portMAX_DELAY);
+        ESP_LOGI("HUM", "hum %d sender %d", hum, ud.HumData.sender);
+        xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
+        humOn = DataParmTable[IDX_BATHLIGHTONHUM].val;
+        humOff = DataParmTable[IDX_BATHLIGHTOFFHUM].val;
+        xSemaphoreGive(DataParmTableMutex);
+        if (hum > humOn)
+        {
+            if( ventOnOff = 0)
+              {
+                  flag=1;
+              }
+            ventOnOff = 1;
+            
+        }
+        else if(hum < humOff)
+        {
+            if(ventOnOff = 1)
+            {
+                flag=1;
+            }
+            ventOnOff = 0;
+        }
+        if (flag)
+        {
+            ud.HumData.HumStatus = ventOnOff;
+            flag = 0;
+            //   ESP_LOGI("Before Send Rest Light","diston %d dist %d onoff %d ",distOn,dist,lightOnOff );
+            xQueueSend(CtrlQueueTab[Q_RESTVENT_IDX], &ud, 0);
+        }
+    }
+}
+
