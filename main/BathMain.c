@@ -79,8 +79,8 @@ static esp_err_t echo_handler(httpd_req_t *req)
         ESP_LOGE(TAG, "httpd_ws_recv_frame failed with %d", ret);
         return ret;
     }
-    ESP_LOGI(TAG, "Got packet with message: %s", ws_pkt.payload);
-    ESP_LOGI(TAG, "Packet type: %d", ws_pkt.type);
+    //ESP_LOGI(TAG, "Got packet with message: %s", ws_pkt.payload);
+    //ESP_LOGI(TAG, "Packet type: %d", ws_pkt.type);
     /*
     * если получен стартовый код - новый сокет
     */
@@ -120,11 +120,11 @@ static esp_err_t echo_handler(httpd_req_t *req)
 
 static esp_err_t get_handler(httpd_req_t *req)
 {
-    ESP_LOGI("get sess id fd", "fd %d", (int)httpd_req_to_sockfd(req));
+    
     extern const unsigned char indexbathrest_html_start[] asm("_binary_indexbathrest_html_start");
     extern const unsigned char indexbathrest_html_end[] asm("_binary_indexbathrest_html_end");
     const size_t indexbathrest_html_size = (indexbathrest_html_end - indexbathrest_html_start);
-    ESP_LOGI("Get HTML", "HTML Size: '%d'", indexbathrest_html_size);
+    
     httpd_resp_send_chunk(req, (const char *)indexbathrest_html_start, indexbathrest_html_size);
     httpd_resp_sendstr_chunk(req, NULL);
 

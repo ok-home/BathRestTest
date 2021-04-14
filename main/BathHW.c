@@ -31,7 +31,6 @@ void BathLightControl(void *p)
             switch (unidata.HttpData.sender)
             {
             case IDX_QHD_HTTP:
-                //ESP_LOGI("BathLight", "HTTP %d id %d", unidata.HttpData.sender, unidata.HttpData.ParmIdx);
                 if (autolight == 0) // ручное управление светом
                 {
                     LightOnOff = DataParmTable[IDX_BATHLIGHTONOFF].val;
@@ -39,10 +38,8 @@ void BathLightControl(void *p)
                 break;
             case IDX_QHD_IrStatus:
             case IDX_QHD_MvStatus:
-                //ESP_LOGI("BathLight", "IrMV %d on/off %d", unidata.IrData.sender, unidata.IrData.IrStatus);
                 if (autolight == 0)
                 {
-                    //ESP_LOGI("BathLight", "DISABLE AUTO LIGHT");
                     break;
                 }
 
@@ -81,8 +78,7 @@ void BathLightControl(void *p)
                 req.hd = NULL;
                 req.idx = IDX_BATHLIGHTSTATUS;
                 xQueueSend(SendWsQueue, &req, 0);
-
-                ESP_LOGI("СВЕТ В ВАННОЙ", "Свет %d IR %d Mv %d idx %d\n", LightOnOff, IrOnOff, MvOnOff, req.idx);
+                //ESP_LOGI("СВЕТ В ВАННОЙ", "Свет %d IR %d Mv %d idx %d\n", LightOnOff, IrOnOff, MvOnOff, req.idx);
                 // сюда ставим информирование о состоянии света и собственно само включени !!
             }
         }
@@ -108,7 +104,7 @@ void RestLightControl(void *p)
     {
         if (xQueueReceive(RestLightSendToCtrl, &unidata, 1000 / portTICK_PERIOD_MS) == pdTRUE)
         {
-            //ESP_LOGI("RestLight", "sender %d id %d", unidata.DistData.sender, unidata.DistData.DistStatus);
+
             //определить режим работы автосвета ( автомат/ручное ) и текущее состояние света
             xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
             autolight = DataParmTable[IDX_RESTLIGHTAUTOENABLE].val;
@@ -117,7 +113,7 @@ void RestLightControl(void *p)
             switch (unidata.HttpData.sender)
             {
             case IDX_QHD_HTTP:
-                //ESP_LOGI("BathLight", "HTTP %d id %d", unidata.HttpData.sender, unidata.HttpData.ParmIdx);
+
                 if (autolight == 0) // ручное управление светом
                 {
                     LightOnOff = DataParmTable[IDX_RESTLIGHTONOFF].val;
@@ -146,7 +142,7 @@ void RestLightControl(void *p)
                 req.hd = NULL;
                 req.idx = IDX_RESTLIGHTSTATUS;
                 xQueueSend(SendWsQueue, &req, 0);
-                ESP_LOGI("СВЕТ В Туалете", "Свет %d idx %d\n", LightOnOff, req.idx);
+                //ESP_LOGI("СВЕТ В Туалете", "Свет %d idx %d\n", LightOnOff, req.idx);
                 // сюда ставим информирование о состоянии света и собственно само включени !!
             }
         }
@@ -308,9 +304,9 @@ void CheckRestHum(void *p)
         }
         if (flag)
         {
-            ud.HumData.HumStatus = ventOnOff;
+            ud.HumData.HumData = ventOnOff;
             flag = 0;
-            ESP_LOGI("Before Send BathVent", "humon %d humoff %d hum %d ventOnOff ", humOn, humOff, hum, lightOnOff);
+            ESP_LOGI("Before Send BathVent", "humon %d humoff %d hum %d ventOnOff %d ", humOn, humOff, hum, ventOnOff);
             xQueueSend(CtrlQueueTab[Q_RESTVENT_IDX], &ud, 0);
         }
     }
@@ -329,12 +325,11 @@ void CheckRestLightOnOff(void *p)
     int ventOnDelay, ventOffDelay;
     ud.LightData.sender = IDX_QHD_LightData;
     int delay = portMAX_DELAY; // меняется в зависимости от состояния света
-    int timer = 0;
     int timeout = pdTRUE;
 
     for (;;)
     {
-        timeout = xQueueReceive(HumIsrQueue, &LightOnOff, delay); // нужно формировать другую очередь
+        timeout = xQueueReceive(HumIsrQueue, &lightOnOff, delay); // нужно формировать другую очередь
         //ESP_LOGI("Light->Vent", "hum %d sender %d", , ud.LightData.sender);
         xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
         ventOnDelay = DataParmTable[IDX_BATHVENTONDELAY].val;

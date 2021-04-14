@@ -172,6 +172,7 @@ xQueueHandle HumIsrQueue; // прерывания от Датчика влажн
 void CheckIrMove(void *p);
 void CheckMvMove(void *p);
 void CheckDistMove( void *p);
+void CheckRestHum(void *p);
 
 /*
 *  Глобальные переменные 

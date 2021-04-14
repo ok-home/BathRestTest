@@ -122,6 +122,8 @@ inline void AddSocket(struct WsDataToSend req)
             break;
         }
     }
+   // for (int sock_idx = 0; sock_idx < CONFIG_LWIP_MAX_SOCKETS; sock_idx++)
+   // ESP_LOGI("add ws","idx %d hd %d fd %d ",sock_idx, (int)SocketArgDb[sock_idx].hd, SocketArgDb[sock_idx].fd);
 }
 // убрать сокет из таблицы сокетов
 inline void RemoveSocket(struct WsDataToSend req)
@@ -146,9 +148,11 @@ inline void SendSocket(struct WsDataToSend req)
     ws_pkt.payload = buff;
     ws_pkt.len = strlen((char *)buff);
     ws_pkt.type = HTTPD_WS_TYPE_TEXT;
+    
     if (httpd_ws_send_frame_async(req.hd, req.fd, &ws_pkt) != ESP_OK)
     {
         // отправлено с ошибкой - убрать сокет из таблицы сокетов
+    
         RemoveSocket(req);
     }
 }
@@ -167,8 +171,6 @@ inline void SendSocket(struct WsDataToSend req)
 void SendWsData(void *p)
 {
     struct WsDataToSend req;
-    httpd_ws_frame_t ws_pkt;
-    uint8_t buff[64];
     int timeout = portMAX_DELAY; // на старте ждем первый сокет
     int cntsock = 0;
 
@@ -176,7 +178,7 @@ void SendWsData(void *p)
     {
         if (xQueueReceive(SendWsQueue, &req, timeout) == pdTRUE) // до таймаута
         {
-            timeout = 5000 / portTICK_RATE_MS); // видимо появился сокет - начинаем обновление статусов
+            timeout = 5000 / portTICK_RATE_MS; // видимо появился сокет - начинаем обновление статусов
             if (req.idx > MAX_IDX_PARM_TABLE)
                 continue; // ошибка данных
             if (req.idx < 0)
@@ -205,6 +207,7 @@ void SendWsData(void *p)
                         continue; // пустой сокет в таблице
                     else
                     {
+                        req.hd = SocketArgDb[f].hd;
                         req.fd = SocketArgDb[f].fd;
                         SendSocket(req);
                     }
@@ -265,6 +268,7 @@ void CreateTaskAndQueue()
     xTaskCreate(CheckIrMove, "IrMove", 2000, NULL, 1, NULL);
     xTaskCreate(CheckMvMove, "MvMove", 2000, NULL, 1, NULL);
     xTaskCreate(CheckDistMove, "DistMove", 2000, NULL, 1, NULL);
+    xTaskCreate(CheckRestHum, "HumData", 2000, NULL, 1, NULL);
 
     xTaskCreate(BathLightControl, "blc", 4000, NULL, 1, NULL);
     xTaskCreate(BathVentControl, "bvc", 4000, NULL, 1, NULL);
