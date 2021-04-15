@@ -89,8 +89,6 @@ void BathLightControl(void *p)
 void BathVentControl(void *p)
 {
     union QueueHwData unidata;
-    uint8_t HumOnOff = 0;
-    uint8_t LightOnOff = 0;
     int ventOnOff = 0;
     int autoVent = 0;
     int flag;
@@ -100,7 +98,6 @@ void BathVentControl(void *p)
     {
         if (xQueueReceive(BathVentSendToCtrl, &unidata, portMAX_DELAY) == pdTRUE)
         {
-            ESP_LOGI("BathVent", "sender %d id %d", unidata.HttpData.sender, unidata.HttpData.ParmIdx);
             xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
             autoVent = DataParmTable[IDX_BATHVENTAUTOENABLE].val;
             ventOnOff = DataParmTable[IDX_BATHVENTONOFF].val;
@@ -145,7 +142,7 @@ void BathVentControl(void *p)
                 req.hd = NULL;
                 req.idx = IDX_BATHVENTSTATUS;
                 xQueueSend(SendWsQueue, &req, 0); // отправить HTTP
-                ESP_LOGI("ВЕНТИЛЯЦИЯ В ВАННОЙ", "Вент %d влажн %d свет %d idx %d\n", ventOnOff, DataParmTable[IDX_HUMVOL].val, DataParmTable[IDX_BATHLIGHTSTATUS].val, req.idx);
+                //ESP_LOGI("ВЕНТИЛЯЦИЯ В ВАННОЙ", "Вент %d влажн %d свет %d idx %d", ventOnOff, DataParmTable[IDX_HUMVOL].val, DataParmTable[IDX_BATHLIGHTSTATUS].val, req.idx);
                 // сюда ставим информирование о состоянии света и собственно само включение !!
             }
         }
@@ -211,7 +208,6 @@ void RestVentControl(void *p)
 {
     union QueueHwData unidata;
    
-    uint8_t LightOnOff = 0;
     int ventOnOff = 0;
     int autoVent = 0;
     int flag;
@@ -221,7 +217,6 @@ void RestVentControl(void *p)
     {
         if (xQueueReceive(RestVentSendToCtrl, &unidata, portMAX_DELAY) == pdTRUE)
         {
-            ESP_LOGI("RestVent", "sender %d id %d", unidata.HttpData.sender, unidata.HttpData.ParmIdx);
             xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
             autoVent = DataParmTable[IDX_RESTVENTAUTOENABLE].val;
             ventOnOff = DataParmTable[IDX_RESTVENTONOFF].val;
@@ -252,7 +247,7 @@ void RestVentControl(void *p)
                 req.hd = NULL;
                 req.idx = IDX_RESTVENTSTATUS;
                 xQueueSend(SendWsQueue, &req, 0); // отправить HTTP
-                ESP_LOGI("ВЕНТИЛЯЦИЯ В ТУАЛЕТЕ", "Вент %d влажн %d свет %d idx %d\n", ventOnOff,, DataParmTable[IDX_RESTLIGHTSTATUS].val, req.idx);
+                //ESP_LOGI("ВЕНТИЛЯЦИЯ В ТУАЛЕТЕ", "Вент %d  свет %d idx %d\n", ventOnOff, DataParmTable[IDX_RESTLIGHTSTATUS].val, req.idx);
                 // сюда ставим информирование о состоянии света и собственно само включение !!
             }
         }
@@ -346,7 +341,7 @@ void CheckDistMove(void *p)
         //ESP_LOGI("DIST", "cm %d sender %d", dist, ud.DistData.sender);
         xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
         distOn = DataParmTable[IDX_RESTLIGHTONDIST].val;
-        DataParmTable[IDX_DISTVOL] = (int)dist;
+        DataParmTable[IDX_DISTVOL].val = (int)dist;
         xSemaphoreGive(DataParmTableMutex);
         if (dist < distOn)
         {
@@ -397,7 +392,6 @@ void CheckBathHum(void *p)
         xQueueReceive(HumIsrQueue, &hum, portMAX_DELAY);
         
 
-        ESP_LOGI("HUM", "hum %d sender %d", hum, ud.HumData.sender);
         xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
         humOn = DataParmTable[IDX_BATHHUMONPARM].val;
         humOff = DataParmTable[IDX_BATHHUMOFFPARM].val;
@@ -428,7 +422,6 @@ void CheckBathHum(void *p)
         {
             ud.HumData.HumData = ventOnOff;
             flag = 0;
-            ESP_LOGI("Before Send BathVent", "humon %d humoff %d hum %d ventOnOff %d ", humOn, humOff, hum, ventOnOff);
             xQueueSend(CtrlQueueTab[Q_BATHVENT_IDX], &ud, 0);
         }
     }
@@ -451,7 +444,6 @@ void CheckBathLightOnOff(void *p)
     for (;;)
     {
         timeout = xQueueReceive(BathLightIsrQueue, &lightOnOff, delay); // включение света
-        //ESP_LOGI("Light->Vent", "hum %d sender %d", , ud.LightData.sender);
         xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
         ventOnDelay = DataParmTable[IDX_BATHVENTONDELAY].val;
         ventOffDelay = DataParmTable[IDX_BATHVENTOFFDELAY].val;
@@ -489,7 +481,6 @@ void CheckBathLightOnOff(void *p)
                 delay = portMAX_DELAY; // долго ждем включения света
             }
             ud.LightData.LightData = ventOnOff;
-            ESP_LOGI("Before Send BathVent -> from Light", "onDelay %d offDelay %d ventOnOff %d", ventOnDelay, ventOffDelay, ventOnOff);
             xQueueSend(CtrlQueueTab[Q_BATHVENT_IDX], &ud, 0);
         }
     }
