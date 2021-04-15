@@ -16,6 +16,7 @@
 #include "esp_eth.h"
 #include "protocol_examples_common.h"
 #include <esp_http_server.h>
+#include <mdns.h>
 
 #include "Bath.h"
 #include "BathInitGlobal.h"
@@ -224,6 +225,10 @@ void app_main(void)
 
     /* Start the server for the first time */
     server = start_webserver();
+    /* start mdns */
+    ESP_ERROR_CHECK(mdns_init());
+    ESP_ERROR_CHECK(mdns_hostname_set("ok-home"));
+    ESP_ERROR_CHECK(mdns_instance_name_set("ok-home BathVent"));
 
     testunion();
 }
