@@ -261,14 +261,19 @@ void CreateTaskAndQueue()
     //очереди из обработчиков прерывания
     IrIsrQueue = xQueueCreate(2, sizeof(uint8_t));
     MvIsrQueue = xQueueCreate(2, sizeof(uint8_t));
-    DistIsrQueue = xQueueCreate(5, sizeof(uint16_t)); // длина очереди в секундах
-    HumIsrQueue = xQueueCreate(5, sizeof(uint16_t)); // длина очереди в секундах
+    DistIsrQueue = xQueueCreate(5, sizeof(uint16_t));
+    HumIsrQueue = xQueueCreate(5, sizeof(uint16_t)); 
+    BathLightIsrQueue = xQueueCreate(2, sizeof(uint16_t));
+    RestLightIsrQueue = xQueueCreate(2, sizeof(uint16_t));
 
     // обработчики прерываний
     xTaskCreate(CheckIrMove, "IrMove", 2000, NULL, 1, NULL);
     xTaskCreate(CheckMvMove, "MvMove", 2000, NULL, 1, NULL);
     xTaskCreate(CheckDistMove, "DistMove", 2000, NULL, 1, NULL);
-    xTaskCreate(CheckRestHum, "HumData", 2000, NULL, 1, NULL);
+    xTaskCreate(CheckBathHum, "HumData", 2000, NULL, 1, NULL);
+    xTaskCreate(CheckBathLightOnOff, "HumData", 2000, NULL, 1, NULL);
+    xTaskCreate(CheckRestLightOnOff, "HumData", 2000, NULL, 1, NULL);
+    
 
     xTaskCreate(BathLightControl, "blc", 4000, NULL, 1, NULL);
     xTaskCreate(BathVentControl, "bvc", 4000, NULL, 1, NULL);

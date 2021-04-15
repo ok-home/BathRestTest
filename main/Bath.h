@@ -125,7 +125,7 @@ union QueueHwData
 #define IDX_RESTLIGHTONDIST 27   // расстояние включения света в туалете
 #define IDX_RESTLIGHTOFFDIST 28  // расстояние выключения света в туалете
 #define IDX_RESTVENTONDELAY 29   // задержка включения вентиляции в туалете
-#define IDX_RESTVENTFFDELAY 30   // задержка выключения вентиляции в туалете
+#define IDX_RESTVENTOFFDELAY 30   // задержка выключения вентиляции в туалете
 
 #define MAX_IDX_PARM_TABLE 31 // размер таблицы параметров
 
@@ -168,17 +168,29 @@ xQueueHandle IrIsrQueue; // пррывание от ИК датчика
 xQueueHandle MvIsrQueue; // прерывание от МВ датчика
 xQueueHandle DistIsrQueue; // прерывания от Датчика расстояния
 xQueueHandle HumIsrQueue; // прерывания от Датчика влажности
+xQueueHandle BathLightIsrQueue; // прерывания от включения света в ванной
+xQueueHandle RestLightIsrQueue; // прерывания от включения света в ванной
 
-void CheckIrMove(void *p);
-void CheckMvMove(void *p);
-void CheckDistMove( void *p);
-void CheckRestHum(void *p);
+
+void CheckIrMove(void *p); // обработчик ИК датчика 
+void CheckMvMove(void *p); // обработчик МВ датчика
+void CheckDistMove( void *p); // обработчик датчика расстояния
+void CheckBathHum(void *p); // обработчик датчика влажности
+void CheckBathLightOnOff(void *p); // обработчик включения света в ванной для вентиляции в ванной
+void CheckRestLightOnOff(void *p); // обработчик включения света в туалете для вентиляции в туалете
 
 /*
 *  Глобальные переменные 
 */
 extern httpNameParm_t DataParmTable[];
 extern struct async_resp_arg SocketArgDb[];
+/*
+Эти очереди в таблице
+QueueHandle_t BathLightSendToCtrl;
+QueueHandle_t BathVentSendToCtrl;
+QueueHandle_t RestLightSendToCtrl;
+QueueHandle_t RestVentSendToCtrl;
+*/
 extern QueueHandle_t *CtrlQueueTab[];
 
 extern uint8_t IrMvAnyAll; // 0 - Any, 1 - All - пока нет в таблице параметров
