@@ -180,6 +180,16 @@ void CheckBathLightOnOff(void *p); // обработчик включения с
 void CheckRestLightOnOff(void *p); // обработчик включения света в туалете для вентиляции в туалете
 
 /*
+*  ISR Defifnition
+*/
+void IrMvISRSetup(void);
+void DistIsrSetup();
+
+
+
+
+
+/*
 *  Глобальные переменные 
 */
 extern httpNameParm_t DataParmTable[];
