@@ -87,11 +87,10 @@ void ParmTableToJson(char *jsonStr, int i)
     }
     else
         itoa(DataParmTable[i].val, valstr, 10);
-    
+
     StrToJson(jsonStr, "\"name\"", DataParmTable[i].name, "\"msg\"", valstr);
     xSemaphoreGive(DataParmTableMutex); // освободить блокировку
 }
-
 
 /*
 * AddSocket, RemSocket, SendSocket - все вызываются только из одного потока SendWsData
@@ -122,8 +121,8 @@ inline void AddSocket(struct WsDataToSend req)
             break;
         }
     }
-   // for (int sock_idx = 0; sock_idx < CONFIG_LWIP_MAX_SOCKETS; sock_idx++)
-   // ESP_LOGI("add ws","idx %d hd %d fd %d ",sock_idx, (int)SocketArgDb[sock_idx].hd, SocketArgDb[sock_idx].fd);
+    // for (int sock_idx = 0; sock_idx < CONFIG_LWIP_MAX_SOCKETS; sock_idx++)
+    // ESP_LOGI("add ws","idx %d hd %d fd %d ",sock_idx, (int)SocketArgDb[sock_idx].hd, SocketArgDb[sock_idx].fd);
 }
 // убрать сокет из таблицы сокетов
 inline void RemoveSocket(struct WsDataToSend req)
@@ -137,7 +136,7 @@ inline void RemoveSocket(struct WsDataToSend req)
             break;
         }
 }
-// отправить в сокет данные из таблицы параметров ( удалиь сокет из таблицы если была ошибка отправки ) 
+// отправить в сокет данные из таблицы параметров ( удалиь сокет из таблицы если была ошибка отправки )
 inline void SendSocket(struct WsDataToSend req)
 {
     httpd_ws_frame_t ws_pkt;
@@ -148,11 +147,11 @@ inline void SendSocket(struct WsDataToSend req)
     ws_pkt.payload = buff;
     ws_pkt.len = strlen((char *)buff);
     ws_pkt.type = HTTPD_WS_TYPE_TEXT;
-    
+
     if (httpd_ws_send_frame_async(req.hd, req.fd, &ws_pkt) != ESP_OK)
     {
         // отправлено с ошибкой - убрать сокет из таблицы сокетов
-    
+
         RemoveSocket(req);
     }
 }
@@ -215,23 +214,22 @@ void SendWsData(void *p)
             }
         }
         else // таймаут - отправляем данные статусов из таблицы
-        { 
+        {
 
-          for (int  f = 0; f < CONFIG_LWIP_MAX_SOCKETS; f++)
+            for (int f = 0; f < CONFIG_LWIP_MAX_SOCKETS; f++)
             {
                 if (SocketArgDb[f].fd == 0)
-                    continue;   // пустой сокет в таблице
-                cntsock++;       // есть сокеты на отправку     
-             for (int p = 0; p <= IDX_MVVOL; p++)   
+                    continue; // пустой сокет в таблице
+                cntsock++;    // есть сокеты на отправку
+                for (int p = 0; p <= IDX_MVVOL; p++)
                 {
-                        req.idx = p;   
-                        req.fd = SocketArgDb[f].fd;
-                        req.hd = SocketArgDb[f].hd;
-                        SendSocket(req);
-                    
+                    req.idx = p;
+                    req.fd = SocketArgDb[f].fd;
+                    req.hd = SocketArgDb[f].hd;
+                    SendSocket(req);
                 }
             }
-            if(cntsock == 0)
+            if (cntsock == 0)
                 timeout = portMAX_DELAY; //таблица сокетов пустая, ждем появления хотя бы одного запроса в очереди
         }
     }
@@ -259,12 +257,12 @@ void CreateTaskAndQueue()
     CtrlQueueTab[Q_RESTVENT_IDX] = RestVentSendToCtrl;
 
     //очереди из обработчиков прерывания
-    IrIsrQueue = xQueueCreate(2, sizeof(uint8_t));
-    MvIsrQueue = xQueueCreate(2, sizeof(uint8_t));
-    DistIsrQueue = xQueueCreate(5, sizeof(uint16_t));
-    HumIsrQueue = xQueueCreate(5, sizeof(uint16_t)); 
-    BathLightIsrQueue = xQueueCreate(2, sizeof(uint16_t));
-    RestLightIsrQueue = xQueueCreate(2, sizeof(uint16_t));
+    IrIsrQueue = xQueueCreate(10, sizeof(uint32_t));
+    MvIsrQueue = xQueueCreate(10, sizeof(uint32_t));
+    DistIsrQueue = xQueueCreate(5, sizeof(uint32_t));
+    HumIsrQueue = xQueueCreate(5, sizeof(uint32_t));
+    BathLightIsrQueue = xQueueCreate(5, sizeof(uint32_t));
+    RestLightIsrQueue = xQueueCreate(5, sizeof(uint32_t));
 
     // обработчики прерываний
     xTaskCreate(CheckIrMove, "IrMove", 2000, NULL, 1, NULL);
@@ -273,7 +271,6 @@ void CreateTaskAndQueue()
     xTaskCreate(CheckBathHum, "HumData", 2000, NULL, 1, NULL);
     xTaskCreate(CheckBathLightOnOff, "HumData", 2000, NULL, 1, NULL);
     xTaskCreate(CheckRestLightOnOff, "HumData", 2000, NULL, 1, NULL);
-    
 
     xTaskCreate(BathLightControl, "blc", 4000, NULL, 1, NULL);
     xTaskCreate(BathVentControl, "bvc", 4000, NULL, 1, NULL);
@@ -289,6 +286,9 @@ void CreateTaskAndQueue()
     SendWsQueue = xQueueCreate(10, sizeof(struct WsDataToSend));
     // отправка в сокет
     xTaskCreate(SendWsData, "Socket Send", 4000, NULL, 1, NULL);
+
+    InitOutGPIO();
+    IrMvISRSetup();
 
     return;
 }

@@ -82,6 +82,7 @@ void BathLightControl(void *p)
 
                 //ESP_LOGI("СВЕТ В ВАННОЙ", "Свет %d IR %d Mv %d idx %d\n", LightOnOff, IrOnOff, MvOnOff, req.idx);
                 // сюда ставим информирование о состоянии света и собственно само включение !!
+                gpio_set_level(GPIO_OUTPUT_IO_0, LightOnOff);
             }
         }
     }
@@ -144,6 +145,7 @@ void BathVentControl(void *p)
                 xQueueSend(SendWsQueue, &req, 0); // отправить HTTP
                 //ESP_LOGI("ВЕНТИЛЯЦИЯ В ВАННОЙ", "Вент %d влажн %d свет %d idx %d", ventOnOff, DataParmTable[IDX_HUMVOL].val, DataParmTable[IDX_BATHLIGHTSTATUS].val, req.idx);
                 // сюда ставим информирование о состоянии света и собственно само включение !!
+                gpio_set_level(GPIO_OUTPUT_IO_2, ventOnOff);
             }
         }
     }
@@ -200,6 +202,7 @@ void RestLightControl(void *p)
                 xQueueSend(RestLightIsrQueue, &LightOnOff, 0); // отправить на обработку включения вентиляции
                 //ESP_LOGI("СВЕТ В Туалете", "Свет %d idx %d\n", LightOnOff, req.idx);
                 // сюда ставим информирование о состоянии света и собственно само включени !!
+                gpio_set_level(GPIO_OUTPUT_IO_1, LightOnOff);
             }
         }
     }
@@ -207,7 +210,7 @@ void RestLightControl(void *p)
 void RestVentControl(void *p)
 {
     union QueueHwData unidata;
-   
+
     int ventOnOff = 0;
     int autoVent = 0;
     int flag;
@@ -238,7 +241,9 @@ void RestVentControl(void *p)
             }
             flag = 1;
             if (DataParmTable[IDX_RESTVENTSTATUS].val == ventOnOff)
-                {flag = 0;}
+            {
+                flag = 0;
+            }
             DataParmTable[IDX_RESTVENTSTATUS].val = ventOnOff;
             xSemaphoreGive(DataParmTableMutex);
             if (flag)
@@ -249,6 +254,7 @@ void RestVentControl(void *p)
                 xQueueSend(SendWsQueue, &req, 0); // отправить HTTP
                 //ESP_LOGI("ВЕНТИЛЯЦИЯ В ТУАЛЕТЕ", "Вент %d  свет %d idx %d\n", ventOnOff, DataParmTable[IDX_RESTLIGHTSTATUS].val, req.idx);
                 // сюда ставим информирование о состоянии света и собственно само включение !!
+                gpio_set_level(GPIO_OUTPUT_IO_3, ventOnOff);
             }
         }
     }
@@ -258,15 +264,20 @@ void RestVentControl(void *p)
 */
 void CheckIrMove(void *p)
 {
-    uint8_t pp;
+    uint32_t pp;
     int MoveDelay;
     int ret;
-    
+
     union QueueHwData *ud = malloc(sizeof(union QueueHwData));
+
     ud->IrData.sender = IDX_QHD_IrStatus; // ик датчик  движения
+    uint32_t IrStat = 0;
+    /*
     for (;;)
     {
         xQueueReceive(IrIsrQueue, &pp, portMAX_DELAY);
+        ESP_LOGI("Ir isr","First - On");
+    
         ud->IrData.IrStatus = 1; // on
         xQueueSend(CtrlQueueTab[Q_BATHLIGHT_IDX], ud, 0);
         xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
@@ -280,6 +291,8 @@ void CheckIrMove(void *p)
             MoveDelay = (DataParmTable[IDX_BATHLIGHTOFFDELAY].val * 1000) / portTICK_RATE_MS; // в таблице в скундах. Задержка выключения
             xSemaphoreGive(DataParmTableMutex);
             ret = xQueueReceive(IrIsrQueue, &pp, MoveDelay);
+            ESP_LOGI("Ir isr","Second & off timeout %d",ret);
+    
         }
         ud->IrData.IrStatus = 0; // Off
         xQueueSend(CtrlQueueTab[Q_BATHLIGHT_IDX], ud, 0);
@@ -288,18 +301,59 @@ void CheckIrMove(void *p)
         xSemaphoreGive(DataParmTableMutex);
 
     }
+    */
+    for (;;)
+    {
+        xQueueReceive(IrIsrQueue, &pp, portMAX_DELAY);
+        IrStat = pp;
+ //          ESP_LOGI("Ir isr check", "IrStat %d", IrStat);
+           continue;
+        if (IrStat) //on stat
+        {
+            ESP_LOGI("Ir isr First", "IrStat %d", IrStat);
+            ud->IrData.IrStatus = 1; // on
+            xQueueSend(CtrlQueueTab[Q_BATHLIGHT_IDX], ud, 0);
+            xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
+            DataParmTable[IDX_IRVOL].val = 1;
+            xSemaphoreGive(DataParmTableMutex);
+            continue;
+        }
+        // irstat off
+        xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
+        MoveDelay = (DataParmTable[IDX_BATHLIGHTOFFDELAY].val * 1000) / portTICK_RATE_MS; // в таблице в скундах. Задержка выключения
+        xSemaphoreGive(DataParmTableMutex);
+        ret = xQueueReceive(IrIsrQueue, &pp, MoveDelay);
+        ESP_LOGI("Ir isr", "Second & off timeout %d", ret);
+        if (ret == pdTRUE) // retriggered not timeout? next loop
+        {
+            continue;
+        }
+        // timeout
+        IrStat = gpio_get_level(GPIO_INPUT_IO_0);
+        ESP_LOGI("Ir isr Last", "IrStat %d", IrStat);
+        ud->IrData.IrStatus = 0; // Off
+        xQueueSend(CtrlQueueTab[Q_BATHLIGHT_IDX], ud, 0);
+        xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
+        DataParmTable[IDX_IRVOL].val = 0;
+        xSemaphoreGive(DataParmTableMutex);
+    }
 }
 void CheckMvMove(void *p)
 {
     uint8_t pp;
     int MoveDelay;
     int ret;
-    
+    int mvstat;
+
     union QueueHwData *ud = malloc(sizeof(union QueueHwData));
+
     ud->IrData.sender = IDX_QHD_MvStatus; // ик датчик  движения
     for (;;)
     {
         xQueueReceive(IrIsrQueue, &pp, portMAX_DELAY);
+        mvstat = gpio_get_level(GPIO_INPUT_IO_1);
+        ESP_LOGI("Mv isr", "First - On %d",mvstat);
+continue;
         ud->IrData.IrStatus = 1; // on
         xQueueSend(CtrlQueueTab[Q_BATHLIGHT_IDX], ud, 0);
         xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
@@ -312,13 +366,13 @@ void CheckMvMove(void *p)
             MoveDelay = (DataParmTable[IDX_BATHLIGHTOFFDELAY].val * 1000) / portTICK_RATE_MS; // в таблице в скундах. Задержка выключения
             xSemaphoreGive(DataParmTableMutex);
             ret = xQueueReceive(IrIsrQueue, &pp, MoveDelay);
+//            ESP_LOGI("Mv isr", "Second & off timeout %d", ret);
         }
         ud->IrData.IrStatus = 0; // Off
         xQueueSend(CtrlQueueTab[Q_BATHLIGHT_IDX], ud, 0);
         xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
         DataParmTable[IDX_MVVOL].val = 0;
         xSemaphoreGive(DataParmTableMutex);
-        
     }
 }
 /*
@@ -330,7 +384,7 @@ void CheckDistMove(void *p)
     uint16_t dist;
     int distOn, distDelay, lightOnOff, flag;
     union QueueHwData ud;
-    
+
     ud.DistData.sender = IDX_QHD_DistData;
     lightOnOff = 0;
     flag = 0;
@@ -382,7 +436,7 @@ void CheckBathHum(void *p)
     uint16_t hum;
     int humOn, humOff, ventOnOff, flag;
     union QueueHwData ud;
-    
+
     ud.HumData.sender = IDX_QHD_HumData;
     ventOnOff = 0;
     flag = 0;
@@ -390,7 +444,6 @@ void CheckBathHum(void *p)
     for (;;)
     {
         xQueueReceive(HumIsrQueue, &hum, portMAX_DELAY);
-        
 
         xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
         humOn = DataParmTable[IDX_BATHHUMONPARM].val;
@@ -540,4 +593,22 @@ void CheckRestLightOnOff(void *p)
             xQueueSend(CtrlQueueTab[Q_RESTVENT_IDX], &ud, 0);
         }
     }
+}
+
+void InitOutGPIO()
+{
+    gpio_config_t io_conf;
+
+    //disable interrupt
+    io_conf.intr_type = GPIO_PIN_INTR_DISABLE;
+    //set as output mode
+    io_conf.mode = GPIO_MODE_OUTPUT;
+    //bit mask of the pins that you want to set,e.g.GPIO18/19
+    io_conf.pin_bit_mask = GPIO_OUTPUT_PIN_SEL;
+    //disable pull-down mode
+    io_conf.pull_down_en = 0;
+    //disable pull-up mode
+    io_conf.pull_up_en = 0;
+    //configure GPIO with the given settings
+    gpio_config(&io_conf);
 }

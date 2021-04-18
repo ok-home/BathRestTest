@@ -5,6 +5,7 @@
 #include <freertos/task.h>
 #include <freertos/queue.h>
 #include <freertos/semphr.h>
+#include "driver/gpio.h"
 
 
 #define SOCKSTARTMSG "sstrt" // при получении по WS - новый сокет.
@@ -182,10 +183,29 @@ void CheckRestLightOnOff(void *p); // обработчик включения с
 /*
 *  ISR Defifnition
 */
-void IrMvISRSetup(void);
+void IrMvISRSetup();
 void DistIsrSetup();
 
+void InitOutGPIO();
+/*
+* connected GPIO
+*/
+#define GPIO_OUTPUT_IO_0    12 // Bath Light
+#define GPIO_OUTPUT_IO_1    13 // Rest Light
+#define GPIO_OUTPUT_IO_2    14 // Bath Vent
+#define GPIO_OUTPUT_IO_3    15 // Rest Vent
+#define GPIO_OUTPUT_PIN_SEL  ((1ULL<<GPIO_OUTPUT_IO_0) | (1ULL<<GPIO_OUTPUT_IO_1) | (1ULL<<GPIO_OUTPUT_IO_2) | (1ULL<<GPIO_OUTPUT_IO_3))
 
+#define GPIO_INPUT_IO_0 19 // IR Input
+#define GPIO_INPUT_IO_1 18 // MV Input
+#define GPIO_INPUT_PIN_SEL ((1ULL << GPIO_INPUT_IO_0) | (1ULL << GPIO_INPUT_IO_1))
+#define ESP_INTR_FLAG_DEFAULT 0
+
+/*
+* Ir Mv Mode
+*/
+#define  IR_TRIGGERED
+#define  MV_TRIGGERED
 
 
 
