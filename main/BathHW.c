@@ -272,6 +272,7 @@ void CheckIrMove(void *p)
 
     ud->IrData.sender = IDX_QHD_IrStatus; // ик датчик  движения
     uint32_t IrStat = 0;
+    for(;;){vTaskDelay(1000);}
     /*
     for (;;)
     {
@@ -302,7 +303,7 @@ void CheckIrMove(void *p)
 
     }
     */
-    for (;;)
+   /* for (;;)
     {
         xQueueReceive(IrIsrQueue, &pp, portMAX_DELAY);
         IrStat = pp;
@@ -336,11 +337,12 @@ void CheckIrMove(void *p)
         xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
         DataParmTable[IDX_IRVOL].val = 0;
         xSemaphoreGive(DataParmTableMutex);
-    }
+    }*/
 }
 void CheckMvMove(void *p)
 {
-    uint8_t pp;
+    for(;;){vTaskDelay(1000);}
+   /* uint8_t pp;
     int MoveDelay;
     int ret;
     int mvstat;
@@ -350,7 +352,7 @@ void CheckMvMove(void *p)
     ud->IrData.sender = IDX_QHD_MvStatus; // ик датчик  движения
     for (;;)
     {
-        xQueueReceive(IrIsrQueue, &pp, portMAX_DELAY);
+       xQueueReceive(MvIsrQueue, &pp, portMAX_DELAY);
         mvstat = gpio_get_level(GPIO_INPUT_IO_1);
         ESP_LOGI("Mv isr", "First - On %d",mvstat);
 continue;
@@ -365,7 +367,7 @@ continue;
             xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
             MoveDelay = (DataParmTable[IDX_BATHLIGHTOFFDELAY].val * 1000) / portTICK_RATE_MS; // в таблице в скундах. Задержка выключения
             xSemaphoreGive(DataParmTableMutex);
-            ret = xQueueReceive(IrIsrQueue, &pp, MoveDelay);
+            ret = xQueueReceive(MvIsrQueue, &pp, MoveDelay);
 //            ESP_LOGI("Mv isr", "Second & off timeout %d", ret);
         }
         ud->IrData.IrStatus = 0; // Off
@@ -373,7 +375,7 @@ continue;
         xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
         DataParmTable[IDX_MVVOL].val = 0;
         xSemaphoreGive(DataParmTableMutex);
-    }
+    }*/
 }
 /*
 *  Включение/вылдючение света по 1 параметру расстояния - дистанция включения

@@ -45,7 +45,7 @@ gpio_config_t io_conf;
     gpio_config(&io_conf);
 
     //disable interrupt
-    io_conf.intr_type = GPIO_PIN_INTR_DISABLE;
+    io_conf.intr_type = GPIO_PIN_INTR_ANYEDGE;
     //bit mask of the pins, use GPIO4/5 here
     io_conf.pin_bit_mask = GPIO_INPUT_PIN_SEL;
     //set as input mode
@@ -55,20 +55,39 @@ gpio_config_t io_conf;
     gpio_config(&io_conf);
 
 int mv = 0;
+int mvp = 0;
 int ir = 0;
+int irp = 0;
 int cnt = 0;
+uint32_t pp;
     while(1) {
-        printf("cnt: %d\n ir %d mv %d ", cnt,ir,mv);
+      //  printf("cnt: %d ir %d mv %d \n", cnt,ir,mv);
         cnt++;
-        vTaskDelay(1000 / portTICK_RATE_MS);
+    //    vTaskDelay(1000 / portTICK_RATE_MS);
+    //vTaskDelay(1);
 //        gpio_set_level(GPIO_OUTPUT_IO_2, cnt % 2);
 //        gpio_set_level(GPIO_OUTPUT_IO_3, cnt % 2);
+    /*    if (xQueueReceive(IrIsrQueue, &pp, 2) == pdTRUE)
+           printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
 
+        irp = ir;
         ir = gpio_get_level(GPIO_INPUT_IO_0);
-        gpio_set_level(GPIO_OUTPUT_IO_0, ir);
-        
+        if(irp!=ir)
+        {
+          gpio_set_level(GPIO_OUTPUT_IO_0, ir);
+          printf("\n-------lvl ir ch last %d next %d\n",irp,ir)  ;
+        }
+        */
+        if (xQueueReceive(MvIsrQueue, &pp, 2) == pdTRUE)
+           printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+        mvp = mv;
         mv = gpio_get_level(GPIO_INPUT_IO_1);
+        if(mvp != mv)
+        {
         gpio_set_level(GPIO_OUTPUT_IO_1, mv);
+        printf("\n++++++++lvl mr ch last %d next %d\n",mvp,mv)  ;
+        }
+        
         
         
         
