@@ -157,9 +157,6 @@ void BathVentControl(void *p);
 void RestLightControl(void *p);
 void RestVentControl(void *p);
 
-//QueueHandle_t AllSockQueue;
-//QueueHandle_t NewSockQueue;
-SemaphoreHandle_t SocketTableMutex;
 SemaphoreHandle_t DataParmTableMutex;
 
 /*
@@ -201,11 +198,12 @@ void InitOutGPIO();
 #define GPIO_INPUT_PIN_SEL ((1ULL << GPIO_INPUT_IO_0) | (1ULL << GPIO_INPUT_IO_1))
 #define ESP_INTR_FLAG_DEFAULT 0
 
-/*
-* Ir Mv Mode
-*/
-#define  IR_TRIGGERED
-#define  MV_TRIGGERED
+#define PIN_TRIGGER 16  // Dist Remote Trigg
+#define PIN_ECHO 17     // Dist Remote Echo
+
+#define PIN_SDA 21 // sda pin Hum
+#define PIN_SCL 22 // scl pin Hum
+
 
 
 
