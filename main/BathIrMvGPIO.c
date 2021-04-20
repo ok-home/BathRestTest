@@ -6,21 +6,22 @@
 
 static void IRAM_ATTR Ir_isr_handler(void *arg)
 {
-    uint32_t gpio_num = (uint32_t)arg;
-    //uint32_t IrStat = gpio_get_level(GPIO_INPUT_IO_0);
-    xQueueSendFromISR(IrIsrQueue, &gpio_num, NULL); // send to IR Queue
+    //uint32_t gpio_num = (uint32_t)arg;
+    uint32_t on_off = gpio_get_level(GPIO_INPUT_IO_0);
+    xQueueSendFromISR(IrIsrQueue, &on_off, NULL); // send to IR Queue
 }
 static void IRAM_ATTR Mv_isr_handler(void *arg)
 {
-    uint32_t gpio_num = (uint32_t)arg;
-    xQueueSendFromISR(MvIsrQueue, &gpio_num, NULL); // send to MV Queue
+    //uint32_t gpio_num = (uint32_t)arg;
+    uint32_t on_off = gpio_get_level(GPIO_INPUT_IO_1);
+    xQueueSendFromISR(MvIsrQueue, &on_off, NULL); // send to MV Queue
     
 }
 
 void IrMvISRSetup()
 {
     gpio_config_t io_conf;
-    //interrupt of rising edge
+    //interrupt of ANY edge
     io_conf.intr_type = GPIO_PIN_INTR_ANYEDGE;//GPIO_PIN_INTR_ANYEDGE;
     //bit mask of the pins, use GPIO4/5 here
     io_conf.pin_bit_mask = GPIO_INPUT_PIN_SEL;

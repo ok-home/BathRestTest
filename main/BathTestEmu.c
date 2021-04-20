@@ -22,7 +22,7 @@ void StartEmu();
 void testunion()
 {
  //StartEmu();
- testGPIO();
+ //testGPIO();
 }
 
 void testGPIO ()

@@ -264,118 +264,116 @@ void RestVentControl(void *p)
 */
 void CheckIrMove(void *p)
 {
-    uint32_t pp;
-    int MoveDelay;
-    int ret;
+    uint32_t on_off;                     // состояние датчика из очереди обработчика прерывания
+    uint32_t MoveDelay;                  // таймаут выключения света ( локально )
+    union QueueHwData ud;                // индекс в таблице
+    ud.IrData.sender = IDX_QHD_IrStatus; // ик датчик  движения
 
-    union QueueHwData *ud = malloc(sizeof(union QueueHwData));
-
-    ud->IrData.sender = IDX_QHD_IrStatus; // ик датчик  движения
-    uint32_t IrStat = 0;
-    for(;;){vTaskDelay(1000);}
-    /*
+    MoveDelay = portMAX_DELAY;
     for (;;)
     {
-        xQueueReceive(IrIsrQueue, &pp, portMAX_DELAY);
-        ESP_LOGI("Ir isr","First - On");
-    
-        ud->IrData.IrStatus = 1; // on
-        xQueueSend(CtrlQueueTab[Q_BATHLIGHT_IDX], ud, 0);
-        xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
-        DataParmTable[IDX_IRVOL].val = 1;
-        xSemaphoreGive(DataParmTableMutex);
-
-        ret = pdTRUE;
-        while (ret == pdTRUE)
+        if (xQueueReceive(IrIsrQueue, &on_off, MoveDelay) == pdTRUE) // получено прерывание
         {
-            xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
-            MoveDelay = (DataParmTable[IDX_BATHLIGHTOFFDELAY].val * 1000) / portTICK_RATE_MS; // в таблице в скундах. Задержка выключения
-            xSemaphoreGive(DataParmTableMutex);
-            ret = xQueueReceive(IrIsrQueue, &pp, MoveDelay);
-            ESP_LOGI("Ir isr","Second & off timeout %d",ret);
-    
-        }
-        ud->IrData.IrStatus = 0; // Off
-        xQueueSend(CtrlQueueTab[Q_BATHLIGHT_IDX], ud, 0);
-        xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
-        DataParmTable[IDX_IRVOL].val = 0;
-        xSemaphoreGive(DataParmTableMutex);
+            ESP_LOGI("Ir isr check", "IrStat %d", on_off);
+            if ((on_off == 1) && (MoveDelay == port_MAX_DELAY)) // включить свет
+            {
+                ud.IrData.IrStatus = 1; // on
+                xQueueSend(CtrlQueueTab[Q_BATHLIGHT_IDX], &ud, 0);
+                xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
+                DataParmTable[IDX_IRVOL].val = 1;
+                xSemaphoreGive(DataParmTableMutex);
+                continue;
+            }
+            if ((on_off == 0) && (MoveDelay == port_MAX_DELAY)) // ждем таймер включения
+            {
 
+                xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
+                MoveDelay = (DataParmTable[IDX_BATHLIGHTOFFDELAY].val * 1000) / portTICK_RATE_MS; // в таблице в скундах. Задержка выключения
+                xSemaphoreGive(DataParmTableMutex);
+                continue;
+            }
+            if ((on_off == 1) && (MoveDelay != port_MAX_DELAY)) // запускаем ожидание выключения
+            {
+                MoveDelay = portMAX_DELAY;
+                continue;
+            }
+        }
+        else // таймаут
+        {
+            if (on_off == 0) // таймаут - выключаем свет
+            {
+                ud.IrData.IrStatus = 0;
+                xQueueSend(CtrlQueueTab[Q_BATHLIGHT_IDX], &ud, 0);
+                xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
+                DataParmTable[IDX_IRVOL].val = 0;
+                xSemaphoreGive(DataParmTableMutex);
+                MoveDelay = portMAX_DELAY;
+                continue;
+            }
+            else
+            {
+                ESP_LOGI("Ir Isr Check", "  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ");
+            }
+        }
     }
-    */
-   /* for (;;)
-    {
-        xQueueReceive(IrIsrQueue, &pp, portMAX_DELAY);
-        IrStat = pp;
- //          ESP_LOGI("Ir isr check", "IrStat %d", IrStat);
-           continue;
-        if (IrStat) //on stat
-        {
-            ESP_LOGI("Ir isr First", "IrStat %d", IrStat);
-            ud->IrData.IrStatus = 1; // on
-            xQueueSend(CtrlQueueTab[Q_BATHLIGHT_IDX], ud, 0);
-            xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
-            DataParmTable[IDX_IRVOL].val = 1;
-            xSemaphoreGive(DataParmTableMutex);
-            continue;
-        }
-        // irstat off
-        xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
-        MoveDelay = (DataParmTable[IDX_BATHLIGHTOFFDELAY].val * 1000) / portTICK_RATE_MS; // в таблице в скундах. Задержка выключения
-        xSemaphoreGive(DataParmTableMutex);
-        ret = xQueueReceive(IrIsrQueue, &pp, MoveDelay);
-        ESP_LOGI("Ir isr", "Second & off timeout %d", ret);
-        if (ret == pdTRUE) // retriggered not timeout? next loop
-        {
-            continue;
-        }
-        // timeout
-        IrStat = gpio_get_level(GPIO_INPUT_IO_0);
-        ESP_LOGI("Ir isr Last", "IrStat %d", IrStat);
-        ud->IrData.IrStatus = 0; // Off
-        xQueueSend(CtrlQueueTab[Q_BATHLIGHT_IDX], ud, 0);
-        xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
-        DataParmTable[IDX_IRVOL].val = 0;
-        xSemaphoreGive(DataParmTableMutex);
-    }*/
 }
+
 void CheckMvMove(void *p)
 {
-    for(;;){vTaskDelay(1000);}
-   /* uint8_t pp;
-    int MoveDelay;
-    int ret;
-    int mvstat;
 
-    union QueueHwData *ud = malloc(sizeof(union QueueHwData));
+    uint32_t on_off;                     // состояние датчика из очереди обработчика прерывания
+    uint32_t MoveDelay;                  // таймаут выключения света ( локально )
+    uint32_t ParmDelay;                  // таймаут выключения света из таблицы
+    union QueueHwData ud;                // индекс в таблице
+    ud.MvData.sender = IDX_QHD_MvStatus; // ик датчик  движения
 
-    ud->IrData.sender = IDX_QHD_MvStatus; // ик датчик  движения
+    MoveDelay = portMAX_DELAY;
     for (;;)
     {
-       xQueueReceive(MvIsrQueue, &pp, portMAX_DELAY);
-        mvstat = gpio_get_level(GPIO_INPUT_IO_1);
-        ESP_LOGI("Mv isr", "First - On %d",mvstat);
-continue;
-        ud->IrData.IrStatus = 1; // on
-        xQueueSend(CtrlQueueTab[Q_BATHLIGHT_IDX], ud, 0);
-        xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
-        DataParmTable[IDX_MVVOL].val = 1;
-        xSemaphoreGive(DataParmTableMutex);
-        ret = pdTRUE;
-        while (ret == pdTRUE)
+
+        if (xQueueReceive(MvIsrQueue, &on_off, MoveDelay) == pdTRUE) // получено прерывание
         {
-            xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
-            MoveDelay = (DataParmTable[IDX_BATHLIGHTOFFDELAY].val * 1000) / portTICK_RATE_MS; // в таблице в скундах. Задержка выключения
-            xSemaphoreGive(DataParmTableMutex);
-            ret = xQueueReceive(MvIsrQueue, &pp, MoveDelay);
-//            ESP_LOGI("Mv isr", "Second & off timeout %d", ret);
+            ESP_LOGI("Mv isr check", "MvStat %d", on_off);
+            if ((on_off == 1) && (MoveDelay == port_MAX_DELAY)) // включить свет
+            {
+                ud.MvData.MvStatus = 1; // on
+                xQueueSend(CtrlQueueTab[Q_BATHLIGHT_IDX], &ud, 0);
+                xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
+                DataParmTable[IDX_MVVOL].val = 1;
+                xSemaphoreGive(DataParmTableMutex);
+                continue;
+            }
+            if ((on_off == 0) && (MoveDelay == port_MAX_DELAY)) // ждем таймер включения
+            {
+                xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
+                MoveDelay = (DataParmTable[IDX_BATHLIGHTOFFDELAY].val * 1000) / portTICK_RATE_MS; // в таблице в скундах. Задержка выключения
+                xSemaphoreGive(DataParmTableMutex);
+                continue;
+            }
+            if ((on_off == 1) && (MoveDelay != port_MAX_DELAY)) // запускаем ожидание выключения
+            {
+                MoveDelay = portMAX_DELAY;
+                continue;
+            }
         }
-        ud->IrData.IrStatus = 0; // Off
-        xQueueSend(CtrlQueueTab[Q_BATHLIGHT_IDX], ud, 0);
-        xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
-        DataParmTable[IDX_MVVOL].val = 0;
-        xSemaphoreGive(DataParmTableMutex);
-    }*/
+        else // таймаут
+        {
+            if (on_off == 0) // таймаут - выключаем свет
+            {
+                ud.MvData.MvStatus = 0; // off
+                xQueueSend(CtrlQueueTab[Q_BATHLIGHT_IDX], &ud, 0);
+                xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
+                DataParmTable[IDX_MVVOL].val = 0;
+                xSemaphoreGive(DataParmTableMutex);
+                MoveDelay = portMAX_DELAY;
+                continue;
+            }
+            else
+            {
+                ESP_LOGI("Ir Isr Check", "  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ");
+            }
+        }
+    }
 }
 /*
 *  Включение/вылдючение света по 1 параметру расстояния - дистанция включения
@@ -597,6 +595,7 @@ void CheckRestLightOnOff(void *p)
     }
 }
 
+// настроить GPIO на вывод реле управления светом и вентиляцией
 void InitOutGPIO()
 {
     gpio_config_t io_conf;
