@@ -67,7 +67,7 @@ uint32_t pp;
     //vTaskDelay(1);
 //        gpio_set_level(GPIO_OUTPUT_IO_2, cnt % 2);
 //        gpio_set_level(GPIO_OUTPUT_IO_3, cnt % 2);
-    /*    if (xQueueReceive(IrIsrQueue, &pp, 2) == pdTRUE)
+       if (xQueueReceive(IrIsrQueue, &pp, 2) == pdTRUE)
            printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
 
         irp = ir;
@@ -77,9 +77,9 @@ uint32_t pp;
           gpio_set_level(GPIO_OUTPUT_IO_0, ir);
           printf("\n-------lvl ir ch last %d next %d\n",irp,ir)  ;
         }
-        */
-        if (xQueueReceive(MvIsrQueue, &pp, 2) == pdTRUE)
-           printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+        
+      //  if (xQueueReceive(MvIsrQueue, &pp, 2) == pdTRUE)
+      //     printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
         mvp = mv;
         mv = gpio_get_level(GPIO_INPUT_IO_1);
         if(mvp != mv)

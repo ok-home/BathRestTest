@@ -1,4 +1,7 @@
 /**/
+#include "driver/i2c.h"
+#include	"Bath.h"
+
 // sensor address
 #define HTU21D_ADDR		0x40
 

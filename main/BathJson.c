@@ -283,7 +283,7 @@ void CreateTaskAndQueue()
 
     InitOutGPIO();  // настроить GPIO на вывод реле управления светом и вентиляцией
     IrMvISRSetup();  //включить датчики движения в ванной Ir+Mv
-    DistIsrSetup();  // включить датчик расстояния в туалете
+    //DistIsrSetup();  // включить датчик расстояния в туалете
 
 
     return;

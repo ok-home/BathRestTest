@@ -226,6 +226,7 @@ void app_main(void)
     /* Start the server for the first time */
     server = start_webserver();
     /* start mdns */
+
     ESP_ERROR_CHECK(mdns_init());
     ESP_ERROR_CHECK(mdns_hostname_set("ok-home"));
     ESP_ERROR_CHECK(mdns_instance_name_set("ok-home BathVent"));
