@@ -267,7 +267,7 @@ void tstHUM()
 
 int err;
 
-   err = htu21d_init ( I2C_NUM_0 ,  PIN_SDA ,  PIN_SCL , GPIO_PULLUP_ENABLE , GPIO_PULLUP_ENABLE );
+   err = htu21d_init ( I2C_NUM_0 ,  GPIO_HUM_SDA_INOUT ,  GPIO_HUM_SCL_OUT , GPIO_PULLUP_ENABLE , GPIO_PULLUP_ENABLE );
    if( err != HTU21D_ERR_OK ) 
    {
     printf("ERR %d ",err);

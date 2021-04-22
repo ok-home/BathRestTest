@@ -7,6 +7,8 @@
 #include <freertos/semphr.h>
 #include "driver/gpio.h"
 
+#include "BathRestHW.h"
+
 
 #define SOCKSTARTMSG "sstrt" // при получении по WS - новый сокет.
 #define MAXJSONSTRING 64 // Буфер JSON
@@ -185,24 +187,24 @@ void DistIsrSetup();
 
 void InitOutGPIO();
 /*
-* connected GPIO
+* connected GPIO - moved  to BathRestHW.h
 */
-#define GPIO_OUTPUT_IO_0    12 // Bath Light
-#define GPIO_OUTPUT_IO_1    13 // Rest Light
-#define GPIO_OUTPUT_IO_2    14 // Bath Vent
-#define GPIO_OUTPUT_IO_3    15 // Rest Vent
-#define GPIO_OUTPUT_PIN_SEL  ((1ULL<<GPIO_OUTPUT_IO_0) | (1ULL<<GPIO_OUTPUT_IO_1) | (1ULL<<GPIO_OUTPUT_IO_2) | (1ULL<<GPIO_OUTPUT_IO_3))
+//#define GPIO_OUTPUT_IO_0    12 // Bath Light
+//#define GPIO_OUTPUT_IO_1    13 // Rest Light
+//#define GPIO_OUTPUT_IO_2    14 // Bath Vent
+//#define GPIO_OUTPUT_IO_3    15 // Rest Vent
+//#define GPIO_OUTPUT_PIN_SEL  ((1ULL<<GPIO_OUTPUT_IO_0) | (1ULL<<GPIO_OUTPUT_IO_1) | (1ULL<<GPIO_OUTPUT_IO_2) | (1ULL<<GPIO_OUTPUT_IO_3))
 
-#define GPIO_INPUT_IO_0 19 // IR Input
-#define GPIO_INPUT_IO_1 18 // MV Input
-#define GPIO_INPUT_PIN_SEL ((1ULL << GPIO_INPUT_IO_0) | (1ULL << GPIO_INPUT_IO_1))
-#define ESP_INTR_FLAG_DEFAULT 0
+//#define GPIO_INPUT_IO_0 19 // IR Input
+//#define GPIO_INPUT_IO_1 18 // MV Input
+//#define GPIO_INPUT_PIN_SEL ((1ULL << GPIO_INPUT_IO_0) | (1ULL << GPIO_INPUT_IO_1))
+//#define ESP_INTR_FLAG_DEFAULT 0
 
-#define PIN_TRIGGER 16  // Dist Remote Trigg
-#define PIN_ECHO 17     // Dist Remote Echo
+//#define PIN_TRIGGER 16  // Dist Remote Trigg
+//#define PIN_ECHO 17     // Dist Remote Echo
 
-#define PIN_SDA 21 // sda pin Hum
-#define PIN_SCL 22 // scl pin Hum
+//#define PIN_SDA 21 // sda pin Hum
+//#define PIN_SCL 22 // scl pin Hum
 
 
 

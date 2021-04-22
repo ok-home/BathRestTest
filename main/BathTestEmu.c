@@ -36,7 +36,7 @@ gpio_config_t io_conf;
     //set as output mode
     io_conf.mode = GPIO_MODE_OUTPUT;
     //bit mask of the pins that you want to set,e.g.GPIO18/19
-    io_conf.pin_bit_mask = GPIO_OUTPUT_PIN_SEL;
+    io_conf.pin_bit_mask = GPIO_OUTPUT_SW_PIN_SEL;
     //disable pull-down mode
     io_conf.pull_down_en = 0;
     //disable pull-up mode
@@ -47,7 +47,7 @@ gpio_config_t io_conf;
     //disable interrupt
     io_conf.intr_type = GPIO_PIN_INTR_ANYEDGE;
     //bit mask of the pins, use GPIO4/5 here
-    io_conf.pin_bit_mask = GPIO_INPUT_PIN_SEL;
+    io_conf.pin_bit_mask = GPIO_IR_MV_PIN_SEL;
     //set as input mode
     io_conf.mode = GPIO_MODE_INPUT;
     //enable pull-up mode
@@ -71,20 +71,20 @@ uint32_t pp;
            printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
 
         irp = ir;
-        ir = gpio_get_level(GPIO_INPUT_IO_0);
+        ir = gpio_get_level(GPIO_IR_IN);
         if(irp!=ir)
         {
-          gpio_set_level(GPIO_OUTPUT_IO_0, ir);
+          gpio_set_level(GPIO_BATH_LIGHT_OUT, ir);
           printf("\n-------lvl ir ch last %d next %d\n",irp,ir)  ;
         }
         
       //  if (xQueueReceive(MvIsrQueue, &pp, 2) == pdTRUE)
       //     printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
         mvp = mv;
-        mv = gpio_get_level(GPIO_INPUT_IO_1);
+        mv = gpio_get_level(GPIO_MV_IN);
         if(mvp != mv)
         {
-        gpio_set_level(GPIO_OUTPUT_IO_1, mv);
+        gpio_set_level(GPIO_REST_LIGHT_OUT, mv);
         printf("\n++++++++lvl mr ch last %d next %d\n",mvp,mv)  ;
         }
         

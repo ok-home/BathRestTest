@@ -82,7 +82,7 @@ void BathLightControl(void *p)
 
                 //ESP_LOGI("СВЕТ В ВАННОЙ", "Свет %d IR %d Mv %d idx %d\n", LightOnOff, IrOnOff, MvOnOff, req.idx);
                 // сюда ставим информирование о состоянии света и собственно само включение !!
-                gpio_set_level(GPIO_OUTPUT_IO_0, LightOnOff);
+                gpio_set_level(GPIO_BATH_LIGHT_OUT, LightOnOff);
             }
         }
     }
@@ -145,7 +145,7 @@ void BathVentControl(void *p)
                 xQueueSend(SendWsQueue, &req, 0); // отправить HTTP
                 //ESP_LOGI("ВЕНТИЛЯЦИЯ В ВАННОЙ", "Вент %d влажн %d свет %d idx %d", ventOnOff, DataParmTable[IDX_HUMVOL].val, DataParmTable[IDX_BATHLIGHTSTATUS].val, req.idx);
                 // сюда ставим информирование о состоянии света и собственно само включение !!
-                gpio_set_level(GPIO_OUTPUT_IO_2, ventOnOff);
+                gpio_set_level(GPIO_BATH_VENT_OUT, ventOnOff);
             }
         }
     }
@@ -202,7 +202,7 @@ void RestLightControl(void *p)
                 xQueueSend(RestLightIsrQueue, &LightOnOff, 0); // отправить на обработку включения вентиляции
                 //ESP_LOGI("СВЕТ В Туалете", "Свет %d idx %d\n", LightOnOff, req.idx);
                 // сюда ставим информирование о состоянии света и собственно само включени !!
-                gpio_set_level(GPIO_OUTPUT_IO_1, LightOnOff);
+                gpio_set_level(GPIO_REST_LIGHT_OUT, LightOnOff);
             }
         }
     }
@@ -254,7 +254,7 @@ void RestVentControl(void *p)
                 xQueueSend(SendWsQueue, &req, 0); // отправить HTTP
                 //ESP_LOGI("ВЕНТИЛЯЦИЯ В ТУАЛЕТЕ", "Вент %d  свет %d idx %d\n", ventOnOff, DataParmTable[IDX_RESTLIGHTSTATUS].val, req.idx);
                 // сюда ставим информирование о состоянии света и собственно само включение !!
-                gpio_set_level(GPIO_OUTPUT_IO_3, ventOnOff);
+                gpio_set_level(GPIO_REST_VENT_OUT, ventOnOff);
             }
         }
     }
@@ -608,7 +608,7 @@ void InitOutGPIO()
     //set as output mode
     io_conf.mode = GPIO_MODE_OUTPUT;
     //bit mask of the pins that you want to set,e.g.GPIO18/19
-    io_conf.pin_bit_mask = GPIO_OUTPUT_PIN_SEL;
+    io_conf.pin_bit_mask = GPIO_OUTPUT_SW_PIN_SEL;
     //disable pull-down mode
     io_conf.pull_down_en = 0;
     //disable pull-up mode
