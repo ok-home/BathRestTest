@@ -121,11 +121,11 @@ static esp_err_t echo_handler(httpd_req_t *req)
 
 static esp_err_t get_handler(httpd_req_t *req)
 {
-    
+
     extern const unsigned char indexbathrest_html_start[] asm("_binary_indexbathrest_html_start");
     extern const unsigned char indexbathrest_html_end[] asm("_binary_indexbathrest_html_end");
     const size_t indexbathrest_html_size = (indexbathrest_html_end - indexbathrest_html_start);
-    
+
     httpd_resp_send_chunk(req, (const char *)indexbathrest_html_start, indexbathrest_html_size);
     httpd_resp_sendstr_chunk(req, NULL);
 
@@ -205,6 +205,10 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 
+    ESP_ERROR_CHECK(mdns_init());
+    ESP_ERROR_CHECK(mdns_hostname_set("ok-home"));
+    ESP_ERROR_CHECK(mdns_instance_name_set("ok-home BathVent"));
+
     /* This helper function configures Wi-Fi or Ethernet, as selected in menuconfig.
      * Read "Establishing Wi-Fi or Ethernet Connection" section in
      * examples/protocols/README.md for more information about this function.
@@ -225,11 +229,7 @@ void app_main(void)
 
     /* Start the server for the first time */
     server = start_webserver();
-    /* start mdns */
-
-    ESP_ERROR_CHECK(mdns_init());
-    ESP_ERROR_CHECK(mdns_hostname_set("ok-home"));
-    ESP_ERROR_CHECK(mdns_instance_name_set("ok-home BathVent"));
+    
 
     testunion();
 }

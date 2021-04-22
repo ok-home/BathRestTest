@@ -183,7 +183,7 @@ void CheckRestLightOnOff(void *p); // обработчик включения с
 *  ISR Defifnition
 */
 void IrMvISRSetup();
-void DistIsrSetup();
+void DistIsrSetup(void *p);
 
 void InitOutGPIO();
 /*

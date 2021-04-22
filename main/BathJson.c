@@ -241,10 +241,10 @@ void CreateTaskAndQueue()
     
    
    // очереди передачи данных на контроллеры включения/выключения света/вентиляции
-    BathLightSendToCtrl = xQueueCreate(4, sizeof(union QueueHwData));
-    BathVentSendToCtrl = xQueueCreate(4, sizeof(union QueueHwData));
-    RestLightSendToCtrl = xQueueCreate(4, sizeof(union QueueHwData));
-    RestVentSendToCtrl = xQueueCreate(4, sizeof(union QueueHwData));
+    BathLightSendToCtrl = xQueueCreate(2, sizeof(union QueueHwData));
+    BathVentSendToCtrl = xQueueCreate(2, sizeof(union QueueHwData));
+    RestLightSendToCtrl = xQueueCreate(2, sizeof(union QueueHwData));
+    RestVentSendToCtrl = xQueueCreate(2, sizeof(union QueueHwData));
   // таблица ссылок на очереди передачи данных на контроллеры
   // в DataParmTable индексы этой таблицы для отправки нужному контроллеру
     CtrlQueueTab[Q_BATHLIGHT_IDX] = BathLightSendToCtrl;
@@ -253,13 +253,13 @@ void CreateTaskAndQueue()
     CtrlQueueTab[Q_RESTVENT_IDX] = RestVentSendToCtrl;
 
     //очереди из обработчиков прерывания
-    IrIsrQueue = xQueueCreate(10, sizeof(uint32_t));
-    MvIsrQueue = xQueueCreate(10, sizeof(uint32_t));
-    DistIsrQueue = xQueueCreate(5, sizeof(uint32_t));
-    HumIsrQueue = xQueueCreate(5, sizeof(uint32_t));
+    IrIsrQueue = xQueueCreate(2, sizeof(uint32_t));
+    MvIsrQueue = xQueueCreate(2, sizeof(uint32_t));
+    DistIsrQueue = xQueueCreate(2, sizeof(uint32_t));
+    HumIsrQueue = xQueueCreate(2, sizeof(uint32_t));
     // при включениии выключении света - для включения вентиляции по состоянию света
-    BathLightIsrQueue = xQueueCreate(5, sizeof(uint32_t));
-    RestLightIsrQueue = xQueueCreate(5, sizeof(uint32_t));
+    BathLightIsrQueue = xQueueCreate(2, sizeof(uint32_t));
+    RestLightIsrQueue = xQueueCreate(2, sizeof(uint32_t));
 
     // обработчики данных с датчиков 
     xTaskCreate(CheckIrMove, "IrMove", 2000, NULL, 1, NULL);
@@ -269,17 +269,17 @@ void CreateTaskAndQueue()
     xTaskCreate(CheckBathLightOnOff, "BathLightIsr", 2000, NULL, 1, NULL);
     xTaskCreate(CheckRestLightOnOff, "RestLightIsr", 2000, NULL, 1, NULL);
 
-    xTaskCreate(BathLightControl, "blc", 4000, NULL, 1, NULL);
-    xTaskCreate(BathVentControl, "bvc", 4000, NULL, 1, NULL);
-    xTaskCreate(RestLightControl, "rlc", 4000, NULL, 1, NULL);
-    xTaskCreate(RestVentControl, "rvc", 4000, NULL, 1, NULL);
+    xTaskCreate(BathLightControl, "blc", 2000, NULL, 1, NULL);
+    xTaskCreate(BathVentControl, "bvc", 2000, NULL, 1, NULL);
+    xTaskCreate(RestLightControl, "rlc", 2000, NULL, 1, NULL);
+    xTaskCreate(RestVentControl, "rvc", 2000, NULL, 1, NULL);
 
-    
+    //xTaskCreate(DistIsrSetup, "DistData", 2000, NULL, 2, NULL);
 
     // очередь отправки в сокет
     SendWsQueue = xQueueCreate(10, sizeof(struct WsDataToSend));
     // отправка в сокет
-    xTaskCreate(SendWsData, "Socket Send", 4000, NULL, 1, NULL);
+    xTaskCreate(SendWsData, "Socket Send", 2000, NULL, 1, NULL);
 
     InitOutGPIO();  // настроить GPIO на вывод реле управления светом и вентиляцией
     IrMvISRSetup();  //включить датчики движения в ванной Ir+Mv

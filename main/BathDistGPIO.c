@@ -9,15 +9,15 @@
 
 #include "Bath.h"
 
-#define RMT_TX_CHANNEL 1                /* RMT channel for transmitter */
-#define RMT_TX_GPIO_NUM GPIO_DIST_TRIGGER_OUT /* GPIO number for transmitter signal */
-#define RMT_RX_CHANNEL 0                /* RMT channel for receiver */
-#define RMT_RX_GPIO_NUM GPIO_DIST_ECHO_IN   /* GPIO number for receiver */
-#define RMT_CLK_DIV 100                 /* RMT counter clock divider */  //1.25 // ставим 118 - 1 тик =  1 см - точность 0,3%, 
-#define RMT_TX_CARRIER_EN 0             /* Disable carrier */
-#define rmt_item32_tIMEOUT_US 9500      /*!< RMT receiver timeout value(us) */ // 8075 см - ставим 8000 тик= 8000 см
+#define RMT_TX_CHANNEL 1                                                  /* RMT channel for transmitter */
+#define RMT_TX_GPIO_NUM GPIO_DIST_TRIGGER_OUT                             /* GPIO number for transmitter signal */
+#define RMT_RX_CHANNEL 0                                                  /* RMT channel for receiver */
+#define RMT_RX_GPIO_NUM GPIO_DIST_ECHO_IN                                 /* GPIO number for receiver */
+#define RMT_CLK_DIV 100 /* RMT counter clock divider */                   //1.25 // ставим 118 - 1 тик =  1 см - точность 0,3%,
+#define RMT_TX_CARRIER_EN 0                                               /* Disable carrier */
+#define rmt_item32_tIMEOUT_US 9600 /*!< RMT receiver timeout value(us) */ // 8075 см - ставим 8000 тик= 8000 см
 
-#define RMT_TICK_10_US (80000000 / RMT_CLK_DIV / 100000) /* RMT counter value for 10 us.(Source clock is APB clock) 8 тиков в 10 мкс 1 тик 1,25 мкс */
+#define RMT_TICK_10_US (80000000 / RMT_CLK_DIV / 100000)      /* RMT counter value for 10 us.(Source clock is APB clock) 8 тиков в 10 мкс 1 тик 1,25 мкс */
 #define ITEM_DURATION(d) ((d & 0x7fff) * 10 / RMT_TICK_10_US) // тики * 1,25 - длительность в мкс
 
 static void HCSR04_tx_init()
@@ -50,39 +50,52 @@ static void HCSR04_rx_init()
     rmt_config(&rmt_rx);
     rmt_driver_install(rmt_rx.channel, 1000, 0);
 }
+static const char *NEC_TAG = "NEC";
 
-void DistIsrSetup()
+void DistIsrSetup(void *p)
 {
     HCSR04_tx_init();
     HCSR04_rx_init();
 
-    rmt_item32_t tx_item;
-    tx_item.level0 = 1;
-    tx_item.duration0 = RMT_TICK_10_US; // 8 - 10 мкс // ставим 7  = 10,3 мкс или 8 = 11,8 мкс
-    tx_item.level1 = 0;
-    tx_item.duration1 = RMT_TICK_10_US; // for one pulse this doesn't matter // 7-8
+    rmt_item32_t item;
+    item.level0 = 1;
+    item.duration0 = RMT_TICK_10_US;
+    item.level1 = 0;
+    item.duration1 = RMT_TICK_10_US; // for one pulse this doesn't matter
 
     size_t rx_size = 0;
     RingbufHandle_t rb = NULL;
     rmt_get_ringbuf_handle(RMT_RX_CHANNEL, &rb);
     rmt_rx_start(RMT_RX_CHANNEL, 1);
 
+    //double distance = 0;
     float distance = 0;
-
+    int dist = 0;
     for (;;)
     {
-        rmt_write_items(RMT_TX_CHANNEL, &tx_item, 1, true);
+        rmt_write_items(RMT_TX_CHANNEL, &item, 1, true);
         rmt_wait_tx_done(RMT_TX_CHANNEL, portMAX_DELAY);
 
-        rmt_item32_t *rx_item = (rmt_item32_t *)xRingbufferReceive(rb, &rx_size, 1000);
-        distance = 340.29 * ITEM_DURATION(item->duration0) / ( 1000 * 2); // distance in centimeters 
-        //int int_distance = rx_item->duration0*10; // distance in centimeters
-        printf("Distance is %f cm\n", distance);                         // distance in centimeters
+        rmt_item32_t *item = (rmt_item32_t *)xRingbufferReceive(rb, &rx_size, 1000);
+        if (item)
+        {
+            // distance = 340.29 * ITEM_DURATION(item->duration0) / (  2000000 ); // distance in meters
+            distance = 340.29 * ITEM_DURATION(item->duration0) / (100 * 2); // distance in centimeters
+            //ESP_LOGI(NEC_TAG, "Distance is %f cm\n", distance);
+            dist = (int)distance;
+            ESP_LOGI(NEC_TAG, "Dist is %d cm\n", dist);
+            vRingbufferReturnItem(rb, (void *)item);
+            xQueueSend(DistIsrQueue, &dist, 0);
+        }
+        else
+        {
+            ESP_LOGI(NEC_TAG, "Distance is not readable");
+        }
 
-        vRingbufferReturnItem(rb, (void *)rx_item);
-        vTaskDelay(200 / portTICK_PERIOD_MS);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
+
 /*
 best
 div - 147 = 1,8375 mks

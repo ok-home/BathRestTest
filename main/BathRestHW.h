@@ -41,12 +41,12 @@ P4 D2.4 - Земля
 
 P1 D3.1 - +3.3В
 P2 D3.2 - HUM_SDA
-P3 D3.3 - HUM_CLK
+P3 D3.3 - HUM_SCL
 P4 D3.4 - Земля
 
 P1 D4.1 - +5В
-P2 D4.2 - DIST_ECHO
-P3 D4.3 - DIST_TRIGGER
+P2 D4.2 - DIST_TRIGGER
+P3 D4.3 - DIST_ECHO
 P4 D4.4 - Земля
 
 */
@@ -67,8 +67,8 @@ P4 D4.4 - Земля
 #define GPIO_IR_MV_PIN_SEL ((1ULL << GPIO_IR_IN) | (1ULL << GPIO_MV_IN))
 #define ESP_INTR_FLAG_DEFAULT 0
 
-#define GPIO_DIST_TRIGGER_OUT 16  // Dist Remote Trigg
-#define GPIO_DIST_ECHO_IN 17     // Dist Remote Echo
+#define GPIO_DIST_TRIGGER_OUT 23  // Dist Remote Trigg
+#define GPIO_DIST_ECHO_IN 22     // Dist Remote Echo
 
-#define GPIO_HUM_SDA_INOUT 21 // sda pin Hum
-#define GPIO_HUM_SCL_OUT 22 // scl pin Hum
+#define GPIO_HUM_SDA_INOUT 16 // sda pin Hum
+#define GPIO_HUM_SCL_OUT 17 // scl pin Hum
