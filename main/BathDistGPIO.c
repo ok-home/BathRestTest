@@ -85,7 +85,7 @@ void DistIsrSetup(void *p)
             //ESP_LOGI(NEC_TAG, "Distance is %f cm\n", distance);
             dist = (int)rx_item->duration0;
             size = rx_size;
-            vRingbufferReturnItem(rb, (void *)item);
+            vRingbufferReturnItem(rb, (void *)rx_item);
             ESP_LOGI(NEC_TAG, "Dist is %d tick size %d item %d \n ", dist, size, (int)rx_item);
             //xQueueSend(DistIsrQueue, &dist, 0);
         }
