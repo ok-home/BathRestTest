@@ -1,6 +1,6 @@
-/**/
-#include "driver/i2c.h"
+
 #include "Bath.h"
+#include "driver/i2c.h"
 
 // sensor address
 #define HTU21D_ADDR 0x40
@@ -31,13 +31,13 @@ i2c_port_t _port;
 int htu21d_init(i2c_port_t port, int sda_pin, int scl_pin, gpio_pullup_t sda_internal_pullup, gpio_pullup_t scl_internal_pullup);
 float ht21d_read_temperature();
 float ht21d_read_humidity();
-uint8_t ht21d_get_resolution();
-int ht21d_set_resolution(uint8_t resolution);
-int htu21d_soft_reset();
+//uint8_t ht21d_get_resolution();
+//int ht21d_set_resolution(uint8_t resolution);
+//int htu21d_soft_reset();
 
 // helper functions
-uint8_t ht21d_read_user_register();
-int ht21d_write_user_register(uint8_t value);
+//uint8_t ht21d_read_user_register();
+//int ht21d_write_user_register(uint8_t value);
 uint16_t read_value(uint8_t command);
 bool is_crc_valid(uint16_t value, uint8_t crc);
 
@@ -97,7 +97,7 @@ float ht21d_read_humidity()
 	// return the real value, formula in datasheet
 	return (raw_humidity * 125.0 / 65536.0) - 6.0;
 }
-
+/*
 uint8_t ht21d_get_resolution()
 {
 
@@ -214,7 +214,7 @@ int ht21d_write_user_register(uint8_t value)
 	}
 	return HTU21D_ERR_OK;
 }
-
+*/
 uint16_t read_value(uint8_t command)
 {
 

@@ -20,7 +20,8 @@
 			"esp_ipc.h": "c",
 			"bath.h": "c",
 			"periph_ctrl.h": "c",
-			"i2c.h": "c"
+			"i2c.h": "c",
+			"gpio.h": "c"
 		},
 		"idf.flashType": "UART"
 	}

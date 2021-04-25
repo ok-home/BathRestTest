@@ -1,13 +1,5 @@
-/*
-* другая версия
-* https://github.com/petemadsen/esp32/blob/master/hc-sr04/main/hcsr04.c
-*/
-
-#include "driver/rmt.h"
-
-//#include "soc/rmt_reg.h"
-
 #include "Bath.h"
+#include "driver/rmt.h"
 
 #define RMT_TX_CHANNEL 5                      /* RMT channel for transmitter */
 #define RMT_TX_GPIO_NUM GPIO_DIST_TRIGGER_OUT /* GPIO number for transmitter signal */
@@ -16,8 +8,6 @@
 #define RMT_CLK_DIV 147                       //1.84 us  -   0,0312 cm
 #define rmt_item32_tIMEOUT 15000              // 468 cm /*!< RMT receiver timeout value(us) */ // 8075 см - ставим 8000 тик= 8000 см
 #define RMT_TRIGG_TICK 6                      // trigg wilth approx 10 us
-//#define RMT_TICK_10_US (80000000 / RMT_CLK_DIV / 100000)      /* RMT counter value for 10 us.(Source clock is APB clock) 8 тиков в 10 мкс 1 тик 1,25 мкс */
-//#define ITEM_DURATION(d) ((d & 0x7fff) * 10 / RMT_TICK_10_US) // тики * 1,25 - длительность в мкс
 
 static void HCSR04_tx_init()
 {
@@ -83,13 +73,14 @@ void DistIsrSetup(void *p)
         if (rx_item)
         {
             dist = ((int)rx_item->duration0) >> 5;
-            size = rx_size;
+            size = (int)rx_size;
             vRingbufferReturnItem(rb, (void *)rx_item);
             //       ESP_LOGI(NEC_TAG, "Dist is %d tick size %d item %d n ", dist, size,cnt);
             if (midl_dist < dist)
+            {
                 midl_dist = dist;
-            cnt++;
-            if (cnt == 4)
+            }
+            if (++cnt == 4)
             {
                 xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
                 DataParmTable[IDX_DISTVOL].val = midl_dist;

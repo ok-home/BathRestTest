@@ -1,11 +1,3 @@
-#include <esp_log.h>
-#include <esp_system.h>
-//#include <sys/param.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <esp_log.h>
 
 #include "Bath.h"
 

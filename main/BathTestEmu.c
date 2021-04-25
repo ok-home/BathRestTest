@@ -1,3 +1,8 @@
+/*
+* use only for tests, remove from compiler files
+*/
+
+
 #include "Bath.h"
 #include "driver/gpio.h"
 

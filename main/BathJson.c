@@ -1,13 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include "jsmn.h"
-#include <string.h>
-#include <ctype.h>
-#include <esp_http_server.h>
-#include <esp_log.h>
-
 #include "Bath.h"
-
+#include "jsmn.h"
+#include <ctype.h>
 /*
 *  возвращает индекс в таблице параметров по совпадению имени параметра
 *  NameParm - имя параметра
@@ -284,8 +277,6 @@ void CreateTaskAndQueue()
 
     InitOutGPIO();  // настроить GPIO на вывод реле управления светом и вентиляцией
     IrMvISRSetup();  //включить датчики движения в ванной Ir+Mv
-    //DistIsrSetup();  // включить датчик расстояния в туалете
-
-
+    
     return;
 }

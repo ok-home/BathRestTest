@@ -1,8 +1,4 @@
 #include "Bath.h"
-#include "driver/gpio.h"
-
-
-
 
 static void IRAM_ATTR Ir_isr_handler(void *arg)
 {
