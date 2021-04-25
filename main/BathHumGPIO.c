@@ -293,7 +293,7 @@ void HumIsrSetup(void *p)
 	int err;
 	int hum_int;
 	float temp, hum;
-	vTaskDelay(50 / portTICK_RATE_MS);
+	vTaskDelay(500 / portTICK_RATE_MS);
 	for (;;)
 	{
 		err = htu21d_init(I2C_NUM_1, GPIO_HUM_SDA_INOUT, GPIO_HUM_SCL_OUT, GPIO_PULLUP_DISABLE, GPIO_PULLUP_DISABLE);
