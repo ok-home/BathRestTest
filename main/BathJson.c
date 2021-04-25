@@ -59,7 +59,7 @@ int JsonDigitBool(char *jsonStr, char *nameStr, int maxNameSize)
 * формимирует строку Json из 2-х пар имя:значение
 * dest - указатель на строку получатель ( размер не контролируется, может быть превышение)
 */
-void StrToJson(char *dest, char *name1, char *vol1, char *name2, char *vol2)
+inline void StrToJson(char *dest, char *name1, char *vol1, char *name2, char *vol2)
 {
     strcpy(dest, "{");
     strcat(dest, name1);
@@ -87,8 +87,73 @@ void ParmTableToJson(char *jsonStr, int i)
     }
     else
         itoa(DataParmTable[i].val, valstr, 10);
-    xSemaphoreGive(DataParmTableMutex); // освободить блокировку
+
     StrToJson(jsonStr, "\"name\"", DataParmTable[i].name, "\"msg\"", valstr);
+    xSemaphoreGive(DataParmTableMutex); // освободить блокировку
+}
+
+/*
+* AddSocket, RemSocket, SendSocket - все вызываются только из одного потока SendWsData
+* блокировка таблицы сокетов не требуется
+*/
+
+// Добавить сокет в таблицу сокетов
+inline void AddSocket(struct WsDataToSend req)
+{
+    for (int flag = 0, sock_idx = 0; sock_idx < CONFIG_LWIP_MAX_SOCKETS; sock_idx++)
+    {
+        if (SocketArgDb[sock_idx].fd == req.fd) // есть в таблице сокетов
+            break;
+        if (SocketArgDb[sock_idx].fd == 0) // есть пустая запись в таблице
+        {
+            if (flag == 0) //такой сокет еще не добавляли
+            {
+                SocketArgDb[sock_idx].fd = req.fd;
+                SocketArgDb[sock_idx].hd = req.hd;
+                flag++; // добавили сокет
+                continue;
+            }
+        }
+        if (SocketArgDb[sock_idx].fd == req.fd) // проходим дальше конца таблицы, если есть дубль - убираем
+        {
+            SocketArgDb[sock_idx].fd = 0;
+            SocketArgDb[sock_idx].hd = NULL;
+            break;
+        }
+    }
+    // for (int sock_idx = 0; sock_idx < CONFIG_LWIP_MAX_SOCKETS; sock_idx++)
+    // ESP_LOGI("add ws","idx %d hd %d fd %d ",sock_idx, (int)SocketArgDb[sock_idx].hd, SocketArgDb[sock_idx].fd);
+}
+// убрать сокет из таблицы сокетов
+inline void RemoveSocket(struct WsDataToSend req)
+{
+
+    for (int i = 0; i < CONFIG_LWIP_MAX_SOCKETS; i++)
+        if (SocketArgDb[i].fd == req.fd)
+        { // сокет закрыт - убрать из таблицы
+            SocketArgDb[i].fd = 0;
+            SocketArgDb[i].hd = NULL;
+            break;
+        }
+}
+// отправить в сокет данные из таблицы параметров ( удалиь сокет из таблицы если была ошибка отправки )
+inline void SendSocket(struct WsDataToSend req)
+{
+    httpd_ws_frame_t ws_pkt;
+    uint8_t buff[64];
+
+    ParmTableToJson((char *)buff, req.idx); // строка данных в HTTP
+    memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
+    ws_pkt.payload = buff;
+    ws_pkt.len = strlen((char *)buff);
+    ws_pkt.type = HTTPD_WS_TYPE_TEXT;
+
+    if (httpd_ws_send_frame_async(req.hd, req.fd, &ws_pkt) != ESP_OK)
+    {
+        // отправлено с ошибкой - убрать сокет из таблицы сокетов
+
+        RemoveSocket(req);
+    }
 }
 /*
 * отправка данных в сокет
@@ -105,77 +170,33 @@ void ParmTableToJson(char *jsonStr, int i)
 void SendWsData(void *p)
 {
     struct WsDataToSend req;
-    httpd_ws_frame_t ws_pkt;
-    uint8_t buff[64];
+    int timeout = portMAX_DELAY; // на старте ждем первый сокет
+    int cntsock = 0;
 
     for (;;)
     {
-        if (xQueueReceive(SendWsQueue, &req, 5000 / portTICK_RATE_MS) == pdTRUE) // до таймаута
+        if (xQueueReceive(SendWsQueue, &req, timeout) == pdTRUE) // до таймаута
         {
-
+            timeout = 5000 / portTICK_RATE_MS; // видимо появился сокет - начинаем обновление статусов
             if (req.idx > MAX_IDX_PARM_TABLE)
                 continue; // ошибка данных
             if (req.idx < 0)
-            { // новый сокет
-
-                xSemaphoreTake(SocketTableMutex, portMAX_DELAY);
-                for (int flag = 0, sock_idx = 0; sock_idx < CONFIG_LWIP_MAX_SOCKETS; sock_idx++)
-                {
-                    if (SocketArgDb[sock_idx].fd == req.fd) // есть в таблице сокетов
-                        break;
-                    if (SocketArgDb[sock_idx].fd == 0) // есть пустая запись в таблице
-                    {
-                        if (flag == 0) //такой сокет еще не добавляли
-                        {
-                            SocketArgDb[sock_idx].fd = req.fd;
-                            SocketArgDb[sock_idx].hd = req.hd;
-                            flag++; // добавили сокет
-                            continue;
-                        }
-                    }
-                    if (SocketArgDb[sock_idx].fd == req.fd) // проходим дальше конца таблицы, если есть дубль - убираем
-                    {
-                        SocketArgDb[sock_idx].fd = 0;
-                        SocketArgDb[sock_idx].hd = NULL;
-                        break;
-                    }
-                }
-                xSemaphoreGive(SocketTableMutex);
-
-                // и здесь отправить всю таблицу параметров в сокет
+            {                   // новый сокет
+                AddSocket(req); // добавим сокет в таблицу
+                // здесь отправим всю таблицу параметров в этот сокет
                 for (int p = 0; p < MAX_IDX_PARM_TABLE; p++)
                 {
-                    ParmTableToJson((char *)buff, p); // строка данных в HTTP
-                    memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
-                    ws_pkt.payload = buff;
-                    ws_pkt.len = strlen((char *)buff);
-                    ws_pkt.type = HTTPD_WS_TYPE_TEXT;
-                    httpd_ws_send_frame_async(req.hd, req.fd, &ws_pkt);
+                    req.idx = p;
+                    SendSocket(req);
                 }
                 continue;
             }
 
-            //строку по индексу из таблицы - отправить в сокет
-            ParmTableToJson((char *)buff, req.idx); // строка данных в HTTP
-            memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
-            ws_pkt.payload = buff;
-            ws_pkt.len = strlen((char *)buff);
-            ws_pkt.type = HTTPD_WS_TYPE_TEXT;
+            // req.idx - индекс в таблице параметров
+
             if (req.fd != 0) // отправить в сокет из запроса
             {
-                if (httpd_ws_send_frame_async(req.hd, req.fd, &ws_pkt) != ESP_OK)
-                {
-                    // отправлено с ошибкой - убрать сокет из таблицы сокетов
-                    xSemaphoreTake(SocketTableMutex, portMAX_DELAY);
-                    for (int i = 0; i < CONFIG_LWIP_MAX_SOCKETS; i++)
-                        if (SocketArgDb[i].fd == req.fd)
-                        { // сокет закрыт - убрать из таблицы
-                            SocketArgDb[i].fd = 0;
-                            SocketArgDb[i].hd = NULL;
-                            break;
-                        }
-                    xSemaphoreGive(SocketTableMutex);
-                }
+                SendSocket(req);
             }
             else // отправить во все сокеты
             {
@@ -183,38 +204,33 @@ void SendWsData(void *p)
                 {
                     if (SocketArgDb[f].fd == 0)
                         continue; // пустой сокет в таблице
-                    if (httpd_ws_send_frame_async(SocketArgDb[f].hd, SocketArgDb[f].fd, &ws_pkt) != ESP_OK)
-                    { // сокет закрыт - убрать из таблицы
-                        xSemaphoreTake(SocketTableMutex, portMAX_DELAY);
-                        SocketArgDb[f].fd = 0;
-                        SocketArgDb[f].hd = NULL;
-                        xSemaphoreGive(SocketTableMutex);
+                    else
+                    {
+                        req.hd = SocketArgDb[f].hd;
+                        req.fd = SocketArgDb[f].fd;
+                        SendSocket(req);
                     }
                 }
             }
         }
         else // таймаут - отправляем данные статусов из таблицы
         {
-            for (int p = 0; p <= IDX_MVVOL; p++)
+
+            for (int f = 0; f < CONFIG_LWIP_MAX_SOCKETS; f++)
             {
-                ParmTableToJson((char *)buff, p); // строка данных в HTTP
-                memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
-                ws_pkt.payload = buff;
-                ws_pkt.len = strlen((char *)buff);
-                ws_pkt.type = HTTPD_WS_TYPE_TEXT;
-                for (int f = 0; f < CONFIG_LWIP_MAX_SOCKETS; f++)
+                if (SocketArgDb[f].fd == 0)
+                    continue; // пустой сокет в таблице
+                cntsock++;    // есть сокеты на отправку
+                for (int p = 0; p <= IDX_MVVOL; p++)
                 {
-                    if (SocketArgDb[f].fd == 0)
-                        continue; // пустой сокет в таблице
-                    if (httpd_ws_send_frame_async(SocketArgDb[f].hd, SocketArgDb[f].fd, &ws_pkt) != ESP_OK)
-                    { // сокет закрыт - убрать из таблицы
-                        xSemaphoreTake(SocketTableMutex, portMAX_DELAY);
-                        SocketArgDb[f].fd = 0;
-                        SocketArgDb[f].hd = NULL;
-                        xSemaphoreGive(SocketTableMutex);
-                    }
+                    req.idx = p;
+                    req.fd = SocketArgDb[f].fd;
+                    req.hd = SocketArgDb[f].hd;
+                    SendSocket(req);
                 }
             }
+            if (cntsock == 0)
+                timeout = portMAX_DELAY; //таблица сокетов пустая, ждем появления хотя бы одного запроса в очереди
         }
     }
 }
@@ -222,48 +238,54 @@ void CreateTaskAndQueue()
 {
     //ограничение доступа к таблице DataParmTable
     DataParmTableMutex = xSemaphoreCreateMutex();
-    //ограничение доступа к таблице SocketTable
-    SocketTableMutex = xSemaphoreCreateMutex();
-    //отправить данные на контроллеры
-    //при получении нового сокета
-    //NewSockQueue = xQueueCreate(4, sizeof(struct async_resp_arg));
-    //обновить все страницы
-    //AllSockQueue = xQueueCreate(4, sizeof(struct async_resp_arg));
-
-    BathLightSendToCtrl = xQueueCreate(4, sizeof(union QueueHwData));
-    BathVentSendToCtrl = xQueueCreate(4, sizeof(union QueueHwData));
-    RestLightSendToCtrl = xQueueCreate(4, sizeof(union QueueHwData));
-    RestVentSendToCtrl = xQueueCreate(4, sizeof(union QueueHwData));
-
+    
+   
+   // очереди передачи данных на контроллеры включения/выключения света/вентиляции
+    BathLightSendToCtrl = xQueueCreate(2, sizeof(union QueueHwData));
+    BathVentSendToCtrl = xQueueCreate(2, sizeof(union QueueHwData));
+    RestLightSendToCtrl = xQueueCreate(2, sizeof(union QueueHwData));
+    RestVentSendToCtrl = xQueueCreate(2, sizeof(union QueueHwData));
+  // таблица ссылок на очереди передачи данных на контроллеры
+  // в DataParmTable индексы этой таблицы для отправки нужному контроллеру
     CtrlQueueTab[Q_BATHLIGHT_IDX] = BathLightSendToCtrl;
     CtrlQueueTab[Q_BATHVENT_IDX] = BathVentSendToCtrl;
     CtrlQueueTab[Q_RESTLIGHT_IDX] = RestLightSendToCtrl;
     CtrlQueueTab[Q_RESTVENT_IDX] = RestVentSendToCtrl;
 
     //очереди из обработчиков прерывания
-    IrIsrQueue = xQueueCreate(2, sizeof(uint8_t));
-    MvIsrQueue = xQueueCreate(2, sizeof(uint8_t));
-    DistIsrQueue = xQueueCreate(5, sizeof(uint16_t)); // длина очереди в секундах
+    IrIsrQueue = xQueueCreate(2, sizeof(uint32_t));
+    MvIsrQueue = xQueueCreate(2, sizeof(uint32_t));
+    DistIsrQueue = xQueueCreate(2, sizeof(uint32_t));
+    HumIsrQueue = xQueueCreate(2, sizeof(uint32_t));
+    // при включениии выключении света - для включения вентиляции по состоянию света
+    BathLightIsrQueue = xQueueCreate(2, sizeof(uint32_t));
+    RestLightIsrQueue = xQueueCreate(2, sizeof(uint32_t));
 
-    // обработчики прерываний
+    // обработчики данных с датчиков 
     xTaskCreate(CheckIrMove, "IrMove", 2000, NULL, 1, NULL);
     xTaskCreate(CheckMvMove, "MvMove", 2000, NULL, 1, NULL);
     xTaskCreate(CheckDistMove, "DistMove", 2000, NULL, 1, NULL);
+    xTaskCreate(CheckBathHum, "HumData", 2000, NULL, 1, NULL);
+    xTaskCreate(CheckBathLightOnOff, "BathLightIsr", 2000, NULL, 1, NULL);
+    xTaskCreate(CheckRestLightOnOff, "RestLightIsr", 2000, NULL, 1, NULL);
 
-    xTaskCreate(BathLightControl, "blc", 4000, NULL, 1, NULL);
-    xTaskCreate(BathVentControl, "bvc", 4000, NULL, 1, NULL);
-    xTaskCreate(RestLightControl, "rlc", 4000, NULL, 1, NULL);
-    xTaskCreate(RestVentControl, "rvc", 4000, NULL, 1, NULL);
+    xTaskCreate(BathLightControl, "blc", 2000, NULL, 1, NULL);
+    xTaskCreate(BathVentControl, "bvc", 2000, NULL, 1, NULL);
+    xTaskCreate(RestLightControl, "rlc", 2000, NULL, 1, NULL);
+    xTaskCreate(RestVentControl, "rvc", 2000, NULL, 1, NULL);
 
-    //заполнить таблицу активных сокетов
-    //xTaskCreate(FillSocketTable, "FillSocketTable", 4000, NULL, 1, NULL);
-    //обновить страницы активных сокетов
-    //xTaskCreate(AllDataSendToWS, "SendStartHTML", 4000, NULL, 1, NULL);
+    xTaskCreate(DistIsrSetup, "DistData", 2000, NULL, 2, NULL);
+    xTaskCreate(HumIsrSetup, "HumData", 2000, NULL, 2, NULL);
 
-    // очередь отправки в сокет 
+    // очередь отправки в сокет
     SendWsQueue = xQueueCreate(10, sizeof(struct WsDataToSend));
     // отправка в сокет
-    xTaskCreate(SendWsData, "Socket Send", 4000, NULL, 1, NULL);
+    xTaskCreate(SendWsData, "Socket Send", 2000, NULL, 1, NULL);
+
+    InitOutGPIO();  // настроить GPIO на вывод реле управления светом и вентиляцией
+    IrMvISRSetup();  //включить датчики движения в ванной Ir+Mv
+    //DistIsrSetup();  // включить датчик расстояния в туалете
+
 
     return;
 }

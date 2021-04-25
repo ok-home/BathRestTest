@@ -5,10 +5,17 @@
 #include <freertos/task.h>
 #include <freertos/queue.h>
 #include <freertos/semphr.h>
+<<<<<<< HEAD
 
 /*
 * branch tst
 */
+=======
+#include "driver/gpio.h"
+
+#include "BathRestHW.h"
+
+>>>>>>> tst
 
 
 #define SOCKSTARTMSG "sstrt" // при получении по WS - новый сокет.
@@ -39,7 +46,6 @@ struct WsDataToSend
 {
     httpd_handle_t hd;
     int fd ;
-    //uint8_t data[64];
     int idx; // 0-32 индекс, <0 - ничего не отправляем.
 };
 
@@ -74,15 +80,23 @@ union QueueHwData
         int HumData;
         int NumDelay; // ??
     } HumData;
+    struct LightRestData
+    {
+        int sender; // 5 - send from dist
+        int LightData;
+        int LightDelay; // ??
+    } LightData;
 };
 /*
 * union QueueHwData - sender IDX
 */
 #define IDX_QHD_HTTP 0     // отправитель HTTP
-#define IDX_QHD_IrStatus 1 // отправитель HTTP
-#define IDX_QHD_MvStatus 2 // отправитель HTTP
-#define IDX_QHD_DistData 3 // отправитель HTTP
-#define IDX_QHD_HumData 4  // отправитель HTTP
+#define IDX_QHD_IrStatus 1 // отправитель датчик ИК
+#define IDX_QHD_MvStatus 2 // отправитель датчик МВ
+#define IDX_QHD_DistData 3 // отправитель датчик расстояния
+#define IDX_QHD_HumData 4  // отправитель датчик влажности
+#define IDX_QHD_LightData 5  // отправитель состояние света в ванной или в туалете ( в разные очереди );
+
 
 /*
 *  Индекс в таблице для параметров
@@ -122,7 +136,7 @@ union QueueHwData
 #define IDX_RESTLIGHTONDIST 27   // расстояние включения света в туалете
 #define IDX_RESTLIGHTOFFDIST 28  // расстояние выключения света в туалете
 #define IDX_RESTVENTONDELAY 29   // задержка включения вентиляции в туалете
-#define IDX_RESTVENTFFDELAY 30   // задержка выключения вентиляции в туалете
+#define IDX_RESTVENTOFFDELAY 30   // задержка выключения вентиляции в туалете
 
 #define MAX_IDX_PARM_TABLE 31 // размер таблицы параметров
 
@@ -153,9 +167,6 @@ void BathVentControl(void *p);
 void RestLightControl(void *p);
 void RestVentControl(void *p);
 
-//QueueHandle_t AllSockQueue;
-//QueueHandle_t NewSockQueue;
-SemaphoreHandle_t SocketTableMutex;
 SemaphoreHandle_t DataParmTableMutex;
 
 /*
@@ -164,16 +175,61 @@ SemaphoreHandle_t DataParmTableMutex;
 xQueueHandle IrIsrQueue; // пррывание от ИК датчика
 xQueueHandle MvIsrQueue; // прерывание от МВ датчика
 xQueueHandle DistIsrQueue; // прерывания от Датчика расстояния
+xQueueHandle HumIsrQueue; // прерывания от Датчика влажности
+xQueueHandle BathLightIsrQueue; // прерывания от включения света в ванной
+xQueueHandle RestLightIsrQueue; // прерывания от включения света в ванной
 
-void CheckIrMove(void *p);
-void CheckMvMove(void *p);
-void CheckDistMove( void *p);
+
+void CheckIrMove(void *p); // обработчик ИК датчика 
+void CheckMvMove(void *p); // обработчик МВ датчика
+void CheckDistMove( void *p); // обработчик датчика расстояния
+void CheckBathHum(void *p); // обработчик датчика влажности
+void CheckBathLightOnOff(void *p); // обработчик включения света в ванной для вентиляции в ванной
+void CheckRestLightOnOff(void *p); // обработчик включения света в туалете для вентиляции в туалете
+
+/*
+*  ISR Defifnition
+*/
+void IrMvISRSetup();
+void DistIsrSetup(void *p);
+void HumIsrSetup(void *p);
+
+void InitOutGPIO();
+/*
+* connected GPIO - moved  to BathRestHW.h
+*/
+//#define GPIO_OUTPUT_IO_0    12 // Bath Light
+//#define GPIO_OUTPUT_IO_1    13 // Rest Light
+//#define GPIO_OUTPUT_IO_2    14 // Bath Vent
+//#define GPIO_OUTPUT_IO_3    15 // Rest Vent
+//#define GPIO_OUTPUT_PIN_SEL  ((1ULL<<GPIO_OUTPUT_IO_0) | (1ULL<<GPIO_OUTPUT_IO_1) | (1ULL<<GPIO_OUTPUT_IO_2) | (1ULL<<GPIO_OUTPUT_IO_3))
+
+//#define GPIO_INPUT_IO_0 19 // IR Input
+//#define GPIO_INPUT_IO_1 18 // MV Input
+//#define GPIO_INPUT_PIN_SEL ((1ULL << GPIO_INPUT_IO_0) | (1ULL << GPIO_INPUT_IO_1))
+//#define ESP_INTR_FLAG_DEFAULT 0
+
+//#define PIN_TRIGGER 16  // Dist Remote Trigg
+//#define PIN_ECHO 17     // Dist Remote Echo
+
+//#define PIN_SDA 21 // sda pin Hum
+//#define PIN_SCL 22 // scl pin Hum
+
+
+
 
 /*
 *  Глобальные переменные 
 */
 extern httpNameParm_t DataParmTable[];
 extern struct async_resp_arg SocketArgDb[];
+/*
+Эти очереди в таблице
+QueueHandle_t BathLightSendToCtrl;
+QueueHandle_t BathVentSendToCtrl;
+QueueHandle_t RestLightSendToCtrl;
+QueueHandle_t RestVentSendToCtrl;
+*/
 extern QueueHandle_t *CtrlQueueTab[];
 
 extern uint8_t IrMvAnyAll; // 0 - Any, 1 - All - пока нет в таблице параметров

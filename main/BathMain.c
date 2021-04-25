@@ -16,6 +16,7 @@
 #include "esp_eth.h"
 #include "protocol_examples_common.h"
 #include <esp_http_server.h>
+#include <mdns.h>
 
 #include "Bath.h"
 #include "BathInitGlobal.h"
@@ -79,8 +80,8 @@ static esp_err_t echo_handler(httpd_req_t *req)
         ESP_LOGE(TAG, "httpd_ws_recv_frame failed with %d", ret);
         return ret;
     }
-    ESP_LOGI(TAG, "Got packet with message: %s", ws_pkt.payload);
-    ESP_LOGI(TAG, "Packet type: %d", ws_pkt.type);
+    //ESP_LOGI(TAG, "Got packet with message: %s", ws_pkt.payload);
+    //ESP_LOGI(TAG, "Packet type: %d", ws_pkt.type);
     /*
     * если получен стартовый код - новый сокет
     */
@@ -120,11 +121,11 @@ static esp_err_t echo_handler(httpd_req_t *req)
 
 static esp_err_t get_handler(httpd_req_t *req)
 {
-    ESP_LOGI("get sess id fd", "fd %d", (int)httpd_req_to_sockfd(req));
+
     extern const unsigned char indexbathrest_html_start[] asm("_binary_indexbathrest_html_start");
     extern const unsigned char indexbathrest_html_end[] asm("_binary_indexbathrest_html_end");
     const size_t indexbathrest_html_size = (indexbathrest_html_end - indexbathrest_html_start);
-    ESP_LOGI("Get HTML", "HTML Size: '%d'", indexbathrest_html_size);
+
     httpd_resp_send_chunk(req, (const char *)indexbathrest_html_start, indexbathrest_html_size);
     httpd_resp_sendstr_chunk(req, NULL);
 
@@ -197,12 +198,15 @@ void app_main(void)
 {
 
     static httpd_handle_t server = NULL;
-
     CreateTaskAndQueue();
-
     ESP_ERROR_CHECK(nvs_flash_init());
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
+ 
+ //   ESP_ERROR_CHECK(mdns_init());
+ //   ESP_ERROR_CHECK(mdns_hostname_set("ok-home"));
+ //   ESP_ERROR_CHECK(mdns_instance_name_set("ok-home BathVent"));
+ 
 
     /* This helper function configures Wi-Fi or Ethernet, as selected in menuconfig.
      * Read "Establishing Wi-Fi or Ethernet Connection" section in
@@ -225,5 +229,4 @@ void app_main(void)
     /* Start the server for the first time */
     server = start_webserver();
 
-    testunion();
 }

@@ -16,7 +16,11 @@
 			"esp_log.h": "c",
 			"ctype.h": "c",
 			"protocol_examples_common.h": "c",
-			"freertos.h": "c"
+			"freertos.h": "c",
+			"esp_ipc.h": "c",
+			"bath.h": "c",
+			"periph_ctrl.h": "c",
+			"i2c.h": "c"
 		},
 		"idf.flashType": "UART"
 	}
