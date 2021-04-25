@@ -274,7 +274,8 @@ void CreateTaskAndQueue()
     xTaskCreate(RestLightControl, "rlc", 2000, NULL, 1, NULL);
     xTaskCreate(RestVentControl, "rvc", 2000, NULL, 1, NULL);
 
-    //xTaskCreate(DistIsrSetup, "DistData", 2000, NULL, 2, NULL);
+    xTaskCreate(DistIsrSetup, "DistData", 2000, NULL, 2, NULL);
+    xTaskCreate(HumIsrSetup, "HumData", 2000, NULL, 2, NULL);
 
     // очередь отправки в сокет
     SendWsQueue = xQueueCreate(10, sizeof(struct WsDataToSend));

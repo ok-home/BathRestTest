@@ -19,7 +19,8 @@
 			"freertos.h": "c",
 			"esp_ipc.h": "c",
 			"bath.h": "c",
-			"periph_ctrl.h": "c"
+			"periph_ctrl.h": "c",
+			"i2c.h": "c"
 		},
 		"idf.flashType": "UART"
 	}

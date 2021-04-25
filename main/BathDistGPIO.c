@@ -9,19 +9,20 @@
 
 #include "Bath.h"
 
-#define RMT_TX_CHANNEL 1                                                  /* RMT channel for transmitter */
-#define RMT_TX_GPIO_NUM GPIO_DIST_TRIGGER_OUT                             /* GPIO number for transmitter signal */
-#define RMT_RX_CHANNEL 0                                                  /* RMT channel for receiver */
-#define RMT_RX_GPIO_NUM GPIO_DIST_ECHO_IN                                 /* GPIO number for receiver */
-#define RMT_CLK_DIV 147                                                   //1.84 us  -   0,0312 cm
-#define rmt_item32_tIMEOUT 15000 // 468 cm /*!< RMT receiver timeout value(us) */ // 8075 см - ставим 8000 тик= 8000 см
-#define RMT_TRIGG_TICK 6  // trigg wilth approx 10 us
+#define RMT_TX_CHANNEL 5                      /* RMT channel for transmitter */
+#define RMT_TX_GPIO_NUM GPIO_DIST_TRIGGER_OUT /* GPIO number for transmitter signal */
+#define RMT_RX_CHANNEL 6                      /* RMT channel for receiver */
+#define RMT_RX_GPIO_NUM GPIO_DIST_ECHO_IN     /* GPIO number for receiver */
+#define RMT_CLK_DIV 147                       //1.84 us  -   0,0312 cm
+#define rmt_item32_tIMEOUT 15000              // 468 cm /*!< RMT receiver timeout value(us) */ // 8075 см - ставим 8000 тик= 8000 см
+#define RMT_TRIGG_TICK 6                      // trigg wilth approx 10 us
 //#define RMT_TICK_10_US (80000000 / RMT_CLK_DIV / 100000)      /* RMT counter value for 10 us.(Source clock is APB clock) 8 тиков в 10 мкс 1 тик 1,25 мкс */
 //#define ITEM_DURATION(d) ((d & 0x7fff) * 10 / RMT_TICK_10_US) // тики * 1,25 - длительность в мкс
 
 static void HCSR04_tx_init()
 {
     rmt_config_t rmt_tx;
+
     rmt_tx.channel = RMT_TX_CHANNEL;
     rmt_tx.gpio_num = RMT_TX_GPIO_NUM;
     rmt_tx.mem_block_num = 1;
@@ -30,7 +31,7 @@ static void HCSR04_tx_init()
     rmt_tx.tx_config.carrier_en = 0;
     rmt_tx.tx_config.idle_level = 0;
     rmt_tx.tx_config.idle_output_en = true;
-    rmt_tx.rmt_mode = 0; // RMT_MODE_TX ?
+    rmt_tx.rmt_mode = RMT_MODE_TX;
     rmt_config(&rmt_tx);
     rmt_driver_install(rmt_tx.channel, 0, 0);
 }
@@ -44,10 +45,10 @@ static void HCSR04_rx_init()
     rmt_rx.mem_block_num = 1;
     rmt_rx.rmt_mode = RMT_MODE_RX;
     rmt_rx.rx_config.filter_en = true;
-    rmt_rx.rx_config.filter_ticks_thresh = 100;
+    rmt_rx.rx_config.filter_ticks_thresh = 50;
     rmt_rx.rx_config.idle_threshold = rmt_item32_tIMEOUT;
     rmt_config(&rmt_rx);
-    rmt_driver_install(rmt_rx.channel, 10, 0); // rb size = 10
+    rmt_driver_install(rmt_rx.channel, 32, 0); // rb size = 10
 }
 static const char *NEC_TAG = "NEC";
 
@@ -63,38 +64,48 @@ void DistIsrSetup(void *p)
     item.duration1 = 20; // for one pulse this doesn't matter
 
     size_t rx_size = 0;
-     rmt_item32_t *rx_item = NULL;
+    rmt_item32_t *rx_item = NULL;
     RingbufHandle_t rb = NULL;
     rmt_get_ringbuf_handle(RMT_RX_CHANNEL, &rb);
-    rmt_rx_start(RMT_RX_CHANNEL, 1);
+    rmt_rx_start(RMT_RX_CHANNEL, true);
 
     //double distance = 0;
-    float distance = 0;
     int dist = 0;
+    int midl_dist = 0;
     int size = 0;
+    int cnt = 0;
     for (;;)
     {
         rmt_write_items(RMT_TX_CHANNEL, &item, 1, true);
         rmt_wait_tx_done(RMT_TX_CHANNEL, portMAX_DELAY);
 
-        rx_item = (rmt_item32_t *)xRingbufferReceive(rb, &rx_size, 20000);
+        rx_item = (rmt_item32_t *)xRingbufferReceive(rb, &rx_size, 2000);
         if (rx_item)
         {
-            // distance = 340.29 * ITEM_DURATION(item->duration0) / (  2000000 ); // distance in meters
-            //distance = 340.29 * ITEM_DURATION(item->duration0) / (100 * 2); // distance in centimeters
-            //ESP_LOGI(NEC_TAG, "Distance is %f cm\n", distance);
-            dist = (int)rx_item->duration0;
+            dist = ((int)rx_item->duration0) >> 5;
             size = rx_size;
             vRingbufferReturnItem(rb, (void *)rx_item);
-            ESP_LOGI(NEC_TAG, "Dist is %d tick size %d item %d \n ", dist, size, (int)rx_item);
-            //xQueueSend(DistIsrQueue, &dist, 0);
+            //       ESP_LOGI(NEC_TAG, "Dist is %d tick size %d item %d n ", dist, size,cnt);
+            if (midl_dist < dist)
+                midl_dist = dist;
+            cnt++;
+            if (cnt == 4)
+            {
+                xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
+                DataParmTable[IDX_DISTVOL].val = midl_dist;
+                xSemaphoreGive(DataParmTableMutex);
+                xQueueSend(DistIsrQueue, &midl_dist, 0);
+                //            ESP_LOGI(NEC_TAG, "MIDL Dist is %d\n ", midl_dist);
+                cnt = 0;
+                midl_dist = 0;
+            }
         }
         else
         {
             ESP_LOGI(NEC_TAG, "Distance is not readable");
         }
 
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 }
 

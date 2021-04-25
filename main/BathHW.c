@@ -592,7 +592,7 @@ void CheckRestLightOnOff(void *p)
                 delay = portMAX_DELAY; // долго ждем включения света
             }
             ud.LightData.LightData = ventOnOff;
-            ESP_LOGI("Before Send RestVent -> from Light", "onDelay %d offDelay %d ventOnOff %d", ventOnDelay, ventOffDelay, ventOnOff);
+//            ESP_LOGI("Before Send RestVent -> from Light", "onDelay %d offDelay %d ventOnOff %d", ventOnDelay, ventOffDelay, ventOnOff);
             xQueueSend(CtrlQueueTab[Q_RESTVENT_IDX], &ud, 0);
         }
     }

@@ -30,16 +30,16 @@ httpNameParm_t DataParmTable[MAX_IDX_PARM_TABLE] = {
     {"BathLightIrUse", 1, 0, Q_BATHLIGHT_IDX},
     {"BathLightMvUse", 1, 0, Q_BATHLIGHT_IDX},
 
-    {"BathHumOnParm", 60, 1, Q_BATHVENT_IDX},
-    {"BathHumOffParm", 61, 1, Q_BATHVENT_IDX},
-    {"BathVentOnDelay", 62, 1, Q_BATHVENT_IDX},
-    {"BathVentOffDelay", 63, 1, Q_BATHVENT_IDX},
+    {"BathHumOnParm", 50, 1, Q_BATHVENT_IDX},
+    {"BathHumOffParm", 50, 1, Q_BATHVENT_IDX},
+    {"BathVentOnDelay", 1, 1, Q_BATHVENT_IDX},
+    {"BathVentOffDelay", 10, 1, Q_BATHVENT_IDX},
     {"BathLightOnDelay", 0, 1, Q_BATHLIGHT_IDX},
-    {"BathLightOffDelay", 2, 1, Q_BATHLIGHT_IDX},
+    {"BathLightOffDelay", 10, 1, Q_BATHLIGHT_IDX},
     {"RestLightOnDist", 120, 1, Q_RESTLIGHT_IDX},
     {"RestLightOffDist", 120, 1, Q_RESTLIGHT_IDX},
-    {"RestVentOnDelay", 68, 1, Q_RESTVENT_IDX},
-    {"RestVentOffDelay", 69, 1, Q_RESTVENT_IDX}};
+    {"RestVentOnDelay", 1, 1, Q_RESTVENT_IDX},
+    {"RestVentOffDelay", 10, 1, Q_RESTVENT_IDX}};
 
 /*
 *  таблица открытых ws сокетов

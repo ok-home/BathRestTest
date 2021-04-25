@@ -184,6 +184,7 @@ void CheckRestLightOnOff(void *p); // обработчик включения с
 */
 void IrMvISRSetup();
 void DistIsrSetup(void *p);
+void HumIsrSetup(void *p);
 
 void InitOutGPIO();
 /*
