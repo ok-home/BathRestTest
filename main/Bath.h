@@ -5,17 +5,10 @@
 #include <freertos/task.h>
 #include <freertos/queue.h>
 #include <freertos/semphr.h>
-<<<<<<< HEAD
-
-/*
-* branch tst
-*/
-=======
 #include "driver/gpio.h"
 
 #include "BathRestHW.h"
 
->>>>>>> tst
 
 
 #define SOCKSTARTMSG "sstrt" // при получении по WS - новый сокет.
