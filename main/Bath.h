@@ -9,17 +9,16 @@
 
 #include "BathRestHW.h"
 
-
-
 #define SOCKSTARTMSG "sstrt" // при получении по WS - новый сокет.
 #define MAXJSONSTRING 64 // Буфер JSON
 
-void testunion();
+//void testunion();
 void CreateTaskAndQueue();
 int FindIdxFromDataParmTable(char *);
 int JsonDigitBool(char *, char *, int);
 void ParmTableToJson(char *, int );
 int SendFrameToAllSocket(char *);
+void LightISRSetup();
 
 void SendWsData ( void*p);
 QueueHandle_t SendWsQueue;
@@ -53,31 +52,31 @@ union QueueHwData
     {
         int sender; // 1 - send from ir
         int IrStatus;
-        int IrDelay;
+        //int IrDelay;
     } IrData;
     struct MvData
     {
         int sender; // 2 - send from Mv
         int MvStatus;
-        int MvDelay;
+        //int MvDelay;
     } MvData;
     struct DistData
     {
         int sender; // 3 - send from dist
         int DistStatus;
-        int DistDelay; // ??
+        //int DistDelay; // ??
     } DistData;
     struct HumData
     {
         int sender; // 4 - send from dist
         int HumData;
-        int NumDelay; // ??
+        //int NumDelay; // ??
     } HumData;
     struct LightRestData
     {
         int sender; // 5 - send from dist
         int LightData;
-        int LightDelay; // ??
+        //int LightDelay; // ??
     } LightData;
 };
 /*
@@ -134,7 +133,7 @@ union QueueHwData
 #define MAX_IDX_PARM_TABLE 31 // размер таблицы параметров
 
 /*
-*  опредеения индексов для CtrlQueueTab - они же в качестве ссылок в Таблице параметров
+*  определения индексов для CtrlQueueTab - они же в качестве ссылок в Таблице параметров
 */
 #define Q_NO_IDX -1
 #define Q_BATHLIGHT_IDX 0

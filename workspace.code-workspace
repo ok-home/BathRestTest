@@ -21,7 +21,9 @@
 			"bath.h": "c",
 			"periph_ctrl.h": "c",
 			"i2c.h": "c",
-			"gpio.h": "c"
+			"gpio.h": "c",
+			"mdns.h": "c",
+			"bathresthw.h": "c"
 		},
 		"idf.flashType": "UART"
 	}

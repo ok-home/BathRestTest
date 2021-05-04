@@ -49,6 +49,12 @@ P2 D4.2 - DIST_TRIGGER
 P3 D4.3 - DIST_ECHO
 P4 D4.4 - Земля
 
+P1 D4.1 - Земля
+P2 D4.2 - GPIO_BATH_LIGHT_SW_IN
+P3 D4.3 - GPIO_REST_LIGHT_SW_IN
+P4 D4.4 - Земля
+
+
 */
 
 /*
@@ -72,3 +78,9 @@ P4 D4.4 - Земля
 
 #define GPIO_HUM_SDA_INOUT 16 // sda pin Hum
 #define GPIO_HUM_SCL_OUT 17 // scl pin Hum
+
+#define GPIO_BATH_LIGHT_SW_IN 26 // temp definition
+#define GPIO_REST_LIGHT_SW_IN 25 // temp definition
+#define GPIO_LIGHT_SW_PIN_SEL ((1ULL << GPIO_BATH_LIGHT_SW_IN) | (1ULL << GPIO_REST_LIGHT_SW_IN))
+
+

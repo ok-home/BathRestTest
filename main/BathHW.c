@@ -66,15 +66,18 @@ void BathLightControl(void *p)
             xSemaphoreGive(DataParmTableMutex);
             if (flag)
             {
+                // сюда ставим информирование о состоянии света и собственно само включение !!
+                gpio_set_level(GPIO_BATH_LIGHT_OUT, LightOnOff);
+                xQueueSend(BathLightIsrQueue, &LightOnOff, 0); // отправить на обработку включения вентиляции
                 req.fd = 0;
                 req.hd = NULL;
                 req.idx = IDX_BATHLIGHTSTATUS;
-                xQueueSend(SendWsQueue, &req, 0);              // отправить HTTP
-                xQueueSend(BathLightIsrQueue, &LightOnOff, 0); // отправить на обработку включения вентиляции
+                xQueueSend(SendWsQueue, &req, 0);               // отправить http вкл света
+                req.idx = IDX_IRVOL;
+                xQueueSend(SendWsQueue, &req, 0);               // Датчик ИК
+                req.idx = IDX_MVVOL;
+                xQueueSend(SendWsQueue, &req, 0);               // датчик МВ
 
-                //ESP_LOGI("СВЕТ В ВАННОЙ", "Свет %d IR %d Mv %d idx %d\n", LightOnOff, IrOnOff, MvOnOff, req.idx);
-                // сюда ставим информирование о состоянии света и собственно само включение !!
-                gpio_set_level(GPIO_BATH_LIGHT_OUT, LightOnOff);
             }
         }
     }
@@ -131,13 +134,17 @@ void BathVentControl(void *p)
             xSemaphoreGive(DataParmTableMutex);
             if (flag)
             {
+                // сюда ставим информирование о состоянии света и собственно само включение !!
+                gpio_set_level(GPIO_BATH_VENT_OUT, ventOnOff);
+
                 req.fd = 0;
                 req.hd = NULL;
                 req.idx = IDX_BATHVENTSTATUS;
                 xQueueSend(SendWsQueue, &req, 0); // отправить HTTP
+                req.idx = IDX_HUMVOL;
+                xQueueSend(SendWsQueue, &req, 0); // датчик влажности
+
                 //ESP_LOGI("ВЕНТИЛЯЦИЯ В ВАННОЙ", "Вент %d влажн %d свет %d idx %d", ventOnOff, DataParmTable[IDX_HUMVOL].val, DataParmTable[IDX_BATHLIGHTSTATUS].val, req.idx);
-                // сюда ставим информирование о состоянии света и собственно само включение !!
-                gpio_set_level(GPIO_BATH_VENT_OUT, ventOnOff);
             }
         }
     }
@@ -187,14 +194,16 @@ void RestLightControl(void *p)
             xSemaphoreGive(DataParmTableMutex);
             if (flag)
             {
+                // сюда ставим информирование о состоянии света и собственно само включени !!
+                gpio_set_level(GPIO_REST_LIGHT_OUT, LightOnOff);
+                xQueueSend(RestLightIsrQueue, &LightOnOff, 0); // отправить на обработку включения вентиляции
+
                 req.fd = 0;
                 req.hd = NULL;
                 req.idx = IDX_RESTLIGHTSTATUS;
                 xQueueSend(SendWsQueue, &req, 0);              // Отправить HTTP
-                xQueueSend(RestLightIsrQueue, &LightOnOff, 0); // отправить на обработку включения вентиляции
-                //ESP_LOGI("СВЕТ В Туалете", "Свет %d idx %d\n", LightOnOff, req.idx);
-                // сюда ставим информирование о состоянии света и собственно само включени !!
-                gpio_set_level(GPIO_REST_LIGHT_OUT, LightOnOff);
+                req.idx = IDX_DISTVOL;
+                xQueueSend(SendWsQueue, &req, 0);              // датчик расстояния
             }
         }
     }
@@ -240,13 +249,14 @@ void RestVentControl(void *p)
             xSemaphoreGive(DataParmTableMutex);
             if (flag)
             {
+
+                // сюда ставим информирование о состоянии света и собственно само включение !!
+                gpio_set_level(GPIO_REST_VENT_OUT, ventOnOff);
+                
                 req.fd = 0;
                 req.hd = NULL;
                 req.idx = IDX_RESTVENTSTATUS;
                 xQueueSend(SendWsQueue, &req, 0); // отправить HTTP
-                //ESP_LOGI("ВЕНТИЛЯЦИЯ В ТУАЛЕТЕ", "Вент %d  свет %d idx %d\n", ventOnOff, DataParmTable[IDX_RESTLIGHTSTATUS].val, req.idx);
-                // сюда ставим информирование о состоянии света и собственно само включение !!
-                gpio_set_level(GPIO_REST_VENT_OUT, ventOnOff);
             }
         }
     }
