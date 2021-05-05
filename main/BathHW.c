@@ -19,7 +19,6 @@ void BathLightControl(void *p)
             xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
             autolight = DataParmTable[IDX_BATHLIGHTAUTOENABLE].val;
             LightOnOff = DataParmTable[IDX_BATHLIGHTSTATUS].val;
-
             switch (unidata.HttpData.sender)
             {
             case IDX_QHD_HTTP:

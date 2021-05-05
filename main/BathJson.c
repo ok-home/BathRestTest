@@ -262,6 +262,7 @@ void CreateTaskAndQueue()
     xTaskCreate(CheckBathLightOnOff, "BathLightIsr", 2000, NULL, 1, NULL);
     xTaskCreate(CheckRestLightOnOff, "RestLightIsr", 2000, NULL, 1, NULL);
 
+    xTaskCreate(BathLightControl, "blc", 2000, NULL, 1, NULL);
     xTaskCreate(BathVentControl, "bvc", 2000, NULL, 1, NULL);
     xTaskCreate(RestLightControl, "rlc", 2000, NULL, 1, NULL);
     xTaskCreate(RestVentControl, "rvc", 2000, NULL, 1, NULL);
