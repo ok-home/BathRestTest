@@ -122,7 +122,7 @@ void BathVentControl(void *p)
                     ventOnOff = unidata.HumData.HumData;
                     break;
                 }
-
+             __attribute__ ((fallthrough));
             case IDX_QHD_LightData:
                 if (autoVent == 0)
                 {
@@ -295,11 +295,12 @@ void CheckIrMove(void *p)
             //ESP_LOGI("Ir isr check", "IrStat %d", on_off);
             if ((on_off == 1) && (MoveDelay == portMAX_DELAY)) // включить свет
             {
-                ud.IrData.IrStatus = 1; // on
-                xQueueSend(CtrlQueueTab[Q_BATHLIGHT_IDX], &ud, 0);
+                
                 xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
                 DataParmTable[IDX_IRVOL].val = 1;
                 xSemaphoreGive(DataParmTableMutex);
+                ud.IrData.IrStatus = 1; // on
+                xQueueSend(CtrlQueueTab[Q_BATHLIGHT_IDX], &ud, 0);
                 //    ESP_LOGI("Ir isr ON", "IrStat %d Delay %d", on_off, MoveDelay);
                 continue;
             }
@@ -321,11 +322,12 @@ void CheckIrMove(void *p)
         {
             if (on_off == 0) // таймаут - выключаем свет
             {
-                ud.IrData.IrStatus = 0;
-                xQueueSend(CtrlQueueTab[Q_BATHLIGHT_IDX], &ud, 0);
+                
                 xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
                 DataParmTable[IDX_IRVOL].val = 0;
                 xSemaphoreGive(DataParmTableMutex);
+                ud.IrData.IrStatus = 0;
+                xQueueSend(CtrlQueueTab[Q_BATHLIGHT_IDX], &ud, 0);
                 MoveDelay = portMAX_DELAY;
                 //    ESP_LOGI("Ir isr OFF", "IrStat %d Delay %d", on_off, MoveDelay);
                 continue;
@@ -355,11 +357,12 @@ void CheckMvMove(void *p)
             //            ESP_LOGI("Mv isr check", "MvStat %d", on_off);
             if ((on_off == 1) && (MoveDelay == portMAX_DELAY)) // включить свет
             {
-                ud.MvData.MvStatus = 1; // on
-                xQueueSend(CtrlQueueTab[Q_BATHLIGHT_IDX], &ud, 0);
                 xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
                 DataParmTable[IDX_MVVOL].val = 1;
                 xSemaphoreGive(DataParmTableMutex);
+                                ud.MvData.MvStatus = 1; // on
+                xQueueSend(CtrlQueueTab[Q_BATHLIGHT_IDX], &ud, 0);
+
                 //                   ESP_LOGI("MV isr ON", "IrStat %d Delay %d", on_off, MoveDelay);
                 continue;
             }
@@ -380,11 +383,12 @@ void CheckMvMove(void *p)
         {
             if (on_off == 0) // таймаут - выключаем свет
             {
-                ud.MvData.MvStatus = 0; // off
-                xQueueSend(CtrlQueueTab[Q_BATHLIGHT_IDX], &ud, 0);
                 xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
                 DataParmTable[IDX_MVVOL].val = 0;
                 xSemaphoreGive(DataParmTableMutex);
+                ud.MvData.MvStatus = 0; // off
+                xQueueSend(CtrlQueueTab[Q_BATHLIGHT_IDX], &ud, 0);
+                
                 //                   ESP_LOGI("MV isr OFF", "IrStat %d Delay %d", on_off, MoveDelay);
                 MoveDelay = portMAX_DELAY;
                 continue;

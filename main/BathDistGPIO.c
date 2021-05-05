@@ -62,7 +62,7 @@ void DistIsrSetup(void *p)
     //double distance = 0;
     int dist = 0;
     int midl_dist = 0;
-    int size = 0;
+    //int size = 0;
     int cnt = 0;
     for (;;)
     {
@@ -73,7 +73,7 @@ void DistIsrSetup(void *p)
         if (rx_item)
         {
             dist = ((int)rx_item->duration0) >> 5;
-            size = (int)rx_size;
+            //size = (int)rx_size;
             vRingbufferReturnItem(rb, (void *)rx_item);
             //       ESP_LOGI(NEC_TAG, "Dist is %d tick size %d item %d n ", dist, size,cnt);
             if (midl_dist < dist)

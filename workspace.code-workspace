@@ -23,7 +23,8 @@
 			"i2c.h": "c",
 			"gpio.h": "c",
 			"mdns.h": "c",
-			"bathresthw.h": "c"
+			"bathresthw.h": "c",
+			"rmt.h": "c"
 		},
 		"idf.flashType": "UART"
 	}
