@@ -25,20 +25,29 @@ void BathLightControl(void *p)
                 if (autolight == 0) // ручное управление светом
                 {
                     LightOnOff = DataParmTable[IDX_BATHLIGHTONOFF].val;
+                    break;
                 }
-                break;
+                else // включаем автомат - определяем состояние света по датчикам
+                {
+                    goto auto_on_lbl;
+                }
             case IDX_QHD_IrStatus:
             case IDX_QHD_MvStatus:
                 if (autolight == 0)
                 {
                     break;
                 }
-
+            //
+            auto_on_lbl:
+                IrOnOff = (uint8_t)DataParmTable[IDX_IRVOL].val;
+                MvOnOff = (uint8_t)DataParmTable[IDX_MVVOL].val;
+                //
+                /*   // ИЗМНЕНИЕ ??
                 if (unidata.IrData.sender == IDX_QHD_IrStatus)
                     IrOnOff = unidata.IrData.IrStatus;
                 else
                     MvOnOff = unidata.MvData.MvStatus;
-
+                */
                 if (DataParmTable[IDX_BATHLIGHTIRUSE].val && DataParmTable[IDX_BATHLIGHTMVUSE].val)
                 {
                     if (IrMvAnyAll == 1)                // all
@@ -71,12 +80,11 @@ void BathLightControl(void *p)
                 req.fd = 0;
                 req.hd = NULL;
                 req.idx = IDX_BATHLIGHTSTATUS;
-                xQueueSend(SendWsQueue, &req, 0);               // отправить http вкл света
+                xQueueSend(SendWsQueue, &req, 0); // отправить http вкл света
                 req.idx = IDX_IRVOL;
-                xQueueSend(SendWsQueue, &req, 0);               // Датчик ИК
+                xQueueSend(SendWsQueue, &req, 0); // Датчик ИК
                 req.idx = IDX_MVVOL;
-                xQueueSend(SendWsQueue, &req, 0);               // датчик МВ
-
+                xQueueSend(SendWsQueue, &req, 0); // датчик МВ
             }
         }
     }
@@ -157,7 +165,7 @@ void RestLightControl(void *p)
     struct WsDataToSend req;
     for (;;)
     {
-        if (xQueueReceive(RestLightSendToCtrl, &unidata, 1000 / portTICK_PERIOD_MS) == pdTRUE)
+        if (xQueueReceive(RestLightSendToCtrl, &unidata, portMAX_DELAY) == pdTRUE)
         {
 
             //определить режим работы автосвета ( автомат/ручное ) и текущее состояние света
@@ -172,8 +180,17 @@ void RestLightControl(void *p)
                 if (autolight == 0) // ручное управление светом
                 {
                     LightOnOff = DataParmTable[IDX_RESTLIGHTONOFF].val;
+                    break;
                 }
-                break;
+                else // вернуться в авторежим
+                {
+                    if (DataParmTable[IDX_RESTLIGHTONDIST].val < DataParmTable[IDX_DISTVOL].val)
+                        {LightOnOff = 0;}
+                    else
+                        {LightOnOff = 1;} 
+                    break;
+                }
+
             case IDX_QHD_DistData:
                 if (autolight == 0)
                 {
@@ -200,9 +217,9 @@ void RestLightControl(void *p)
                 req.fd = 0;
                 req.hd = NULL;
                 req.idx = IDX_RESTLIGHTSTATUS;
-                xQueueSend(SendWsQueue, &req, 0);              // Отправить HTTP
+                xQueueSend(SendWsQueue, &req, 0); // Отправить HTTP
                 req.idx = IDX_DISTVOL;
-                xQueueSend(SendWsQueue, &req, 0);              // датчик расстояния
+                xQueueSend(SendWsQueue, &req, 0); // датчик расстояния
             }
         }
     }
@@ -251,7 +268,7 @@ void RestVentControl(void *p)
 
                 // сюда ставим информирование о состоянии света и собственно само включение !!
                 gpio_set_level(GPIO_REST_VENT_OUT, ventOnOff);
-                
+
                 req.fd = 0;
                 req.hd = NULL;
                 req.idx = IDX_RESTVENTSTATUS;
@@ -283,7 +300,7 @@ void CheckIrMove(void *p)
                 xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
                 DataParmTable[IDX_IRVOL].val = 1;
                 xSemaphoreGive(DataParmTableMutex);
-            //    ESP_LOGI("Ir isr ON", "IrStat %d Delay %d", on_off, MoveDelay);
+                //    ESP_LOGI("Ir isr ON", "IrStat %d Delay %d", on_off, MoveDelay);
                 continue;
             }
             if ((on_off == 0) && (MoveDelay == portMAX_DELAY)) // ждем таймер включения
@@ -310,7 +327,7 @@ void CheckIrMove(void *p)
                 DataParmTable[IDX_IRVOL].val = 0;
                 xSemaphoreGive(DataParmTableMutex);
                 MoveDelay = portMAX_DELAY;
-            //    ESP_LOGI("Ir isr OFF", "IrStat %d Delay %d", on_off, MoveDelay);
+                //    ESP_LOGI("Ir isr OFF", "IrStat %d Delay %d", on_off, MoveDelay);
                 continue;
             }
             else
@@ -335,7 +352,7 @@ void CheckMvMove(void *p)
 
         if (xQueueReceive(MvIsrQueue, &on_off, MoveDelay) == pdTRUE) // получено прерывание
         {
-//            ESP_LOGI("Mv isr check", "MvStat %d", on_off);
+            //            ESP_LOGI("Mv isr check", "MvStat %d", on_off);
             if ((on_off == 1) && (MoveDelay == portMAX_DELAY)) // включить свет
             {
                 ud.MvData.MvStatus = 1; // on
@@ -343,7 +360,7 @@ void CheckMvMove(void *p)
                 xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
                 DataParmTable[IDX_MVVOL].val = 1;
                 xSemaphoreGive(DataParmTableMutex);
- //                   ESP_LOGI("MV isr ON", "IrStat %d Delay %d", on_off, MoveDelay);
+                //                   ESP_LOGI("MV isr ON", "IrStat %d Delay %d", on_off, MoveDelay);
                 continue;
             }
             if ((on_off == 0) && (MoveDelay == portMAX_DELAY)) // ждем таймер включения
@@ -368,7 +385,7 @@ void CheckMvMove(void *p)
                 xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
                 DataParmTable[IDX_MVVOL].val = 0;
                 xSemaphoreGive(DataParmTableMutex);
- //                   ESP_LOGI("MV isr OFF", "IrStat %d Delay %d", on_off, MoveDelay);
+                //                   ESP_LOGI("MV isr OFF", "IrStat %d Delay %d", on_off, MoveDelay);
                 MoveDelay = portMAX_DELAY;
                 continue;
             }
@@ -593,7 +610,7 @@ void CheckRestLightOnOff(void *p)
                 delay = portMAX_DELAY; // долго ждем включения света
             }
             ud.LightData.LightData = ventOnOff;
-//            ESP_LOGI("Before Send RestVent -> from Light", "onDelay %d offDelay %d ventOnOff %d", ventOnDelay, ventOffDelay, ventOnOff);
+            //            ESP_LOGI("Before Send RestVent -> from Light", "onDelay %d offDelay %d ventOnOff %d", ventOnDelay, ventOffDelay, ventOnOff);
             xQueueSend(CtrlQueueTab[Q_RESTVENT_IDX], &ud, 0);
         }
     }

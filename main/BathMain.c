@@ -159,7 +159,6 @@ void app_main(void)
 
     static httpd_handle_t server = NULL;
 
-   // LightISRSetup(); //tmp
     CreateTaskAndQueue();
     
     ESP_ERROR_CHECK(nvs_flash_init());

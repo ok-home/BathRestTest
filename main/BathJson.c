@@ -277,6 +277,8 @@ void CreateTaskAndQueue()
 
     InitOutGPIO();  // настроить GPIO на вывод реле управления светом и вентиляцией
     IrMvISRSetup();  //включить датчики движения в ванной Ir+Mv
+    LightISRSetup(); //механический выключатель света
+
     
     return;
 }
