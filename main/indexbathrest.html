@@ -1,452 +1,503 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<title>Document</title>
+	<meta charset="UTF-8">
+	<title>Document</title>
 </head>
+
 <body>
 	<table border="1" cellpadding="1" cellspacing="1" id="CtrlData" style="width: 500px">
 		<tbody>
-		<tr>
-			<td colspan="2" style="text-align: center;">Данные Датчиков</td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">Температура</td>
-			<td><div id="TempVol" style="text-align: center;"></div></td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">Влажность</td>
-			<td><div id="HumVol" style="text-align: center;"></div></td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">Расстояние</td>
-			<td><div id="DistVol" style="text-align: center;"></div></td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">Ик Датчик Движения</td>
-			<td><div id="IrVol" style="text-align: center;"></div></td>
-		</tr>
-		<tr>
-			<td style="text-align: center;">Мв Датчик Движения</td>
-			<td><div id="MvVol" style="text-align: center;"></div></td>
-		</tr>
-		<tr>
-			<td colspan="2" style="text-align: center;"><div id="EchoString" style="text-align: center;"></div></td>
-		</tr>
-	</tbody>
-</table>
-<form action="DisplayStatus" enctype="text/plain" id="Status" method="get" name="StatusForm">&nbsp;
-	<table border="1" cellpadding="1" cellspacing="1" style="width: 500px">
-		<tbody>
 			<tr>
-				<td>&nbsp;</td>
-				<td style="text-align: center;">Состояние</td>
+				<td colspan="2" style="text-align: center;">Данные Датчиков</td>
+			</tr>
+			<tr>
+				<td style="text-align: center;">Температура</td>
 				<td>
-					<p align="center">Разрешить</p>
-					<p align="center">Автомат</p>
+					<div id="TempVol" style="text-align: center;"></div>
 				</td>
-				<td style="text-align: center;">Ручное включение</td>
 			</tr>
 			<tr>
-				<td>Свет Ванная</td>
-				<td><div id="BathLightStatus" style="text-align: center;">   </div></td>
-				<td style="text-align: center;"><input checked="checked" name="BathLightAutoEnable" type="checkbox" value="On">&nbsp;Разрешить</td>
-				<td style="text-align: center;"><input checked="checked" name="BathLightOnOff" type="checkbox" value="On">&nbsp;Вкл/Выкл</td>
+				<td style="text-align: center;">Влажность</td>
+				<td>
+					<div id="HumVol" style="text-align: center;"></div>
+				</td>
 			</tr>
 			<tr>
-				<td>Свет Туалет</td>
-				<td><div id="RestLightStatus" style="text-align: center;">   </div></td>
-				<td style="text-align: center;"><input checked="checked" name="RestLightAutoEnable" type="checkbox" value="On">&nbsp;Разрешить</td>
-				<td style="text-align: center;"><input checked="checked" name="RestLightOnOff" type="checkbox" value="On">&nbsp;Вкл/Выкл</td>
+				<td style="text-align: center;">Расстояние</td>
+				<td>
+					<div id="DistVol" style="text-align: center;"></div>
+				</td>
 			</tr>
 			<tr>
-				<td>Вентиляция Ванная</td>
-				<td><div id="BathVentStatus" style="text-align: center;">   </div></td>
-				<td style="text-align: center;"><input checked="checked" name="BathVentAutoEnable" type="checkbox" value="On">&nbsp;Разрешить</td>
-				<td style="text-align: center;"><input checked="checked" name="BathVentOnOff" type="checkbox" value="On">&nbsp;Вкл/Выкл</td>
+				<td style="text-align: center;">Ик Датчик Движения</td>
+				<td>
+					<div id="IrVol" style="text-align: center;"></div>
+				</td>
 			</tr>
 			<tr>
-				<td>Вентиляция Туалет</td>
-				<td><div id="RestVentStatus" style="text-align: center;">   </div></td>
-				<td style="text-align: center;"><input checked="checked" name="RestVentAutoEnable" type="checkbox" value="On">&nbsp;Разрешить</td>
-				<td style="text-align: center;"><input checked="checked" name="RestVentOnOff" type="checkbox" value="On">&nbsp;Вкл/Выкл</td>
+				<td style="text-align: center;">Мв Датчик Движения</td>
+				<td>
+					<div id="MvVol" style="text-align: center;"></div>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2" style="text-align: center;">
+					<div id="EchoString" style="text-align: center;"></div>
+				</td>
 			</tr>
 		</tbody>
 	</table>
-</form>
-<form action="AutoSetForm" enctype="text/plain" id="AutoSetId" method="get" name="AutoSetForm">&nbsp;
-<table border="1" cellpadding="1" cellspacing="1" style="width:500px">
-	<tbody>
-		<tr>
-			<td colspan="3" style="text-align:center">Настройка параметров</td>
-		</tr>
-		<tr>
-			<td>Вентиляция Ванна Влажность</td>
-			<td colspan="2" rowspan="1" style="text-align:center"><input checked="checked" name="BathVentUseHum" type="checkbox" />&nbsp;Разрешить</td>
-		</tr>
-		<tr>
-			<td>Вентиляция Ванна Влажность Параметры</td>
-			<td style="text-align:center">Включение &gt;&nbsp;<input name="BathHumOnParm" type="text" value="70" required pattern="[0-9]{2}" /></td>
-			<td style="text-align:center">Выключение &lt;<input name="BathHumOffParm" type="text" value="50" /></td>
-		</tr>
-		<tr>
-			<td>Вентиляция Ванна Присутствие</td>
-			<td colspan="2" rowspan="1" style="text-align:center"><input checked="checked" name="BathVentUseMove" type="checkbox" />&nbsp;Разрешить</td>
-		</tr>
-		<tr>
-			<td>Вентиляция Ванна Присутствие Параметры</td>
-			<td style="text-align:center">Задержка Включения<input name="BathVentOnDelay" type="text" value="0" /></td>
-			<td style="text-align:center">Задержка выключения<input name="BathVentOffDelay" type="text" value="120" /></td>
-		</tr>
-		<tr>
-			<td colspan="3" style="text-align:center">&nbsp;</td>
-		</tr>
-		<tr>
-			<td>Свет Ванна ИК датчик</td>
-			<td colspan="2" rowspan="1" style="text-align:center"><input checked="checked" name="BathLightIrUse" type="checkbox" />&nbsp;Разрешить</td>
-		</tr>
-		<tr>
-			<td>Свет Ванна МВ Датчик</td>
-			<td colspan="2" rowspan="1" style="text-align:center"><input checked="checked" name="BathLightMvUse" type="checkbox" />&nbsp;Разрешить</td>
-		</tr>
-		<tr>
-			<td>Свет Ванна Параметры</td>
-			<td style="text-align:center">Задержка включения<input name="BathLightOnDelay" type="text" value="10" /></td>
-			<td style="text-align:center">Задержка Выключения<input name="BathLightOffDelay" type="text" value="120" /></td>
-		</tr>
-		<tr>
-			<td colspan="3" style="text-align:center">&nbsp;</td>
-		</tr>
-		<tr>
-			<td>Свет Туалет Параметры</td>
-			<td style="text-align:center">Расстояние Включения<input name="RestLightOnDist" type="text" value="200" /></td>
-			<td style="text-align:center">Расстояние Выключения<input name="RestLightOffDist" type="text" value="250" /></td>
-		</tr>
-		<tr>
-			<td>Вентиляция Туалет Параметры</td>
-			<td style="text-align:center">Задержка включения<input name="RestVentOnDelay" type="text" value="30" /></td>
-			<td style="text-align:center">Задержка Выключения<input name="RestVentOffDelay" type="text" value="120" /></td>
-		</tr>
-	</tbody>
-</table>
-</form>
+	<form action="DisplayStatus" enctype="text/plain" id="Status" method="get" name="StatusForm">&nbsp;
+		<table border="1" cellpadding="1" cellspacing="1" style="width: 500px">
+			<tbody>
+				<tr>
+					<td>&nbsp;</td>
+					<td style="text-align: center;">Состояние</td>
+					<td>
+						<p align="center">Разрешить</p>
+						<p align="center">Автомат</p>
+					</td>
+					<td style="text-align: center;">Ручное включение</td>
+				</tr>
+				<tr>
+					<td>Свет Ванная</td>
+					<td>
+						<div id="BathLightStatus" style="text-align: center;"> </div>
+					</td>
+					<td style="text-align: center;"><input checked="checked" name="BathLightAutoEnable" type="checkbox"
+							value="On">&nbsp;Разрешить</td>
+					<td style="text-align: center;"><input checked="checked" name="BathLightOnOff" type="checkbox"
+							value="On">&nbsp;Вкл/Выкл</td>
+				</tr>
+				<tr>
+					<td>Свет Туалет</td>
+					<td>
+						<div id="RestLightStatus" style="text-align: center;"> </div>
+					</td>
+					<td style="text-align: center;"><input checked="checked" name="RestLightAutoEnable" type="checkbox"
+							value="On">&nbsp;Разрешить</td>
+					<td style="text-align: center;"><input checked="checked" name="RestLightOnOff" type="checkbox"
+							value="On">&nbsp;Вкл/Выкл</td>
+				</tr>
+				<tr>
+					<td>Вентиляция Ванная</td>
+					<td>
+						<div id="BathVentStatus" style="text-align: center;"> </div>
+					</td>
+					<td style="text-align: center;"><input checked="checked" name="BathVentAutoEnable" type="checkbox"
+							value="On">&nbsp;Разрешить</td>
+					<td style="text-align: center;"><input checked="checked" name="BathVentOnOff" type="checkbox"
+							value="On">&nbsp;Вкл/Выкл</td>
+				</tr>
+				<tr>
+					<td>Вентиляция Туалет</td>
+					<td>
+						<div id="RestVentStatus" style="text-align: center;"> </div>
+					</td>
+					<td style="text-align: center;"><input checked="checked" name="RestVentAutoEnable" type="checkbox"
+							value="On">&nbsp;Разрешить</td>
+					<td style="text-align: center;"><input checked="checked" name="RestVentOnOff" type="checkbox"
+							value="On">&nbsp;Вкл/Выкл</td>
+				</tr>
+			</tbody>
+		</table>
+	</form>
+	<form action="AutoSetForm" enctype="text/plain" id="AutoSetId" method="get" name="AutoSetForm">&nbsp;
+		<table border="1" cellpadding="1" cellspacing="1" style="width:500px">
+			<tbody>
+				<tr>
+					<td colspan="3" style="text-align:center">Настройка параметров</td>
+				</tr>
+				<tr>
+					<td>Вентиляция Ванна Влажность</td>
+					<td colspan="2" rowspan="1" style="text-align:center"><input checked="checked" name="BathVentUseHum"
+							type="checkbox" />&nbsp;Разрешить</td>
+				</tr>
+				<tr>
+					<td>Вентиляция Ванна Влажность Параметры</td>
+					<td style="text-align:center">Включение &gt;&nbsp;<input name="BathHumOnParm" type="text" value="70"
+							required pattern="[0-9]{2}" /></td>
+					<td style="text-align:center">Выключение &lt;<input name="BathHumOffParm" type="text" value="50" />
+					</td>
+				</tr>
+				<tr>
+					<td>Вентиляция Ванна Присутствие</td>
+					<td colspan="2" rowspan="1" style="text-align:center"><input checked="checked"
+							name="BathVentUseMove" type="checkbox" />&nbsp;Разрешить</td>
+				</tr>
+				<tr>
+					<td>Вентиляция Ванна Присутствие Параметры</td>
+					<td style="text-align:center">Задержка Включения<input name="BathVentOnDelay" type="text"
+							value="0" /></td>
+					<td style="text-align:center">Задержка выключения<input name="BathVentOffDelay" type="text"
+							value="120" /></td>
+				</tr>
+				<tr>
+					<td colspan="3" style="text-align:center">&nbsp;</td>
+				</tr>
+				<tr>
+					<td>Свет Ванна ИК датчик</td>
+					<td colspan="2" rowspan="1" style="text-align:center"><input checked="checked" name="BathLightIrUse"
+							type="checkbox" />&nbsp;Разрешить</td>
+				</tr>
+				<tr>
+					<td>Свет Ванна МВ Датчик</td>
+					<td colspan="2" rowspan="1" style="text-align:center"><input checked="checked" name="BathLightMvUse"
+							type="checkbox" />&nbsp;Разрешить</td>
+				</tr>
+				<tr>
+					<td>Свет Ванна Параметры</td>
+					<td style="text-align:center">Задержка включения<input name="BathLightOnDelay" type="text"
+							value="10" /></td>
+					<td style="text-align:center">Задержка Выключения<input name="BathLightOffDelay" type="text"
+							value="120" /></td>
+				</tr>
+				<tr>
+					<td colspan="3" style="text-align:center">&nbsp;</td>
+				</tr>
+				<tr>
+					<td>Свет Туалет Параметры</td>
+					<td style="text-align:center">Расстояние Включения<input name="RestLightOnDist" type="text"
+							value="200" /></td>
+					<td style="text-align:center">Расстояние Выключения<input name="RestLightOffDist" type="text"
+							value="250" /></td>
+				</tr>
+				<tr>
+					<td>Вентиляция Туалет Параметры</td>
+					<td style="text-align:center">Задержка включения<input name="RestVentOnDelay" type="text"
+							value="30" /></td>
+					<td style="text-align:center">Задержка Выключения<input name="RestVentOffDelay" type="text"
+							value="120" /></td>
+				</tr>
+			</tbody>
+		</table>
+	</form>
 
-<script>
+	<script>
 
-/*data range*/
-MaxHum = 90;
-MinHum = 10;
-MaxDelay = 300;
-MinDelay = 0;
-MaxDistance = 400;
-MinDistance = 100;
+		/*data range*/
+		MaxHum = 90;
+		MinHum = 10;
+		MaxDelay = 300;
+		MinDelay = 0;
+		MaxDistance = 400;
+		MinDistance = 50;
 
-EnableHandOnOff();
-EnableInputParm();
-var wsHostStr = "ws://"+document.location.host+"/ws"
+		EnableHandOnOff();
+		EnableInputParm();
+		var wsHostStr = "ws://" + document.location.host + "/ws"
 
-window.onload = function(){
-//var socket = new WebSocket("ws://echo.websocket.org");
-//var socket = new WebSocket("ws://192.168.1.61/ws");
-var socket = new WebSocket(wsHostStr);
-var status = document.getElementById("EchoString");
+		window.onload = function () {
+			//var socket = new WebSocket("ws://echo.websocket.org");
+			//var socket = new WebSocket("ws://192.168.1.61/ws");
+			var socket = new WebSocket(wsHostStr);
+			var status = document.getElementById("EchoString");
 
-socket.onopen = function() {
-  status.innerHTML = "cоединение установлено";
-  socket.send("sstrt");
-  /* test init send */
-  /* переносим инициализацию на сервер
-  socket.send(JSON.stringify({  name:"TempVol",  msg:56  }));
-  socket.send(JSON.stringify({  name:"HumVol",  msg:68  }));
-  socket.send(JSON.stringify({  name:"DistVol",  msg:230  }));
-  socket.send(JSON.stringify({  name:"IrVol",  msg:true  }));
-  socket.send(JSON.stringify({  name:"MvVol",  msg:true  }));
+			socket.onopen = function () {
+				status.innerHTML = "cоединение установлено";
+				socket.send("sstrt");
+				/* test init send */
+				/* переносим инициализацию на сервер
+				socket.send(JSON.stringify({  name:"TempVol",  msg:56  }));
+				socket.send(JSON.stringify({  name:"HumVol",  msg:68  }));
+				socket.send(JSON.stringify({  name:"DistVol",  msg:230  }));
+				socket.send(JSON.stringify({  name:"IrVol",  msg:true  }));
+				socket.send(JSON.stringify({  name:"MvVol",  msg:true  }));
+			  
+				socket.send(JSON.stringify({  name:"BathLightAutoEnable",  msg:false  }));
+				socket.send(JSON.stringify({  name:"RestLightAutoEnable",  msg:false  }));
+				socket.send(JSON.stringify({  name:"BathVentAutoEnable",  msg:false  }));
+				socket.send(JSON.stringify({  name:"RestVentAutoEnable",  msg:false  }));
+				socket.send(JSON.stringify({  name:"BathLightOnOff",  msg:true  }));
+				socket.send(JSON.stringify({  name:"RestLightOnOff",  msg:true  }));
+				socket.send(JSON.stringify({  name:"BathVentOnOff",  msg:true  }));
+				socket.send(JSON.stringify({  name:"RestVentOnOff",  msg:true  }));
+			    
+				socket.send(JSON.stringify({  name:"BathVentUseHum",  msg:true  }));
+				socket.send(JSON.stringify({  name:"BathVentUseMove",  msg:true  }));
+				socket.send(JSON.stringify({  name:"BathLightIrUse",  msg:false  }));
+				socket.send(JSON.stringify({  name:"BathLightMvUse",  msg:true  }));
+			  
+				socket.send(JSON.stringify({  name:"BathHumOnParm",  msg:60  }));
+				socket.send(JSON.stringify({  name:"BathHumOffParm",  msg:61  }));
+				socket.send(JSON.stringify({  name:"BathVentOnDelay",  msg:62  }));
+				socket.send(JSON.stringify({  name:"BathVentOffDelay",  msg:63  }));
+				socket.send(JSON.stringify({  name:"BathLightOnDelay",  msg:64  }));
+				socket.send(JSON.stringify({  name:"BathLightOffDelay",  msg:65  }));
+				socket.send(JSON.stringify({  name:"RestLightOnDist",  msg:166  }));
+				socket.send(JSON.stringify({  name:"RestLightOffDist",  msg:167  }));
+				socket.send(JSON.stringify({  name:"BRestVentOnDelay",  msg:68  }));
+				socket.send(JSON.stringify({  name:"RestVentOffDelay",  msg:69  }));
+				  */
+			};
 
-  socket.send(JSON.stringify({  name:"BathLightAutoEnable",  msg:false  }));
-  socket.send(JSON.stringify({  name:"RestLightAutoEnable",  msg:false  }));
-  socket.send(JSON.stringify({  name:"BathVentAutoEnable",  msg:false  }));
-  socket.send(JSON.stringify({  name:"RestVentAutoEnable",  msg:false  }));
-  socket.send(JSON.stringify({  name:"BathLightOnOff",  msg:true  }));
-  socket.send(JSON.stringify({  name:"RestLightOnOff",  msg:true  }));
-  socket.send(JSON.stringify({  name:"BathVentOnOff",  msg:true  }));
-  socket.send(JSON.stringify({  name:"RestVentOnOff",  msg:true  }));
-  
-  socket.send(JSON.stringify({  name:"BathVentUseHum",  msg:true  }));
-  socket.send(JSON.stringify({  name:"BathVentUseMove",  msg:true  }));
-  socket.send(JSON.stringify({  name:"BathLightIrUse",  msg:false  }));
-  socket.send(JSON.stringify({  name:"BathLightMvUse",  msg:true  }));
+			socket.onclose = function (event) {
+				if (event.wasClean) {
+					status.innerHTML = 'cоединение закрыто';
+				} else {
+					status.innerHTML = 'соединения как-то закрыто';
+				}
+				status.innerHTML += ' код: ' + event.code + ' причина: ' + event.reason;
+			};
 
-  socket.send(JSON.stringify({  name:"BathHumOnParm",  msg:60  }));
-  socket.send(JSON.stringify({  name:"BathHumOffParm",  msg:61  }));
-  socket.send(JSON.stringify({  name:"BathVentOnDelay",  msg:62  }));
-  socket.send(JSON.stringify({  name:"BathVentOffDelay",  msg:63  }));
-  socket.send(JSON.stringify({  name:"BathLightOnDelay",  msg:64  }));
-  socket.send(JSON.stringify({  name:"BathLightOffDelay",  msg:65  }));
-  socket.send(JSON.stringify({  name:"RestLightOnDist",  msg:166  }));
-  socket.send(JSON.stringify({  name:"RestLightOffDist",  msg:167  }));
-  socket.send(JSON.stringify({  name:"BRestVentOnDelay",  msg:68  }));
-  socket.send(JSON.stringify({  name:"RestVentOffDelay",  msg:69  }));
-	*/
-  };
+			/*чтение данных сокета с сервера*/
 
-socket.onclose = function(event) {
-  if (event.wasClean) {
-    status.innerHTML = 'cоединение закрыто';
-  } else {
-    status.innerHTML = 'соединения как-то закрыто';
-  }
-  status.innerHTML += ' код: ' + event.code + ' причина: ' + event.reason;
- };
+			socket.onmessage = function (event) {
+				let message = JSON.parse(event.data);
+				status.innerHTML = `пришли данные: <b>${message.name}</b>: ${message.msg}`;
+				/*
+			  /* Инликация включения света и вентиляции ( пока в режиме эхо), 
+			  /*в дальнейшем заменить Case переменные"
+			  */
+				switch (message.name) {
+					/* показать состояние включения света и вентиляции */
+					case "BathLightStatus":
+						if (message.msg == true) document.getElementById("BathLightStatus").innerHTML = "Вкл";
+						else document.getElementById("BathLightStatus").innerHTML = "Выкл";
+						break;
+					case "RestLightStatus":
+						if (message.msg == true) document.getElementById("RestLightStatus").innerHTML = "Вкл";
+						else document.getElementById("RestLightStatus").innerHTML = "Выкл";
+						break;
+					case "BathVentStatus":
+						if (message.msg == true) document.getElementById("BathVentStatus").innerHTML = "Вкл";
+						else document.getElementById("BathVentStatus").innerHTML = "Выкл";
+						break;
+					case "RestVentStatus":
+						if (message.msg == true) document.getElementById("RestVentStatus").innerHTML = "Вкл";
+						else document.getElementById("RestVentStatus").innerHTML = "Выкл";
+						break;
+					/* показать состояние датчиков */
+					case "TempVol":
+					case "HumVol":
+					case "DistVol":
+						document.getElementById(message.name).innerHTML = message.msg;
+						break;
+					case "IrVol":
+					case "MvVol":
+						if (message.msg == true) message.msg = "Вкл"; else message.msg = "Выкл";
+						document.getElementById(message.name).innerHTML = message.msg;
+						break;
 
-/*чтение данных сокета с сервера*/
+					/* Status FormField */
+					case "BathLightAutoEnable":
+					case "RestLightAutoEnable":
+					case "RestVentAutoEnable":
+					case "BathVentAutoEnable":
+					case "BathLightOnOff":
+					case "RestLightOnOff":
+					case "BathVentOnOff":
+					case "RestVentOnOff":
+						document.StatusForm.elements[message.name].checked = message.msg;
+						EnableHandOnOff();
+						break;
 
-socket.onmessage = function(event) {
-  let message = JSON.parse(event.data);
-  status.innerHTML = `пришли данные: <b>${message.name}</b>: ${message.msg}`;
-    /*
-  /* Инликация включения света и вентиляции ( пока в режиме эхо), 
-  /*в дальнейшем заменить Case переменные"
-  */
-  switch(message.name){
-	/* показать состояние включения света и вентиляции */  
-	case "BathLightStatus":
-		  if(message.msg == true) document.getElementById("BathLightStatus").innerHTML="Вкл";
-		  else document.getElementById("BathLightStatus").innerHTML="Выкл";
-	  	 break;
-	case "RestLightStatus":
-		  if(message.msg == true) document.getElementById("RestLightStatus").innerHTML="Вкл";
-		  else document.getElementById("RestLightStatus").innerHTML="Выкл";
-	  	 break;
-	case "BathVentStatus":
-		  if(message.msg == true) document.getElementById("BathVentStatus").innerHTML="Вкл";
-		  else document.getElementById("BathVentStatus").innerHTML="Выкл";
-	  	 break;
-	case "RestVentStatus":
-		  if(message.msg == true) document.getElementById("RestVentStatus").innerHTML="Вкл";
-		  else document.getElementById("RestVentStatus").innerHTML="Выкл";
-	  	 break;
-	/* показать состояние датчиков */
-	case "TempVol" :
-	case "HumVol"  :
-	case "DistVol" : 
-		document.getElementById(message.name).innerHTML=message.msg;
-	break;
-	case "IrVol"   :
-	case "MvVol"   :
-		if(message.msg==true) message.msg="Вкл"; else message.msg="Выкл";
-		document.getElementById(message.name).innerHTML=message.msg;
-	break;
+					/*Data Sw Autoset Forms*/
+					case "BathVentUseHum":
+					case "BathVentUseMove":
+					case "BathLightIrUse":
+					case "BathLightMvUse":
+						document.AutoSetForm.elements[message.name].checked = message.msg;
+						EnableInputParm();
+						break;
 
-	/* Status FormField */
-	case "BathLightAutoEnable" :
-	case "RestLightAutoEnable" :
-	case "RestVentAutoEnable" :
-	case "BathVentAutoEnable" :
-	case "BathLightOnOff" :
-	case "RestLightOnOff" :
-	case "BathVentOnOff" :
-	case "RestVentOnOff" :
-	document.StatusForm.elements[message.name].checked=message.msg;
-	EnableHandOnOff();
-	break;
+					/*Data Param Autoset Form */
+					case "BathHumOnParm":
+					case "BathHumOffParm":
+					case "BathVentOnDelay":
+					case "BathVentOffDelay":
+					case "BathLightOnDelay":
+					case "BathLightOffDelay":
+					case "RestLightOnDist":
+					case "RestLightOffDist":
+					case "RestVentOnDelay":
+					case "RestVentOffDelay":
+						document.AutoSetForm.elements[message.name].value = message.msg;
+						break;
+				}
 
-	/*Data Sw Autoset Forms*/
-	case "BathVentUseHum"  :
-	case "BathVentUseMove" :
-	case "BathLightIrUse"  :
-	case "BathLightMvUse"  :
-	document.AutoSetForm.elements[message.name].checked=message.msg;
-	EnableInputParm();
-	break;
+			};
 
-	/*Data Param Autoset Form */
-	case "BathHumOnParm" :
-	case "BathHumOffParm" :
-	case "BathVentOnDelay" :
-	case "BathVentOffDelay" :
-	case "BathLightOnDelay" :
-	case "BathLightOffDelay" :
-	case "RestLightOnDist" :
-	case "RestLightOffDist"	:
-	case "RestVentOnDelay"	:
-	case "RestVentOffDelay" :
-	document.AutoSetForm.elements[message.name].value=message.msg;
-	break;
-  }
- 
- };
+			socket.onerror = function (event) {
+				status.innerHTML = "ошибка " + event.message;
+			};
+			/*отправка по submit StatusForm - отключеноа кнопка submit*/
+			/*document.StatusForm.onsubmit = function(){
+			  let message = {
+			  name:this.BathLightAutoEnable.name,
+			  msg: this.BathLightAutoEnable.checked
+			  }
+			socket.send(JSON.stringify(message));
+			  return false;
+			 }*/
 
-socket.onerror = function(event) {
-  status.innerHTML = "ошибка " + event.message;
- }; 
-/*отправка по submit StatusForm - отключеноа кнопка submit*/
-/*document.StatusForm.onsubmit = function(){
-  let message = {
-  name:this.BathLightAutoEnable.name,
-  msg: this.BathLightAutoEnable.checked
-  }
-socket.send(JSON.stringify(message));
-  return false;
- }*/
+			/*Отправить параметры поля CheckBox в формате Json*/
+			function SendPairCheckBox(e) {
+				socket.send(JSON.stringify({ name: e.target.name, msg: e.target.checked }));
+				return false;
+			}
 
- /*Отправить параметры поля CheckBox в формате Json*/
-function SendPairCheckBox(e){
-socket.send(JSON.stringify({  name:e.target.name,  msg:e.target.checked  }));
-  return false;	
-}
+			/*Отправить параметры поля InputText в формате Json*/
+			function SendPairInputData(e) {
+				socket.send(JSON.stringify({ name: e.target.name, msg: e.target.value }));
+				return false;
+			}
 
-/*Отправить параметры поля InputText в формате Json*/
-function SendPairInputData(e){
-socket.send(JSON.stringify({  name:e.target.name,  msg:e.target.value  }));
-  return false;	
-}
+			/* Обработчик CheckBox */
+			/*StatusForm CheckBox*/
+			document.StatusForm.BathLightAutoEnable.addEventListener("click", function (e) {
+				EnableHandOnOff();
+				SendPairCheckBox(e)
+			});
+			document.StatusForm.BathLightOnOff.addEventListener("click", function (e) { SendPairCheckBox(e) });
+			document.StatusForm.RestLightAutoEnable.addEventListener("click", function (e) {
+				EnableHandOnOff();
+				SendPairCheckBox(e)
+			});
+			document.StatusForm.RestLightOnOff.addEventListener("click", function (e) { SendPairCheckBox(e) });
+			document.StatusForm.BathVentAutoEnable.addEventListener("click", function (e) {
+				EnableHandOnOff();
+				SendPairCheckBox(e)
+			});
+			document.StatusForm.BathVentOnOff.addEventListener("click", function (e) { SendPairCheckBox(e) });
+			document.StatusForm.RestVentAutoEnable.addEventListener("click", function (e) {
+				EnableHandOnOff();
+				SendPairCheckBox(e)
+			});
+			document.StatusForm.RestVentOnOff.addEventListener("click", function (e) { SendPairCheckBox(e) });
 
-/* Обработчик CheckBox */
-/*StatusForm CheckBox*/
-document.StatusForm.BathLightAutoEnable.addEventListener("click", function(e){
-	EnableHandOnOff();
-	SendPairCheckBox(e)});
-document.StatusForm.BathLightOnOff.addEventListener("click", function(e){ SendPairCheckBox(e)});
-document.StatusForm.RestLightAutoEnable.addEventListener("click", function(e){
-	EnableHandOnOff();
-	SendPairCheckBox(e)});
-document.StatusForm.RestLightOnOff.addEventListener("click", function(e){ SendPairCheckBox(e)});
-document.StatusForm.BathVentAutoEnable.addEventListener("click", function(e){
-	EnableHandOnOff();
-	SendPairCheckBox(e)});
-document.StatusForm.BathVentOnOff.addEventListener("click", function(e){ SendPairCheckBox(e)});
-document.StatusForm.RestVentAutoEnable.addEventListener("click", function(e){ 
-	EnableHandOnOff();
-	SendPairCheckBox(e)});
-document.StatusForm.RestVentOnOff.addEventListener("click", function(e){ SendPairCheckBox(e)});
+			/* AutoSetForm CheckBox*/
+			document.AutoSetForm.BathVentUseHum.addEventListener("click", function (e) {
+				EnableInputParm();
+				SendPairCheckBox(e)
+			});
+			document.AutoSetForm.BathVentUseMove.addEventListener("click", function (e) {
+				EnableInputParm();
+				SendPairCheckBox(e)
+			});
+			document.AutoSetForm.BathLightIrUse.addEventListener("click", function (e) { SendPairCheckBox(e) });
+			document.AutoSetForm.BathLightMvUse.addEventListener("click", function (e) { SendPairCheckBox(e) });
 
-/* AutoSetForm CheckBox*/
-document.AutoSetForm.BathVentUseHum.addEventListener("click", function(e){ 
-	EnableInputParm();
-	SendPairCheckBox(e)});
-document.AutoSetForm.BathVentUseMove.addEventListener("click", function(e){ 
-	EnableInputParm();
-	SendPairCheckBox(e)});
-document.AutoSetForm.BathLightIrUse.addEventListener("click", function(e){ SendPairCheckBox(e)});
-document.AutoSetForm.BathLightMvUse.addEventListener("click", function(e){ SendPairCheckBox(e)});
+			/* Обработчик InputFields */
+			/*AutoSetForm input field */
+			document.AutoSetForm.BathHumOnParm.addEventListener("change", function (e) {
+				if (e.target.value > MinHum && e.target.value < MaxHum)
+					SendPairInputData(e);
+				else {
+					e.target.value = "Интервал " + MinHum + "-" + MaxHum;
+					e.target.focus();
+				}
+			});
+			document.AutoSetForm.BathHumOffParm.addEventListener("change", function (e) {
+				if (e.target.value > MinHum && e.target.value < MaxHum)
+					SendPairInputData(e);
+				else {
+					e.target.value = "Интервал " + MinHum + "-" + MaxHum;
+					e.target.focus();
+				}
+			});
+			document.AutoSetForm.BathVentOnDelay.addEventListener("change", function (e) {
+				if (e.target.value > MinDelay && e.target.value < MaxDelay)
+					SendPairInputData(e);
+				else {
+					e.target.value = "Интервал " + MinDelay + "-" + MaxDelay;
+					e.target.focus();
+				}
+			});
+			document.AutoSetForm.BathVentOffDelay.addEventListener("change", function (e) {
+				if (e.target.value > MinDelay && e.target.value < MaxDelay)
+					SendPairInputData(e);
+				else {
+					e.target.value = "Интервал " + MinDelay + "-" + MaxDelay;
+					e.target.focus();
+				}
+			});
+			document.AutoSetForm.BathLightOnDelay.addEventListener("change", function (e) {
+				if (e.target.value > MinDelay && e.target.value < MaxDelay)
+					SendPairInputData(e);
+				else {
+					e.target.value = "Интервал " + MinDelay + "-" + MaxDelay;
+					e.target.focus();
+				}
+			});
+			document.AutoSetForm.BathLightOffDelay.addEventListener("change", function (e) {
+				if (e.target.value > MinDelay && e.target.value < MaxDelay)
+					SendPairInputData(e);
+				else {
+					e.target.value = "Интервал " + MinDelay + "-" + MaxDelay;
+					e.target.focus();
+				}
+			});
+			document.AutoSetForm.RestLightOnDist.addEventListener("change", function (e) {
+				if (e.target.value > MinDistance && e.target.value < MaxDistance)
+					SendPairInputData(e);
+				else {
+					e.target.value = "Интервал " + MinDistance + "-" + MaxDistance;
+					e.target.focus();
+				}
+			});
+			document.AutoSetForm.RestLightOffDist.addEventListener("change", function (e) {
+				if (e.target.value > MinDistance && e.target.value < MaxDistance)
+					SendPairInputData(e);
+				else {
+					e.target.value = "Интервал " + MinDistance + "-" + MaxDistance;
+					e.target.focus();
+				}
+			});
+			document.AutoSetForm.RestVentOnDelay.addEventListener("change", function (e) {
+				if (e.target.value > MinDelay && e.target.value < MaxDelay)
+					SendPairInputData(e);
+				else {
+					e.target.value = "Интервал " + MinDelay + "-" + MaxDelay;
+					e.target.focus();
+				}
+			});
+			document.AutoSetForm.RestVentOffDelay.addEventListener("change", function (e) {
+				if (e.target.value > MinDelay && e.target.value < MaxDelay)
+					SendPairInputData(e);
+				else {
+					e.target.value = "Интервал " + MinDelay + "-" + MaxDelay;
+					e.target.focus();
+				}
+			});
 
-/* Обработчик InputFields */
-/*AutoSetForm input field */
-document.AutoSetForm.BathHumOnParm.addEventListener("change", function(e){ 
-	if(e.target.value>MinHum && e.target.value<MaxHum )
-		SendPairInputData(e);
-	else {
-	e.target.value = "Интервал "+MinHum+"-"+MaxHum;	
-	e.target.focus();
-	}
-  });
-  document.AutoSetForm.BathHumOffParm.addEventListener("change", function(e){ 
-	if(e.target.value>MinHum && e.target.value<MaxHum )
-		SendPairInputData(e);
-	else {
-	e.target.value = "Интервал "+MinHum+"-"+MaxHum;	
-	e.target.focus();
-	}
-  });
-  document.AutoSetForm.BathVentOnDelay.addEventListener("change", function(e){ 
-	if(e.target.value>MinDelay && e.target.value<MaxDelay )
-		SendPairInputData(e);
-	else {
-	e.target.value = "Интервал "+MinDelay+"-"+MaxDelay;	
-	e.target.focus();
-	}
-  });
-  document.AutoSetForm.BathVentOffDelay.addEventListener("change", function(e){ 
-	if(e.target.value>MinDelay && e.target.value<MaxDelay )
-		SendPairInputData(e);
-	else {
-	e.target.value = "Интервал "+MinDelay+"-"+MaxDelay;	
-	e.target.focus();
-	}
-  });
-  document.AutoSetForm.BathLightOnDelay.addEventListener("change", function(e){ 
-	if(e.target.value>MinDelay && e.target.value<MaxDelay )
-		SendPairInputData(e);
-	else {
-	e.target.value = "Интервал "+MinDelay+"-"+MaxDelay;	
-	e.target.focus();
-	}
-  });
-  document.AutoSetForm.BathLightOffDelay.addEventListener("change", function(e){ 
-	if(e.target.value>MinDelay && e.target.value<MaxDelay )
-		SendPairInputData(e);
-	else {
-	e.target.value = "Интервал "+MinDelay+"-"+MaxDelay;	
-	e.target.focus();
-	}
-  });
-  document.AutoSetForm.RestLightOnDist.addEventListener("change", function(e){ 
-	if(e.target.value>MinDistance && e.target.value<MaxDistance )
-		SendPairInputData(e);
-	else {
-	e.target.value = "Интервал "+MinDistance+"-"+MaxDistance;	
-	e.target.focus();
-	}
-  });
-  document.AutoSetForm.RestLightOffDist.addEventListener("change", function(e){ 
-	if(e.target.value>MinDistance && e.target.value<MaxDistance )
-		SendPairInputData(e);
-	else {
-	e.target.value = "Интервал "+MinDistance+"-"+MaxDistance;	
-	e.target.focus();
-	}
-  });
-  document.AutoSetForm.RestVentOnDelay.addEventListener("change", function(e){ 
-	if(e.target.value>MinDelay && e.target.value<MaxDelay )
-		SendPairInputData(e);
-	else {
-	e.target.value = "Интервал "+MinDelay+"-"+MaxDelay;	
-	e.target.focus();
-	}
-  });
-  document.AutoSetForm.RestVentOffDelay.addEventListener("change", function(e){ 
-	if(e.target.value>MinDelay && e.target.value<MaxDelay )
-		SendPairInputData(e);
-	else {
-	e.target.value = "Интервал "+MinDelay+"-"+MaxDelay;	
-	e.target.focus();
-	}
-  });
+		}
+		/* 
+		/*инициализация формы разрешение ручного включения света и вентиляции
+		/*установка / снятие разрешения ручного ввода
+		*/
+		function EnableHandOnOff() {
+			if (document.StatusForm.BathLightAutoEnable.checked == true) document.StatusForm.BathLightOnOff.disabled = true;
+			else document.StatusForm.BathLightOnOff.disabled = false;
+			if (document.StatusForm.RestLightAutoEnable.checked == true) document.StatusForm.RestLightOnOff.disabled = true;
+			else document.StatusForm.RestLightOnOff.disabled = false;
+			if (document.StatusForm.BathVentAutoEnable.checked == true) document.StatusForm.BathVentOnOff.disabled = true;
+			else document.StatusForm.BathVentOnOff.disabled = false;
+			if (document.StatusForm.RestVentAutoEnable.checked == true) document.StatusForm.RestVentOnOff.disabled = true;
+			else document.StatusForm.RestVentOnOff.disabled = false;
+		}
 
-}
-/* 
-/*инициализация формы разрешение ручного включения света и вентиляции
-/*установка / снятие разрешения ручного ввода
-*/
-function EnableHandOnOff(){
-if(document.StatusForm.BathLightAutoEnable.checked==true)	document.StatusForm.BathLightOnOff.disabled = true;
-	else document.StatusForm.BathLightOnOff.disabled = false;
-if(document.StatusForm.RestLightAutoEnable.checked==true)	document.StatusForm.RestLightOnOff.disabled = true;
-	else document.StatusForm.RestLightOnOff.disabled = false;
-if(document.StatusForm.BathVentAutoEnable.checked==true)	document.StatusForm.BathVentOnOff.disabled = true;
-	else document.StatusForm.BathVentOnOff.disabled = false;
-if(document.StatusForm.RestVentAutoEnable.checked==true)	document.StatusForm.RestVentOnOff.disabled = true;
-	else document.StatusForm.RestVentOnOff.disabled = false;
-}
+		function EnableInputParm() {
+			if (document.AutoSetForm.BathVentUseHum.checked == true) {
+				document.AutoSetForm.BathHumOnParm.disabled = false;
+				document.AutoSetForm.BathHumOffParm.disabled = false;
+			} else {
+				document.AutoSetForm.BathHumOnParm.disabled = true;
+				document.AutoSetForm.BathHumOffParm.disabled = true;
+			};
+			if (document.AutoSetForm.BathVentUseMove.checked == true) {
+				document.AutoSetForm.BathVentOnDelay.disabled = false;
+				document.AutoSetForm.BathVentOffDelay.disabled = false;
+			} else {
+				document.AutoSetForm.BathVentOnDelay.disabled = true;
+				document.AutoSetForm.BathVentOffDelay.disabled = true;
+			};
 
-function EnableInputParm(){
-	if(document.AutoSetForm.BathVentUseHum.checked==true) {
-		document.AutoSetForm.BathHumOnParm.disabled=false;
-		document.AutoSetForm.BathHumOffParm.disabled=false;
-	} else {
-		document.AutoSetForm.BathHumOnParm.disabled=true;
-		document.AutoSetForm.BathHumOffParm.disabled=true;	
-	};
-	if(document.AutoSetForm.BathVentUseMove.checked==true) {
-		document.AutoSetForm.BathVentOnDelay.disabled=false;
-		document.AutoSetForm.BathVentOffDelay.disabled=false;
-	} else {
-		document.AutoSetForm.BathVentOnDelay.disabled=true;
-		document.AutoSetForm.BathVentOffDelay.disabled=true;	
-	};
+		}
 
-}
-
-</script>
+	</script>
 </body>
+
 </html>
