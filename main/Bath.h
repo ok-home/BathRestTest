@@ -21,6 +21,10 @@ void ParmTableToJson(char *, int );
 int SendFrameToAllSocket(char *);
 void LightISRSetup();
 
+int start_ota(void);
+int write_ota(int data_read, uint8_t *ota_write_data);
+int end_ota(void);
+
 void SendWsData ( void*p);
 QueueHandle_t SendWsQueue;
 

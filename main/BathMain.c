@@ -12,10 +12,13 @@
 
 #include "Bath.h"
 #include "BathInitGlobal.h"
+
 /*
 ota test
 */
 
+#define MAX_OTA_SIZE 4096
+static uint8_t buff[MAX_OTA_SIZE];
 /* A simple example that demonstrates using websocket echo server
  */
 static const char *TAG = "ws_echo_server";
@@ -30,7 +33,7 @@ static esp_err_t echo_handler(httpd_req_t *req)
     struct WsDataToSend rq;
     rq.fd = resp_arg.fd;
     rq.hd = resp_arg.hd;
-
+    printf("ws sock %d\n", (int)resp_arg.fd);
     char NameField[MAXJSONSTRING];
     uint8_t buf[128] = {0};
 
@@ -81,6 +84,79 @@ static esp_err_t echo_handler(httpd_req_t *req)
 
     return ESP_OK;
 }
+static esp_err_t ota_handler(httpd_req_t *req)
+{
+    struct async_resp_arg resp_arg;
+    resp_arg.hd = req->handle;
+    resp_arg.fd = httpd_req_to_sockfd(req);
+    /*uint8_t *buf;
+    buf = malloc(MAX_OTA_SIZE);
+    if(buf==0)
+        {
+            printf("MALLOC ERR\n");
+            return -1;
+        }
+    //uint8_t buf[MAX_OTA_SIZE+1] = {0};
+    */
+    httpd_ws_frame_t ws_pkt;
+    printf("otaws sock %d\n", (int)resp_arg.fd);
+    memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
+    ws_pkt.payload = buff;
+    // TXT HDR
+    ws_pkt.type = HTTPD_WS_TYPE_TEXT; // BIN &&
+    esp_err_t ret = httpd_ws_recv_frame(req, &ws_pkt, MAX_OTA_SIZE);
+    if (ret != ESP_OK)
+    {
+        ESP_LOGE(TAG, "httpd_ws_recv_frame failed with %d", ret);
+        return ret;
+    }
+    ESP_LOGI("OTA", "TYPE %d", ws_pkt.type);
+    if (ws_pkt.type == HTTPD_WS_TYPE_TEXT &&
+        strcmp((char *)ws_pkt.payload, "start") == 0) // start ota transfer
+    {
+        ESP_LOGI("OTA", "START size %d data %s", ws_pkt.len, (char *)ws_pkt.payload);
+        start_ota();
+        ret = httpd_ws_send_frame_async(resp_arg.hd, resp_arg.fd, &ws_pkt); //full echo
+        if (ret != ESP_OK)
+        {
+            return ret;
+        }
+    }
+    else if (ws_pkt.type == HTTPD_WS_TYPE_TEXT &&
+             strcmp((char *)ws_pkt.payload, "end") == 0) // stop ota transfer
+    {
+        ESP_LOGI("OTA", "END size %d data %s", ws_pkt.len, (char *)ws_pkt.payload);
+        end_ota();
+        ret = httpd_ws_send_frame_async(resp_arg.hd, resp_arg.fd, &ws_pkt); //full echo
+        if (ret != ESP_OK)
+        {
+            return ret;
+        }
+    }
+    else if (1) //check bin ota data
+    {
+
+        ESP_LOGI("OTA", "DATA BIN ??? type %d size %d", ws_pkt.type, ws_pkt.len);
+        write_ota(ws_pkt.len, ws_pkt.payload);
+        if (ws_pkt.type == HTTPD_WS_TYPE_BINARY)
+        {
+            ws_pkt.type = HTTPD_WS_TYPE_TEXT;
+            ws_pkt.payload = (uint8_t *)strcpy((char *)ws_pkt.payload, "next");
+            ws_pkt.len = 4;
+        }
+        else if (ws_pkt.type != HTTPD_WS_TYPE_TEXT)
+        {
+            return ESP_OK;
+        }
+        ret = httpd_ws_send_frame_async(resp_arg.hd, resp_arg.fd, &ws_pkt); //full echo
+        if (ret != ESP_OK)
+        {
+            return ret;
+        }
+    }
+    //free(buf);
+    return ESP_OK;
+}
 
 static esp_err_t get_handler(httpd_req_t *req)
 {
@@ -108,6 +184,13 @@ static const httpd_uri_t gh = {
     .handler = get_handler,
     .user_ctx = NULL};
 
+static const httpd_uri_t ota_ws = {
+    .uri = "/otaws",
+    .method = HTTP_GET,
+    .handler = ota_handler,
+    .user_ctx = NULL,
+    .is_websocket = true};
+
 static httpd_handle_t start_webserver(void)
 {
     httpd_handle_t server = NULL;
@@ -121,6 +204,7 @@ static httpd_handle_t start_webserver(void)
         ESP_LOGI(TAG, "Registering URI handlers");
         httpd_register_uri_handler(server, &ws);
         httpd_register_uri_handler(server, &gh);
+        httpd_register_uri_handler(server, &ota_ws);
         return server;
     }
 
@@ -163,11 +247,11 @@ void app_main(void)
     static httpd_handle_t server = NULL;
 
     CreateTaskAndQueue();
-    
+
     ESP_ERROR_CHECK(nvs_flash_init());
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
- 
+
     /* This helper function configures Wi-Fi or Ethernet, as selected in menuconfig.
      * Read "Establishing Wi-Fi or Ethernet Connection" section in
      * examples/protocols/README.md for more information about this function.
@@ -181,7 +265,4 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &disconnect_handler, &server));
     /* Start the server for the first time */
     server = start_webserver();
-
-
-
 }

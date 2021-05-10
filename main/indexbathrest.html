@@ -175,7 +175,104 @@
 		</table>
 	</form>
 
+
+	<h1>
+		Select OTA file
+	</h1>
+	<input type="file" id="files" name="file" /> Read bytes:
+	
+	<script id="worker1" type="javascript/worker">
+
+		self.onmessage = function(e) {
+			
+		var otasocket = new WebSocket("ws://192.168.1.61/otaws");
+		//var otasocket = new WebSocket("ws://echo.websocket.org");
+
+		//otasocket.binaryType = 'blob';
+
+		var file = e.data;
+		var size = file.size;
+		var reader = new FileReaderSync();
+		var start;
+		var end;
+		var offset = 4096;
+		var data;
+
+		otasocket.onopen = function () {
+			console.log( " ota cоединение установлено");
+			otasocket.send("start");
+			
+		}
+		otasocket.onclose = function (event) {
+			console.log( " ota cоединение закрыто");
+		}
+		otasocket.onerror = function (event) {
+				console.log("ошибка " + event.message);
+			};
+				
+		otasocket.onmessage = function (event) {
+				postMessage(event.data);
+
+				switch(event.data){
+				case "end":
+					postMessage("transfer end-------------------");
+					otasocket.close();
+					break;
+				case "start":
+				postMessage("transfer start---------------------");
+					start = 0;
+					end = start+offset;
+					if ( end > size )
+						end = size;
+					blob = file.slice(start,end);
+					//data = reader.readAsBinaryString(blob);
+					data = reader.readAsArrayBuffer(blob);
+					postMessage("---------transfer from "+start+" to "+end);
+					otasocket.send(data);
+					break;
+				default:
+					if(end == size)
+					{
+						otasocket.send("end");
+						break;
+					}
+					start = end;
+					end = start+offset;
+					if ( end > size )
+					end = size;
+					blob = file.slice(start,end);
+					//data = reader.readAsBinaryString(blob);
+					data = reader.readAsArrayBuffer(blob);
+					postMessage("---------transfer from "+start+" to "+end );
+					otasocket.send(data);
+			}
+			}
+		  };
+	</script>
+
+
+
 	<script>
+		if (window.File && window.FileReader && window.FileList && window.Blob) {
+			// Great success! All the File APIs are supported.
+		} else {
+			alert('The File APIs are not fully supported in this browser.');
+		}
+
+		var bb = new Blob([document.querySelector('#worker1').textContent]);
+		var worker = new Worker(window.webkitURL.createObjectURL(bb));
+
+		worker.onmessage = function (e) {
+			console.log("Received: " + e.data);
+		}
+
+		const fileSelector = document.getElementById('files');
+		fileSelector.addEventListener('change', (event) => {
+			const fileList = event.target.files;
+			worker.postMessage(fileList[0]); // Start the worker.
+		});
+
+		/*--------------------------------------------------------------*/
 
 		/*data range*/
 		MaxHum = 90;
@@ -190,9 +287,9 @@
 		var wsHostStr = "ws://" + document.location.host + "/ws"
 
 		window.onload = function () {
-			//var socket = new WebSocket("ws://echo.websocket.org");
+			//var otasocket = new WebSocket("ws://echo.websocket.org");
 			//var socket = new WebSocket("ws://192.168.1.61/ws");
-			var socket = new WebSocket(wsHostStr);
+			//var socket = new WebSocket(wsHostStr);
 			var status = document.getElementById("EchoString");
 
 			socket.onopen = function () {
