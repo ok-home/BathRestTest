@@ -17,8 +17,8 @@
 ota test
 */
 
-#define MAX_OTA_SIZE 4096*2+20
-static uint8_t buff[MAX_OTA_SIZE];
+#define MAX_OTA_SIZE 4096 * 2 + 20
+//static uint8_t buff[MAX_OTA_SIZE];
 /* A simple example that demonstrates using websocket echo server
  */
 static const char *TAG = "ws_echo_server";
@@ -89,48 +89,70 @@ static esp_err_t ota_handler(httpd_req_t *req)
     struct async_resp_arg resp_arg;
     resp_arg.hd = req->handle;
     resp_arg.fd = httpd_req_to_sockfd(req);
-    /*uint8_t *buf;
-    buf = malloc(MAX_OTA_SIZE);
-    if(buf==0)
-        {
-            printf("MALLOC ERR\n");
-            return -1;
-        }
-    //uint8_t buf[MAX_OTA_SIZE+1] = {0};
-    */
-    httpd_ws_frame_t ws_pkt;
-    printf("otaws sock %d\n", (int)resp_arg.fd);
-    memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
-    //memset(buff, 0, MAX_OTA_SIZE);
-    
-    ws_pkt.payload = buff;
-    // TXT HDR
-    ws_pkt.type = HTTPD_WS_TYPE_TEXT; // BIN &&
-    esp_err_t ret = httpd_ws_recv_frame(req, &ws_pkt, MAX_OTA_SIZE);
-    if (ret != ESP_OK)
+    if (req->method == HTTP_GET)
     {
-        ESP_LOGE(TAG, "httpd_ws_recv_frame ota failed with %d", ret);
-            
-            memset(buff, 0, MAX_OTA_SIZE);
-            ws_pkt.type = HTTPD_WS_TYPE_TEXT;
-            ws_pkt.payload = (uint8_t *)strcpy((char *)ws_pkt.payload, "err");
-            ws_pkt.len = 3;
-            ret = httpd_ws_send_frame_async(resp_arg.hd, resp_arg.fd, &ws_pkt);
-            if(ret !=ESP_OK)
-            ESP_LOGE(TAG, "httpd_send_frame_async ota failed with %d", ret);
-
+        ESP_LOGI(TAG, "Handshake done, the new connection was opened");
         return ESP_OK;
     }
+    httpd_ws_frame_t ws_pkt;
+    uint8_t *buf = NULL;
+    memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
+    ws_pkt.type = HTTPD_WS_TYPE_TEXT;
+    // Set max_len = 0 to get the frame len 
+    esp_err_t ret = httpd_ws_recv_frame(req, &ws_pkt, 0);
+    if (ret != ESP_OK)
+    {
+        ESP_LOGI(TAG, "httpd_ws_recv_frame failed to get frame len with %d", ret);
+        //
+        ws_pkt.type = HTTPD_WS_TYPE_TEXT;
+        ws_pkt.payload = (uint8_t *)strcpy((char *)ws_pkt.payload, "err");
+        ws_pkt.len = 3;
+        ret = httpd_ws_send_frame(req, &ws_pkt);
+        //
+        return ret;
+        
+    }
+    ESP_LOGI(TAG, "frame len is %d", ws_pkt.len);
+    if (ws_pkt.len)
+    {
+        // ws_pkt.len + 1 is for NULL termination as we are expecting a string 
+        buf = calloc(1, ws_pkt.len + 1);
+        if (buf == NULL)
+        {
+            ESP_LOGE(TAG, "Failed to calloc memory for buf");
+            return ESP_ERR_NO_MEM;
+        }
+        ws_pkt.payload = buf;
+        // Set max_len = ws_pkt.len to get the frame payload 
+        ret = httpd_ws_recv_frame(req, &ws_pkt, ws_pkt.len);
+        if (ret != ESP_OK)
+        {
+            ESP_LOGI(TAG, "httpd_ws_recv_frame failed to get frame with %d", ret);
+            //
+            ws_pkt.type = HTTPD_WS_TYPE_TEXT;
+            ws_pkt.payload = (uint8_t *)strcpy((char *)ws_pkt.payload, "next");
+            ws_pkt.len = 4;
+            ret = httpd_ws_send_frame(req, &ws_pkt);
+            //
+
+            return ret;
+
+        }
+        //ESP_LOGI(TAG, "Got packet with message: %s", ws_pkt.payload);
+        ESP_LOGI(TAG, "Got packet OTA");
+    }
+
     ESP_LOGI("OTA", "TYPE %d", ws_pkt.type);
     if (ws_pkt.type == HTTPD_WS_TYPE_TEXT &&
         strcmp((char *)ws_pkt.payload, "start") == 0) // start ota transfer
     {
         ESP_LOGI("OTA", "START size %d data %s", ws_pkt.len, (char *)ws_pkt.payload);
         start_ota();
-        ret = httpd_ws_send_frame_async(resp_arg.hd, resp_arg.fd, &ws_pkt); //full echo
+        ret = httpd_ws_send_frame(req, &ws_pkt); //full echo
         if (ret != ESP_OK)
         {
-            ESP_LOGE(TAG, "httpd_send_frame_async ota failed with %d", ret);
+            ESP_LOGI(TAG, "httpd_send_frame_async ota failed with %d", ret);
+            free(buf);
             return ESP_OK;
         }
     }
@@ -139,38 +161,49 @@ static esp_err_t ota_handler(httpd_req_t *req)
     {
         ESP_LOGI("OTA", "END size %d data %s", ws_pkt.len, (char *)ws_pkt.payload);
         end_ota();
-        ret = httpd_ws_send_frame_async(resp_arg.hd, resp_arg.fd, &ws_pkt); //full echo
+        ret = httpd_ws_send_frame(req, &ws_pkt); //full echo
         if (ret != ESP_OK)
         {
-            ESP_LOGE(TAG, "httpd_send_frame_async ota failed with %d", ret);
+            ESP_LOGI(TAG, "httpd_send_frame_async ota failed with %d", ret);
+            free(buf);
             return ESP_OK;
         }
     }
-    else if (1) //check bin ota data
+    else if (ws_pkt.type == HTTPD_WS_TYPE_BINARY) //check bin ota data
     {
-
         ESP_LOGI("OTA", "DATA BIN ??? type %d size %d", ws_pkt.type, ws_pkt.len);
         write_ota(ws_pkt.len, ws_pkt.payload);
-        if (ws_pkt.type == HTTPD_WS_TYPE_BINARY)
-        {
-            ws_pkt.type = HTTPD_WS_TYPE_TEXT;
-            ws_pkt.payload = (uint8_t *)strcpy((char *)ws_pkt.payload, "next");
-            ws_pkt.len = 4;
-        }
-        else if (ws_pkt.type != HTTPD_WS_TYPE_TEXT)
-        {
-            return ESP_OK;
-        }
-        ret = httpd_ws_send_frame_async(resp_arg.hd, resp_arg.fd, &ws_pkt); //full echo
+
+        ws_pkt.type = HTTPD_WS_TYPE_TEXT;
+        ws_pkt.payload = (uint8_t *)strcpy((char *)ws_pkt.payload, "next");
+        ws_pkt.len = 4;
+        ret = httpd_ws_send_frame(req, &ws_pkt); //full echo
         if (ret != ESP_OK)
         {
-            ESP_LOGE(TAG, "httpd_send_frame_async ota failed with %d", ret);
+            ESP_LOGI(TAG, "httpd_send_frame_async ota failed with %d", ret);
+            free(buf);
             return ESP_OK;
         }
     }
-    //free(buf);
+    else
+    {
+        printf("exit ERR TYPE %d\n", ws_pkt.type);
+        ws_pkt.type = HTTPD_WS_TYPE_TEXT;
+        ws_pkt.payload = (uint8_t *)strcpy((char *)ws_pkt.payload, "next");
+        ws_pkt.len = 4;
+        ret = httpd_ws_send_frame(req, &ws_pkt); //full echo
+        if (ret != ESP_OK)
+        {
+            ESP_LOGI(TAG, "httpd_send_frame_async ota failed with %d", ret);
+            free(buf);
+            return ESP_OK;
+        }
+    }
+    free(buf);
     return ESP_OK;
 }
+
+
 
 static esp_err_t get_handler(httpd_req_t *req)
 {

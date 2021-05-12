@@ -195,7 +195,7 @@
 		var reader = new FileReaderSync();
 		var start;
 		var end;
-		var offset = 4096;
+		var offset = 4096*8;
 		var data =  new Uint8Array(offset);
 
 		otasocket.onopen = function () {
@@ -211,7 +211,7 @@
 			};
 				
 		otasocket.onmessage = function (event) {
-				postMessage(event.data);
+				console.log(event.data);
 
 				switch(event.data){
 				case "end":
@@ -230,7 +230,8 @@
 					postMessage("---------transfer from "+start+" to "+end);
 					otasocket.send(data);
 					break;
-				default:
+				//case "next":
+				default :
 					if(end == size)
 					{
 						otasocket.send("end");
