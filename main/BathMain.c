@@ -17,7 +17,7 @@
 ota test
 */
 
-#define MAX_OTA_SIZE 4096
+#define MAX_OTA_SIZE 4096*2+20
 static uint8_t buff[MAX_OTA_SIZE];
 /* A simple example that demonstrates using websocket echo server
  */
@@ -45,7 +45,7 @@ static esp_err_t echo_handler(httpd_req_t *req)
     esp_err_t ret = httpd_ws_recv_frame(req, &ws_pkt, 128);
     if (ret != ESP_OK)
     {
-        ESP_LOGE(TAG, "httpd_ws_recv_frame failed with %d", ret);
+        ESP_LOGE(TAG, "httpd_ws_recv_frame echo failed with %d", ret);
         return ret;
     }
     /*
@@ -101,14 +101,25 @@ static esp_err_t ota_handler(httpd_req_t *req)
     httpd_ws_frame_t ws_pkt;
     printf("otaws sock %d\n", (int)resp_arg.fd);
     memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
+    //memset(buff, 0, MAX_OTA_SIZE);
+    
     ws_pkt.payload = buff;
     // TXT HDR
     ws_pkt.type = HTTPD_WS_TYPE_TEXT; // BIN &&
     esp_err_t ret = httpd_ws_recv_frame(req, &ws_pkt, MAX_OTA_SIZE);
     if (ret != ESP_OK)
     {
-        ESP_LOGE(TAG, "httpd_ws_recv_frame failed with %d", ret);
-        return ret;
+        ESP_LOGE(TAG, "httpd_ws_recv_frame ota failed with %d", ret);
+            
+            memset(buff, 0, MAX_OTA_SIZE);
+            ws_pkt.type = HTTPD_WS_TYPE_TEXT;
+            ws_pkt.payload = (uint8_t *)strcpy((char *)ws_pkt.payload, "err");
+            ws_pkt.len = 3;
+            ret = httpd_ws_send_frame_async(resp_arg.hd, resp_arg.fd, &ws_pkt);
+            if(ret !=ESP_OK)
+            ESP_LOGE(TAG, "httpd_send_frame_async ota failed with %d", ret);
+
+        return ESP_OK;
     }
     ESP_LOGI("OTA", "TYPE %d", ws_pkt.type);
     if (ws_pkt.type == HTTPD_WS_TYPE_TEXT &&
@@ -119,7 +130,8 @@ static esp_err_t ota_handler(httpd_req_t *req)
         ret = httpd_ws_send_frame_async(resp_arg.hd, resp_arg.fd, &ws_pkt); //full echo
         if (ret != ESP_OK)
         {
-            return ret;
+            ESP_LOGE(TAG, "httpd_send_frame_async ota failed with %d", ret);
+            return ESP_OK;
         }
     }
     else if (ws_pkt.type == HTTPD_WS_TYPE_TEXT &&
@@ -130,7 +142,8 @@ static esp_err_t ota_handler(httpd_req_t *req)
         ret = httpd_ws_send_frame_async(resp_arg.hd, resp_arg.fd, &ws_pkt); //full echo
         if (ret != ESP_OK)
         {
-            return ret;
+            ESP_LOGE(TAG, "httpd_send_frame_async ota failed with %d", ret);
+            return ESP_OK;
         }
     }
     else if (1) //check bin ota data
@@ -151,7 +164,8 @@ static esp_err_t ota_handler(httpd_req_t *req)
         ret = httpd_ws_send_frame_async(resp_arg.hd, resp_arg.fd, &ws_pkt); //full echo
         if (ret != ESP_OK)
         {
-            return ret;
+            ESP_LOGE(TAG, "httpd_send_frame_async ota failed with %d", ret);
+            return ESP_OK;
         }
     }
     //free(buf);

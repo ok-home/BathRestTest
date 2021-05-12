@@ -196,7 +196,7 @@
 		var start;
 		var end;
 		var offset = 4096;
-		var data;
+		var data =  new Uint8Array(offset);
 
 		otasocket.onopen = function () {
 			console.log( " ota cоединение установлено");
