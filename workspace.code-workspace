@@ -24,7 +24,8 @@
 			"gpio.h": "c",
 			"mdns.h": "c",
 			"bathresthw.h": "c",
-			"rmt.h": "c"
+			"rmt.h": "c",
+			"system_internal.h": "c"
 		},
 		"idf.flashType": "UART"
 	}

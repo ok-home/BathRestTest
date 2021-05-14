@@ -166,13 +166,52 @@ void SendWsData(void *p)
     int timeout = portMAX_DELAY; // на старте ждем первый сокет
     int cntsock = 0;
 
+    httpd_ws_frame_t ws_pkt;
+    char buff[8];
+    ws_pkt.type = HTTPD_WS_TYPE_TEXT;
+    ws_pkt.payload = (uint8_t*)buff;
+
     for (;;)
     {
         if (xQueueReceive(SendWsQueue, &req, timeout) == pdTRUE) // до таймаута
         {
-            timeout = 5000 / portTICK_RATE_MS; // видимо появился сокет - начинаем обновление статусов
-            if (req.idx > MAX_IDX_PARM_TABLE)
+            if (req.idx > MAX_IDX_PARM_TABLE) //отправка сообщений для ОТА
+            {
+                if (req.idx == OTA_IDX_MSG_START)
+                {
+                    memset(buff, 0, sizeof(buff));
+                    ws_pkt.payload = (uint8_t*)strcpy(buff, "start");
+                    ws_pkt.len = strlen(buff);
+                    httpd_ws_send_frame_async(req.hd, req.fd, &ws_pkt);
+                    continue;
+                }
+                else if (req.idx == OTA_IDX_MSG_END)
+                {
+                    memset(buff, 0, sizeof(buff));
+                    ws_pkt.payload = (uint8_t*)strcpy(buff, "end");
+                    ws_pkt.len = strlen(buff);
+                    httpd_ws_send_frame_async(req.hd, req.fd, &ws_pkt);
+                     continue;
+                }
+                else if (req.idx == OTA_IDX_MSG_NEXT)
+                {
+                    memset(buff, 0, sizeof(buff));
+                    ws_pkt.payload = (uint8_t*)strcpy(buff,"next");
+                    ws_pkt.len = strlen(buff);
+                    httpd_ws_send_frame_async(req.hd, req.fd, &ws_pkt);
+                     continue;
+                }
+                else if (req.idx == OTA_IDX_MSG_ERR)
+                {
+                    memset(buff, 0, sizeof(buff));
+                    ws_pkt.payload = (uint8_t*)strcpy(buff, "err");
+                    ws_pkt.len = strlen(buff);
+                    httpd_ws_send_frame_async(req.hd, req.fd, &ws_pkt);
+                     continue;
+                }
                 continue; // ошибка данных
+            }
+            timeout = 5000 / portTICK_RATE_MS; // видимо появился сокет - начинаем обновление статусов
             if (req.idx < 0)
             {                   // новый сокет
                 AddSocket(req); // добавим сокет в таблицу
@@ -231,15 +270,14 @@ void CreateTaskAndQueue()
 {
     //ограничение доступа к таблице DataParmTable
     DataParmTableMutex = xSemaphoreCreateMutex();
-    
-   
-   // очереди передачи данных на контроллеры включения/выключения света/вентиляции
+
+    // очереди передачи данных на контроллеры включения/выключения света/вентиляции
     BathLightSendToCtrl = xQueueCreate(2, sizeof(union QueueHwData));
     BathVentSendToCtrl = xQueueCreate(2, sizeof(union QueueHwData));
     RestLightSendToCtrl = xQueueCreate(2, sizeof(union QueueHwData));
     RestVentSendToCtrl = xQueueCreate(2, sizeof(union QueueHwData));
-  // таблица ссылок на очереди передачи данных на контроллеры
-  // в DataParmTable индексы этой таблицы для отправки нужному контроллеру
+    // таблица ссылок на очереди передачи данных на контроллеры
+    // в DataParmTable индексы этой таблицы для отправки нужному контроллеру
     CtrlQueueTab[Q_BATHLIGHT_IDX] = BathLightSendToCtrl;
     CtrlQueueTab[Q_BATHVENT_IDX] = BathVentSendToCtrl;
     CtrlQueueTab[Q_RESTLIGHT_IDX] = RestLightSendToCtrl;
@@ -254,7 +292,7 @@ void CreateTaskAndQueue()
     BathLightIsrQueue = xQueueCreate(2, sizeof(uint32_t));
     RestLightIsrQueue = xQueueCreate(2, sizeof(uint32_t));
 
-    // обработчики данных с датчиков 
+    // обработчики данных с датчиков
     xTaskCreate(CheckIrMove, "IrMove", 2000, NULL, 1, NULL);
     xTaskCreate(CheckMvMove, "MvMove", 2000, NULL, 1, NULL);
     xTaskCreate(CheckDistMove, "DistMove", 2000, NULL, 1, NULL);
@@ -267,18 +305,17 @@ void CreateTaskAndQueue()
     xTaskCreate(RestLightControl, "rlc", 2000, NULL, 1, NULL);
     xTaskCreate(RestVentControl, "rvc", 2000, NULL, 1, NULL);
 
-    //xTaskCreate(DistIsrSetup, "DistData", 2000, NULL, 2, NULL);
-    //xTaskCreate(HumIsrSetup, "HumData", 2000, NULL, 2, NULL);
+    xTaskCreate(DistIsrSetup, "DistData", 2000, NULL, 2, NULL);
+    xTaskCreate(HumIsrSetup, "HumData", 2000, NULL, 2, NULL);
 
     // очередь отправки в сокет
     SendWsQueue = xQueueCreate(10, sizeof(struct WsDataToSend));
     // отправка в сокет
-    //xTaskCreate(SendWsData, "Socket Send", 2000, NULL, 1, NULL);
+    xTaskCreate(SendWsData, "Socket Send", 2000, NULL, 1, NULL);
 
-    InitOutGPIO();  // настроить GPIO на вывод реле управления светом и вентиляцией
+    InitOutGPIO();   // настроить GPIO на вывод реле управления светом и вентиляцией
     IrMvISRSetup();  //включить датчики движения в ванной Ir+Mv
     LightISRSetup(); //механический выключатель света
 
-    
     return;
 }

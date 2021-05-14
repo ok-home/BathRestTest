@@ -48,7 +48,7 @@ struct async_resp_arg SocketArgDb[CONFIG_LWIP_MAX_SOCKETS] = {{NULL}, {0}};
 /*
 *Таблица переадресации Очередей 
 */
-QueueHandle_t *CtrlQueueTab[Q_MAX_TABLE_IDX];
+QueueHandle_t CtrlQueueTab[Q_MAX_TABLE_IDX];
 
 uint8_t IrMvAnyAll = 0 ; // 0 - Any, 1 - All - пока нет в таблице параметров
 int RestLightDelay = 2 ;// нет в таблице параметров - задержка выключения света по датчику расстояния

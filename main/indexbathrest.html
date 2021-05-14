@@ -179,23 +179,35 @@
 	<h1>
 		Select OTA file
 	</h1>
-	<input type="file" id="files" name="file" /> Read bytes:
+	<div id="OtaString" ></div>
+
+	<input type="file" id="files" name="file" />
 	
 	<script id="worker1" type="javascript/worker">
 
+		var wsHost = 0;
 		self.onmessage = function(e) {
-			
-		var otasocket = new WebSocket("ws://192.168.1.61/otaws");
+
+		if(wsHost == 0)
+		{
+		if(e.data.indexOf("ws") != -1)
+			{
+			wsHost = e.data;	
+			}
+			return;
+		}
+
+		var otasocket = new WebSocket(wsHost);
 		//var otasocket = new WebSocket("ws://echo.websocket.org");
 
-		//otasocket.binaryType = 'blob';
+		otasocket.binaryType = 'blob';
 
 		var file = e.data;
 		var size = file.size;
 		var reader = new FileReaderSync();
 		var start;
 		var end;
-		var offset = 4096*8;
+		var offset = 1024;
 		var data =  new Uint8Array(offset);
 
 		otasocket.onopen = function () {
@@ -205,21 +217,30 @@
 		}
 		otasocket.onclose = function (event) {
 			console.log( " ota cоединение закрыто");
+			if (end == size)
+				postMessage("transfer END - ALL DONE");
+			else
+				postMessage("transfer ABORTED - ERROR");
+
 		}
 		otasocket.onerror = function (event) {
 				console.log("ошибка " + event.message);
 			};
 				
 		otasocket.onmessage = function (event) {
-				console.log(event.data);
+				//console.log(event.data);
 
 				switch(event.data){
+				case "err":
+					postMessage("transfer ERR");
+					otasocket.close();
+					break;
 				case "end":
-					postMessage("transfer end-------------------");
+					postMessage("transfer end");
 					otasocket.close();
 					break;
 				case "start":
-				postMessage("transfer start---------------------");
+					postMessage("transfer start");
 					start = 0;
 					end = start+offset;
 					if ( end > size )
@@ -227,11 +248,11 @@
 					blob = file.slice(start,end);
 					//data = reader.readAsBinaryString(blob);
 					data = reader.readAsArrayBuffer(blob);
-					postMessage("---------transfer from "+start+" to "+end);
+					postMessage("transfer from "+start+" to "+end);
 					otasocket.send(data);
 					break;
-				//case "next":
-				default :
+				case "next":
+				//default :
 					if(end == size)
 					{
 						otasocket.send("end");
@@ -244,27 +265,24 @@
 					blob = file.slice(start,end);
 					//data = reader.readAsBinaryString(blob);
 					data = reader.readAsArrayBuffer(blob);
-					postMessage("---------transfer from "+start+" to "+end );
+					postMessage("transfer from "+start+" to "+end );
 					otasocket.send(data);
 			}
 			}
 		  };
 	</script>
 
-
-
 	<script>
-		if (window.File && window.FileReader && window.FileList && window.Blob) {
-			// Great success! All the File APIs are supported.
-		} else {
-			alert('The File APIs are not fully supported in this browser.');
-		}
-
+	
 		var bb = new Blob([document.querySelector('#worker1').textContent]);
 		var worker = new Worker(window.webkitURL.createObjectURL(bb));
+		var otastr = document.getElementById("OtaString");
+		
+		worker.postMessage("ws://" + document.location.host + "/otaws");
 
 		worker.onmessage = function (e) {
-			console.log("Received: " + e.data);
+			//console.log("Received: " + e.data);
+			otastr.innerHTML =  e.data;
 		}
 
 		const fileSelector = document.getElementById('files');
@@ -286,49 +304,15 @@
 		EnableHandOnOff();
 		EnableInputParm();
 		var wsHostStr = "ws://" + document.location.host + "/ws"
-
 		window.onload = function () {
 			//var otasocket = new WebSocket("ws://echo.websocket.org");
 			//var socket = new WebSocket("ws://192.168.1.61/ws");
-			//var socket = new WebSocket(wsHostStr);
+			var socket = new WebSocket(wsHostStr);
 			var status = document.getElementById("EchoString");
 
 			socket.onopen = function () {
 				status.innerHTML = "cоединение установлено";
 				socket.send("sstrt");
-				/* test init send */
-				/* переносим инициализацию на сервер
-				socket.send(JSON.stringify({  name:"TempVol",  msg:56  }));
-				socket.send(JSON.stringify({  name:"HumVol",  msg:68  }));
-				socket.send(JSON.stringify({  name:"DistVol",  msg:230  }));
-				socket.send(JSON.stringify({  name:"IrVol",  msg:true  }));
-				socket.send(JSON.stringify({  name:"MvVol",  msg:true  }));
-			  
-				socket.send(JSON.stringify({  name:"BathLightAutoEnable",  msg:false  }));
-				socket.send(JSON.stringify({  name:"RestLightAutoEnable",  msg:false  }));
-				socket.send(JSON.stringify({  name:"BathVentAutoEnable",  msg:false  }));
-				socket.send(JSON.stringify({  name:"RestVentAutoEnable",  msg:false  }));
-				socket.send(JSON.stringify({  name:"BathLightOnOff",  msg:true  }));
-				socket.send(JSON.stringify({  name:"RestLightOnOff",  msg:true  }));
-				socket.send(JSON.stringify({  name:"BathVentOnOff",  msg:true  }));
-				socket.send(JSON.stringify({  name:"RestVentOnOff",  msg:true  }));
-			    
-				socket.send(JSON.stringify({  name:"BathVentUseHum",  msg:true  }));
-				socket.send(JSON.stringify({  name:"BathVentUseMove",  msg:true  }));
-				socket.send(JSON.stringify({  name:"BathLightIrUse",  msg:false  }));
-				socket.send(JSON.stringify({  name:"BathLightMvUse",  msg:true  }));
-			  
-				socket.send(JSON.stringify({  name:"BathHumOnParm",  msg:60  }));
-				socket.send(JSON.stringify({  name:"BathHumOffParm",  msg:61  }));
-				socket.send(JSON.stringify({  name:"BathVentOnDelay",  msg:62  }));
-				socket.send(JSON.stringify({  name:"BathVentOffDelay",  msg:63  }));
-				socket.send(JSON.stringify({  name:"BathLightOnDelay",  msg:64  }));
-				socket.send(JSON.stringify({  name:"BathLightOffDelay",  msg:65  }));
-				socket.send(JSON.stringify({  name:"RestLightOnDist",  msg:166  }));
-				socket.send(JSON.stringify({  name:"RestLightOffDist",  msg:167  }));
-				socket.send(JSON.stringify({  name:"BRestVentOnDelay",  msg:68  }));
-				socket.send(JSON.stringify({  name:"RestVentOffDelay",  msg:69  }));
-				  */
 			};
 
 			socket.onclose = function (event) {

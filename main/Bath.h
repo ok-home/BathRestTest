@@ -28,6 +28,7 @@ int end_ota(void);
 void SendWsData ( void*p);
 QueueHandle_t SendWsQueue;
 
+
 /*
  * Structure holding server handle
  * and internal socket fd in order
@@ -227,7 +228,13 @@ QueueHandle_t BathVentSendToCtrl;
 QueueHandle_t RestLightSendToCtrl;
 QueueHandle_t RestVentSendToCtrl;
 */
-extern QueueHandle_t *CtrlQueueTab[];
+extern QueueHandle_t CtrlQueueTab[];
 
 extern uint8_t IrMvAnyAll; // 0 - Any, 1 - All - пока нет в таблице параметров
 extern int RestLightDelay;
+
+
+#define OTA_IDX_MSG_START 64
+#define OTA_IDX_MSG_END 65
+#define OTA_IDX_MSG_NEXT 66
+#define OTA_IDX_MSG_ERR 67

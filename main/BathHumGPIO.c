@@ -55,6 +55,7 @@ int htu21d_init(i2c_port_t port, int sda_pin, int scl_pin, gpio_pullup_t sda_int
 	conf.sda_pullup_en = sda_internal_pullup;
 	conf.scl_pullup_en = scl_internal_pullup;
 	conf.master.clk_speed = 50000;
+	conf.clk_flags = I2C_SCLK_SRC_FLAG_FOR_NOMAL;
 	ret = i2c_param_config(port, &conf);
 	if (ret != ESP_OK)
 		return HTU21D_ERR_CONFIG;

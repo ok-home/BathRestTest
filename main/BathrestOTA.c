@@ -18,7 +18,7 @@ static esp_ota_handle_t update_handle = 0;
 
 int start_ota(void)
 {
-    return ESP_OK;
+    //return ESP_OK;
     esp_err_t err;
     ESP_LOGI(TAG, "Starting OTA example");
 
@@ -52,7 +52,7 @@ int start_ota(void)
 
 int write_ota(int data_read, uint8_t *ota_write_data)
 {
-    return data_read;
+    //return data_read;
     if (image_header_was_checked == false) // first segment
     {
         esp_app_desc_t new_app_info;
@@ -82,7 +82,7 @@ int write_ota(int data_read, uint8_t *ota_write_data)
 
 int end_ota(void)
 {
-    return ESP_OK;
+    //return ESP_OK;
     esp_err_t err = esp_ota_end(update_handle);
     if (err != ESP_OK) {
         if (err == ESP_ERR_OTA_VALIDATE_FAILED) {
@@ -97,7 +97,6 @@ int end_ota(void)
         ESP_LOGE(TAG, "esp_ota_set_boot_partition failed (%s)!", esp_err_to_name(err));
         return -1;
     }
-    ESP_LOGI(TAG, "Prepare to restart system!");
-    esp_restart();
+    
     return  ESP_OK;
 }
