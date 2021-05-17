@@ -134,9 +134,17 @@ inline void SendSocket(struct WsDataToSend req)
 {
     httpd_ws_frame_t ws_pkt;
     uint8_t buff[64];
-
-    ParmTableToJson((char *)buff, req.idx); // строка данных в HTTP
     memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
+    if (req.idx < MAX_IDX_PARM_TABLE)
+    {
+        ParmTableToJson((char *)buff, req.idx); // строка данных в HTTP
+    }
+    else
+    {
+        xSemaphoreTake(wifiDataParmMutex, portMAX_DELAY);
+        StrToJson(buff, "\"name\"", wifiDataParm[req.idx - WIFI_TAB_OFFSET].name, "\"msg\"", wifiDataParm[req.idx - WIFI_TAB_OFFSET].val);
+        xSemaphoreGive(wifiDataParmMutex);
+    }
     ws_pkt.payload = buff;
     ws_pkt.len = strlen((char *)buff);
     ws_pkt.type = HTTPD_WS_TYPE_TEXT;
@@ -169,18 +177,18 @@ void SendWsData(void *p)
     httpd_ws_frame_t ws_pkt;
     char buff[8];
     ws_pkt.type = HTTPD_WS_TYPE_TEXT;
-    ws_pkt.payload = (uint8_t*)buff;
+    ws_pkt.payload = (uint8_t *)buff;
 
     for (;;)
     {
         if (xQueueReceive(SendWsQueue, &req, timeout) == pdTRUE) // до таймаута
         {
-            if (req.idx > MAX_IDX_PARM_TABLE) //отправка сообщений для ОТА
+            if (req.idx >= OTA_IDX_MSG_START) //отправка сообщений для ОТА
             {
                 if (req.idx == OTA_IDX_MSG_START)
                 {
                     memset(buff, 0, sizeof(buff));
-                    ws_pkt.payload = (uint8_t*)strcpy(buff, "start");
+                    ws_pkt.payload = (uint8_t *)strcpy(buff, "start");
                     ws_pkt.len = strlen(buff);
                     httpd_ws_send_frame_async(req.hd, req.fd, &ws_pkt);
                     continue;
@@ -188,26 +196,26 @@ void SendWsData(void *p)
                 else if (req.idx == OTA_IDX_MSG_END)
                 {
                     memset(buff, 0, sizeof(buff));
-                    ws_pkt.payload = (uint8_t*)strcpy(buff, "end");
+                    ws_pkt.payload = (uint8_t *)strcpy(buff, "end");
                     ws_pkt.len = strlen(buff);
                     httpd_ws_send_frame_async(req.hd, req.fd, &ws_pkt);
-                     continue;
+                    continue;
                 }
                 else if (req.idx == OTA_IDX_MSG_NEXT)
                 {
                     memset(buff, 0, sizeof(buff));
-                    ws_pkt.payload = (uint8_t*)strcpy(buff,"next");
+                    ws_pkt.payload = (uint8_t *)strcpy(buff, "next");
                     ws_pkt.len = strlen(buff);
                     httpd_ws_send_frame_async(req.hd, req.fd, &ws_pkt);
-                     continue;
+                    continue;
                 }
                 else if (req.idx == OTA_IDX_MSG_ERR)
                 {
                     memset(buff, 0, sizeof(buff));
-                    ws_pkt.payload = (uint8_t*)strcpy(buff, "err");
+                    ws_pkt.payload = (uint8_t *)strcpy(buff, "err");
                     ws_pkt.len = strlen(buff);
                     httpd_ws_send_frame_async(req.hd, req.fd, &ws_pkt);
-                     continue;
+                    continue;
                 }
                 continue; // ошибка данных
             }
@@ -221,6 +229,13 @@ void SendWsData(void *p)
                     req.idx = p;
                     SendSocket(req);
                 }
+                // всю таблицу параметров wifi в этот сокет
+                for (int p = 0; p < WIFI_TAB_RESTART; p++)
+                {
+                    req.idx = p+WIFI_TAB_OFFSET;
+                    SendSocket(req);
+                }
+
                 continue;
             }
 
@@ -270,6 +285,8 @@ void CreateTaskAndQueue()
 {
     //ограничение доступа к таблице DataParmTable
     DataParmTableMutex = xSemaphoreCreateMutex();
+    // ограничение доступа к таблице wifiDataParm
+    wifiDataParmMutex = xSemaphoreCreateMutex();
 
     // очереди передачи данных на контроллеры включения/выключения света/вентиляции
     BathLightSendToCtrl = xQueueCreate(2, sizeof(union QueueHwData));

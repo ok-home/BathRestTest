@@ -271,8 +271,8 @@
 
 	<div id="OTA" class="tabcontent">
 		<h3>Выберите файл обновления</h3>
-		<div  id="OtaString"></div>
-		<input  type="file" id="files" name="file" />
+		<div id="OtaString"></div>
+		<input type="file" id="files" name="file" />
 		<button class="btn default" id="OTA_start">Обновить ПО</button>
 	</div>
 
@@ -287,6 +287,7 @@
 			<option value="wifi_sta">Подключение к сети</option>
 			<option value="wifi_ap">Точка доступа</option>
 		</select>
+		<button class="btn default" id="Wifi_Upload">Записать данные WiFi </button>
 		<button class="btn default" id="Wifi_Restart">Рестарт</button>
 	</div>
 
@@ -405,7 +406,7 @@
 					worker.postMessage(fileList[0]);
 					//fileList = 0;
 				}
-				else{
+				else {
 					otastr.innerHTML = "Файл обновления не выбран";
 				}
 			}
@@ -661,6 +662,24 @@
 				}
 			});
 			/*********************/
+			function check_Wifi_SSID_Pass(){
+				var ssid = document.getElementById("WiFi_SSID");
+				if (ssid.value.length == 0) {
+					ssid.placeholder = "не может быть пустым";
+					ssid.focus();
+					return false;
+				}
+
+				var pass = document.getElementById("WiFi_Pass");
+				if (pass.value.length < 8) {
+					pass.value = "";
+					pass.placeholder = "Пароль должен быть больше 8 символов";
+					pass.focus();
+					return false;
+				}
+				return true;
+			}
+
 			document.getElementById("WiFi_SSID").addEventListener("change", function (e) {
 				if (e.target.value.length == 0) {
 					e.target.placeholder = "не может быть пустым";
@@ -675,21 +694,9 @@
 				}
 			});
 			document.getElementById("Wifi_Restart").addEventListener("click", function (e) {
-
 				var ssid = document.getElementById("WiFi_SSID");
-				if (ssid.value.length == 0) {
-					ssid.placeholder = "не может быть пустым";
-					ssid.focus();
-					return;
-				}
-
 				var pass = document.getElementById("WiFi_Pass");
-				if (pass.value.length < 8) {
-					pass.value = "";
-					pass.placeholder = "Пароль должен быть больше 8 символов";
-					pass.focus();
-					return;
-				}
+				if ( check_Wifi_SSID_Pass() ){
 				console.log(JSON.stringify({ name: ssid.name, msg: ssid.value }));
 				socket.send(JSON.stringify({ name: ssid.name, msg: ssid.value }));
 
@@ -702,7 +709,26 @@
 
 				console.log(JSON.stringify({ name: "Wifi_Restart", msg: "true" }));
 				socket.send(JSON.stringify({ name: "Wifi_Restart", msg: "true" }));
+				}
 
+			});
+			document.getElementById("Wifi_Upload").addEventListener("click", function (e) {
+				var ssid = document.getElementById("WiFi_SSID");
+				var pass = document.getElementById("WiFi_Pass");
+				if ( check_Wifi_SSID_Pass() ){
+				console.log(JSON.stringify({ name: ssid.name, msg: ssid.value }));
+				socket.send(JSON.stringify({ name: ssid.name, msg: ssid.value }));
+
+				console.log(JSON.stringify({ name: pass.name, msg: pass.value }));
+				socket.send(JSON.stringify({ name: pass.name, msg: pass.value }));
+
+				var sta_ap = document.getElementById("WiFi_STA_AP");
+				console.log(JSON.stringify({ name: sta_ap.name, msg: sta_ap.value }));
+				socket.send(JSON.stringify({ name: sta_ap.name, msg: sta_ap.value }));
+
+				console.log(JSON.stringify({ name: "Wifi_Restart", msg: "false" }));
+				socket.send(JSON.stringify({ name: "Wifi_Restart", msg: "false" }));
+				}
 
 			});
 

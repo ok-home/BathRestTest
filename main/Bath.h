@@ -166,6 +166,8 @@ void RestLightControl(void *p);
 void RestVentControl(void *p);
 
 SemaphoreHandle_t DataParmTableMutex;
+SemaphoreHandle_t wifiDataParmMutex;
+
 
 /*
 * Выход обработчиков переывания
@@ -219,3 +221,24 @@ extern int RestLightDelay;
 #define OTA_IDX_MSG_END 65
 #define OTA_IDX_MSG_NEXT 66
 #define OTA_IDX_MSG_ERR 67
+
+#define WIFI_TAB_OFFSET 40
+#define WIFI_TAB_SSID 0
+#define WIFI_TAB_PASS 1
+#define WIFI_TAB_STA_AP 2
+#define WIFI_TAB_RESTART 3
+
+typedef struct wifiNameParm
+{
+    char name[32]; // строка имя в http
+    char val[32];  // значение параметра
+} wifiNameParm_t;
+
+/*
+*  wifi nvs definition
+*/
+int json_to_str_parm(char *, char *, char *);
+int read_wifiDataParm_from_socket(char *);
+int read_wifiDataParm_from_nvs(void);
+int write_wifiDataParm_to_nvs(void);
+void send_wifiDataParm_to_socket(void);
