@@ -13,6 +13,7 @@
 
 #include "Bath.h"
 #include "BathInitGlobal.h"
+void initSoftAp();
 /*
 ota test
 */
@@ -68,6 +69,7 @@ static esp_err_t echo_handler(httpd_req_t *req)
         if (ret != ESP_OK)
         {
             ESP_LOGI(TAG, "httpd_ws_recv_frame failed to get frame with %d", ret);
+            free(buf);
             return ret;
         }
         //ESP_LOGI(TAG, "Got packet with message: %s", ws_pkt.payload);
@@ -77,6 +79,7 @@ static esp_err_t echo_handler(httpd_req_t *req)
     if (ret != ESP_OK)
     {
         ESP_LOGE(TAG, "httpd_ws_recv_frame echo failed with %d", ret);
+        free(buf);
         return ret;
     }
     /*
@@ -87,6 +90,7 @@ static esp_err_t echo_handler(httpd_req_t *req)
     {
         rq.idx = -1; // занести сокет в таблицу сокетов
         xQueueSend(SendWsQueue, &rq, 0);
+        free(buf);
         return (ESP_OK);
     }
     /*
@@ -94,6 +98,13 @@ static esp_err_t echo_handler(httpd_req_t *req)
     */
     int val = JsonDigitBool((char *)ws_pkt.payload, NameField, sizeof(NameField));
     int idx = FindIdxFromDataParmTable(NameField);
+    if(idx<0)
+    {
+        ESP_LOGI("WIFI DATA","%s  ",(char *)ws_pkt.payload);
+        free(buf);
+        return ESP_OK;
+    }
+    
     // данные в таблицу параметров
     xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
     DataParmTable[idx].val = val;
@@ -112,7 +123,7 @@ static esp_err_t echo_handler(httpd_req_t *req)
     rq.fd = 0; // во все сокеты
     rq.idx = idx;
     xQueueSend(SendWsQueue, &rq, 0);
-
+    free(buf);
     return ESP_OK;
 }
 static esp_err_t ota_handler(httpd_req_t *req)
@@ -157,6 +168,7 @@ static esp_err_t ota_handler(httpd_req_t *req)
         if (ret != ESP_OK)
         {
             ESP_LOGI(TAG, "httpd_ws_recv_frame failed to get frame with %d", ret);
+            free(buf);
             return ret;
         }
         //ESP_LOGI(TAG, "Got packet with message: %s", ws_pkt.payload);
@@ -169,6 +181,7 @@ static esp_err_t ota_handler(httpd_req_t *req)
         if (ret != ESP_OK)
         {
             ESP_LOGI("START OTA ", "ERR %d", ret);
+            free(buf);
             return (ret);
         }
         rq.idx = OTA_IDX_MSG_START;
@@ -182,6 +195,7 @@ static esp_err_t ota_handler(httpd_req_t *req)
         if (ret != ESP_OK)
         {
             ESP_LOGI("END OTA ", "ERR %d", ret);
+            free(buf);
             return (ret);
         }
 
@@ -199,6 +213,7 @@ static esp_err_t ota_handler(httpd_req_t *req)
         if (ret == -1)
         {
             ESP_LOGI("WRITE OTA ", "ERR %d", ret);
+            free(buf);
             return (ret);
         }
         //ESP_LOGI("OTA WS","RET DATA %d",ret);
@@ -329,15 +344,68 @@ void app_main(void)
      * examples/protocols/README.md for more information about this function.
      */
     ESP_ERROR_CHECK(example_connect());
-
+    
+    //initSoftAp();
     
     /* Register event handlers to stop the server when Wi-Fi or Ethernet is disconnected,
      * and re-start it upon connection.
+     * for STA
      */
     ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &connect_handler, &server));
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &disconnect_handler, &server));
+    /*
+    * for softAP
+    */
+    //ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_AP_STACONNECTED, &connect_handler, &server));
+    //ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_AP_STADISCONNECTED, &disconnect_handler, &server));
+
+  
+    
+    
     /* Start the server for the first time */
     server = start_webserver();
 
     
+}
+/*
+    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_AP_STACONNECTED, &connect_handler, &server));
+    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_AP_STADISCONNECTED, &disconnect_handler, &server));
+*/
+
+/*
+1. прочитать ssid/pass/start_ap/sta
+2. нет - softap
+    - старт сервер
+    - зачитать ssid/pass/restart - записать в нвс+ start_ap/sta - перезагрузить
+3. да - пробуем sta
+    - 5 реконнектов - записать в нвс start_ap/sta - перезагрузить
+
+4. 
+*/
+
+void initSoftAp()
+{
+	
+	esp_netif_create_default_wifi_ap();
+
+    wifi_init_config_t wifiConfiguration = WIFI_INIT_CONFIG_DEFAULT();
+    ESP_ERROR_CHECK(esp_wifi_init(&wifiConfiguration));
+    
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
+
+    wifi_config_t apConfiguration = {
+        .ap = {
+            .ssid = "BathRestWifi_AP",
+            .password = "",
+            .ssid_len = 0,
+            //.channel = default,
+            .authmode = WIFI_AUTH_OPEN,
+            .ssid_hidden = 0,
+            .max_connection = 1,
+            .beacon_interval = 150,
+        },
+    };
+    ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_AP, &apConfiguration));
+    ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
+    ESP_ERROR_CHECK(esp_wifi_start());
 }
