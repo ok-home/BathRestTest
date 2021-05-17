@@ -5,9 +5,11 @@
 #include <freertos/task.h>
 #include <freertos/queue.h>
 #include <freertos/semphr.h>
-#include "driver/gpio.h"
+#include <driver/gpio.h>
+#include <nvs_flash.h>
+#include <nvs.h>
 
-
+//#include "jsmn.h"
 #include "BathRestHW.h"
 
 #define SOCKSTARTMSG "sstrt" // при получении по WS - новый сокет.
@@ -156,6 +158,14 @@ typedef struct httpNameParm
     int QueueTableIdx; // индекс в таблице очереди CTRL
 } httpNameParm_t;
 
+typedef struct wifiNameParm
+{
+    char name[32]; // строка имя в http
+    char val[32];  // значение параметра
+} wifiNameParm_t;
+
+
+
 QueueHandle_t BathLightSendToCtrl;
 QueueHandle_t BathVentSendToCtrl;
 QueueHandle_t RestLightSendToCtrl;
@@ -203,6 +213,8 @@ void InitOutGPIO();
 *  Глобальные переменные 
 */
 extern httpNameParm_t DataParmTable[];
+extern wifiNameParm_t wifiDataParm[];
+
 extern struct async_resp_arg SocketArgDb[];
 /*
 Эти очереди в таблице
@@ -228,17 +240,12 @@ extern int RestLightDelay;
 #define WIFI_TAB_STA_AP 2
 #define WIFI_TAB_RESTART 3
 
-typedef struct wifiNameParm
-{
-    char name[32]; // строка имя в http
-    char val[32];  // значение параметра
-} wifiNameParm_t;
 
 /*
 *  wifi nvs definition
 */
 int json_to_str_parm(char *, char *, char *);
 int read_wifiDataParm_from_socket(char *);
-int read_wifiDataParm_from_nvs(void);
-int write_wifiDataParm_to_nvs(void);
-void send_wifiDataParm_to_socket(void);
+int read_wifiDataParm_from_nvs();
+int write_wifiDataParm_to_nvs();
+void send_wifiDataParm_to_socket();

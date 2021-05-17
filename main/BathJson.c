@@ -64,6 +64,19 @@ inline void StrToJson(char *dest, char *name1, char *vol1, char *name2, char *vo
     strcat(dest, vol2);
     strcat(dest, "}");
 };
+inline void StrToJsons(char *dest, char *name1, char *vol1, char *name2, char *vol2)
+{
+    strcpy(dest, "{");
+    strcat(dest, name1);
+    strcat(dest, ": \"");
+    strcat(dest, vol1);
+    strcat(dest, "\",");
+    strcat(dest, name2);
+    strcat(dest, ": \"");
+    strcat(dest, vol2);
+    strcat(dest, "\" }");
+};
+
 /*
 * формирует сроку json из данных таблицы DataParmTable по индексу i
 */
@@ -134,6 +147,7 @@ inline void SendSocket(struct WsDataToSend req)
 {
     httpd_ws_frame_t ws_pkt;
     uint8_t buff[64];
+    memset(buff,0,sizeof(buff));
     memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
     if (req.idx < MAX_IDX_PARM_TABLE)
     {
@@ -142,7 +156,7 @@ inline void SendSocket(struct WsDataToSend req)
     else
     {
         xSemaphoreTake(wifiDataParmMutex, portMAX_DELAY);
-        StrToJson(buff, "\"name\"", wifiDataParm[req.idx - WIFI_TAB_OFFSET].name, "\"msg\"", wifiDataParm[req.idx - WIFI_TAB_OFFSET].val);
+        StrToJsons((char *)buff, "\"name\"", wifiDataParm[req.idx - WIFI_TAB_OFFSET].name, "\"msg\"", wifiDataParm[req.idx - WIFI_TAB_OFFSET].val);
         xSemaphoreGive(wifiDataParmMutex);
     }
     ws_pkt.payload = buff;

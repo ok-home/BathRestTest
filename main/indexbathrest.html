@@ -524,6 +524,15 @@
 					case "RestVentOffDelay":
 						document.AutoSetForm.elements[message.name].value = message.msg;
 						break;
+					case "wifi_ssid":
+						document.getElementById("WiFi_SSID").value = message.msg;
+						break;
+					case "wifi_pass":
+						document.getElementById("WiFi_Pass").value = message.msg;
+						break;
+					case "wifi_sta_ap":
+						document.getElementById("WiFi_STA_AP").value = message.msg;
+						break;
 				}
 
 			};
@@ -662,7 +671,7 @@
 				}
 			});
 			/*********************/
-			function check_Wifi_SSID_Pass(){
+			function check_Wifi_SSID_Pass() {
 				var ssid = document.getElementById("WiFi_SSID");
 				if (ssid.value.length == 0) {
 					ssid.placeholder = "не может быть пустым";
@@ -696,38 +705,24 @@
 			document.getElementById("Wifi_Restart").addEventListener("click", function (e) {
 				var ssid = document.getElementById("WiFi_SSID");
 				var pass = document.getElementById("WiFi_Pass");
-				if ( check_Wifi_SSID_Pass() ){
-				console.log(JSON.stringify({ name: ssid.name, msg: ssid.value }));
-				socket.send(JSON.stringify({ name: ssid.name, msg: ssid.value }));
-
-				console.log(JSON.stringify({ name: pass.name, msg: pass.value }));
-				socket.send(JSON.stringify({ name: pass.name, msg: pass.value }));
-
 				var sta_ap = document.getElementById("WiFi_STA_AP");
-				console.log(JSON.stringify({ name: sta_ap.name, msg: sta_ap.value }));
-				socket.send(JSON.stringify({ name: sta_ap.name, msg: sta_ap.value }));
-
-				console.log(JSON.stringify({ name: "Wifi_Restart", msg: "true" }));
-				socket.send(JSON.stringify({ name: "Wifi_Restart", msg: "true" }));
+				if (check_Wifi_SSID_Pass()) {
+					socket.send(JSON.stringify({ name: ssid.name, msg: ssid.value }));
+					socket.send(JSON.stringify({ name: pass.name, msg: pass.value }));
+					socket.send(JSON.stringify({ name: sta_ap.name, msg: sta_ap.value }));
+					socket.send(JSON.stringify({ name: "Wifi_Restart", msg: "true" }));
 				}
 
 			});
 			document.getElementById("Wifi_Upload").addEventListener("click", function (e) {
 				var ssid = document.getElementById("WiFi_SSID");
 				var pass = document.getElementById("WiFi_Pass");
-				if ( check_Wifi_SSID_Pass() ){
-				console.log(JSON.stringify({ name: ssid.name, msg: ssid.value }));
-				socket.send(JSON.stringify({ name: ssid.name, msg: ssid.value }));
-
-				console.log(JSON.stringify({ name: pass.name, msg: pass.value }));
-				socket.send(JSON.stringify({ name: pass.name, msg: pass.value }));
-
 				var sta_ap = document.getElementById("WiFi_STA_AP");
-				console.log(JSON.stringify({ name: sta_ap.name, msg: sta_ap.value }));
-				socket.send(JSON.stringify({ name: sta_ap.name, msg: sta_ap.value }));
-
-				console.log(JSON.stringify({ name: "Wifi_Restart", msg: "false" }));
-				socket.send(JSON.stringify({ name: "Wifi_Restart", msg: "false" }));
+				if (check_Wifi_SSID_Pass()) {
+					socket.send(JSON.stringify({ name: ssid.name, msg: ssid.value }));
+					socket.send(JSON.stringify({ name: pass.name, msg: pass.value }));
+					socket.send(JSON.stringify({ name: sta_ap.name, msg: sta_ap.value }));
+					socket.send(JSON.stringify({ name: "Wifi_Restart", msg: "false" }));
 				}
 
 			});

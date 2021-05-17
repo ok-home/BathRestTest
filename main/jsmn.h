@@ -30,6 +30,8 @@
 extern "C" {
 #endif
 
+#define JSMN_STATIC
+
 #ifdef JSMN_STATIC
 #define JSMN_API static
 #else

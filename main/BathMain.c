@@ -3,13 +3,13 @@
 #include <esp_event.h>
 #include <esp_log.h>
 #include <esp_system.h>
-#include <nvs_flash.h>
 #include "esp_netif.h"
 #include "esp_eth.h"
 #include "protocol_examples_common.h"
 #include <esp_http_server.h>
 #include <mdns.h>
 #include "esp_private/system_internal.h"
+//#include "jsmn.h"
 
 #include "Bath.h"
 #include "BathInitGlobal.h"
@@ -98,9 +98,10 @@ static esp_err_t echo_handler(httpd_req_t *req)
     */
     int val = JsonDigitBool((char *)ws_pkt.payload, NameField, sizeof(NameField));
     int idx = FindIdxFromDataParmTable(NameField);
-    if(idx<0)
+    if(idx<0)  // not found on table
     {
-        ESP_LOGI("WIFI DATA","%s  ",(char *)ws_pkt.payload);
+        //ESP_LOGI("WIFI DATA","%s  ",(char *)ws_pkt.payload);
+        read_wifiDataParm_from_socket((char *)ws_pkt.payload);
         free(buf);
         return ESP_OK;
     }

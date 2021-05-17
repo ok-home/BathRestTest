@@ -25,7 +25,8 @@
 			"mdns.h": "c",
 			"bathresthw.h": "c",
 			"rmt.h": "c",
-			"system_internal.h": "c"
+			"system_internal.h": "c",
+			"jsmn.h": "c"
 		},
 		"idf.flashType": "UART"
 	}
