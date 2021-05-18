@@ -49,7 +49,7 @@ int JsonDigitBool(char *jsonStr, char *nameStr, int maxNameSize)
     return (-3);                             // это не число или false/true
 };
 /*
-* формимирует строку Json из 2-х пар имя:значение
+* формимирует строку Json из 2-х пар имя:значение - для цифровых значений
 * dest - указатель на строку получатель ( размер не контролируется, может быть превышение)
 */
 inline void StrToJson(char *dest, char *name1, char *vol1, char *name2, char *vol2)
@@ -64,6 +64,10 @@ inline void StrToJson(char *dest, char *name1, char *vol1, char *name2, char *vo
     strcat(dest, vol2);
     strcat(dest, "}");
 };
+/*
+* формимирует строку Json из 2-х пар имя:значение - для текстовых полей - дополнительные кавычки
+* dest - указатель на строку получатель ( размер не контролируется, может быть превышение)
+*/
 inline void StrToJsons(char *dest, char *name1, char *vol1, char *name2, char *vol2)
 {
     strcpy(dest, "{");

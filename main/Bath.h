@@ -27,6 +27,9 @@ int start_ota(void);
 int write_ota(int data_read, uint8_t *ota_write_data);
 int end_ota(void);
 
+err_t wifi_init_sta(void);
+void wifi_init_softap(void);
+
 void SendWsData ( void*p);
 QueueHandle_t SendWsQueue;
 
