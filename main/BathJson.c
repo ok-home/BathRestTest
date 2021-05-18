@@ -68,13 +68,13 @@ inline void StrToJsons(char *dest, char *name1, char *vol1, char *name2, char *v
 {
     strcpy(dest, "{");
     strcat(dest, name1);
-    strcat(dest, ": \"");
+    strcat(dest, ":\"");
     strcat(dest, vol1);
     strcat(dest, "\",");
     strcat(dest, name2);
-    strcat(dest, ": \"");
+    strcat(dest, ":\"");
     strcat(dest, vol2);
-    strcat(dest, "\" }");
+    strcat(dest, "\"}");
 };
 
 /*
