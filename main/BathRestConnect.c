@@ -20,9 +20,9 @@
 #define AP_ESP_WIFI_PASS      ""
 #define AP_MAX_STA_CONN       1
 
-#define STA_ESP_WIFI_SSID      "ok-home-Keenetic"
-#define STA_ESP_WIFI_PASS      "RicohPriport"
-#define STA_ESP_MAXIMUM_RETRY  3
+//#define STA_ESP_WIFI_SSID      "ok-home-Keenetic"
+//#define STA_ESP_WIFI_PASS      "RicohPriport"
+#define STA_ESP_MAXIMUM_RETRY  5
 
 /* FreeRTOS event group to signal when we are connected*/
 static EventGroupHandle_t s_wifi_event_group;
@@ -93,13 +93,13 @@ void wifi_init_softap(void)
     wifi_config_t wifi_config = {
         .ap = {
             .ssid = AP_ESP_WIFI_SSID,
-            .ssid_len = strlen(EXAMPLE_ESP_WIFI_SSID),
+            .ssid_len = strlen(AP_ESP_WIFI_SSID),
             .password = AP_ESP_WIFI_PASS,
             .max_connection = AP_MAX_STA_CONN,
             .authmode = WIFI_AUTH_WPA_WPA2_PSK
         },
     };
-    if (strlen(EXAMPLE_ESP_WIFI_PASS) == 0) {
+    if (strlen(AP_ESP_WIFI_PASS) == 0) {
         wifi_config.ap.authmode = WIFI_AUTH_OPEN;
     }
 
@@ -111,9 +111,9 @@ void wifi_init_softap(void)
              AP_ESP_WIFI_SSID, AP_ESP_WIFI_PASS);
 }
 
-err_t wifi_init_sta(void)
+esp_err_t wifi_init_sta(void)
 {
-    err_t err;
+    esp_err_t err = ESP_OK;
     s_wifi_event_group = xEventGroupCreate();
 
     //ESP_ERROR_CHECK(esp_netif_init());
@@ -140,8 +140,8 @@ err_t wifi_init_sta(void)
 
     wifi_config_t wifi_config = {
         .sta = {
-            .ssid = STA_ESP_WIFI_SSID,
-            .password = STA_ESP_WIFI_PASS,
+            //.ssid =(uint8_t *)wifiDataParm[WIFI_TAB_SSID].val,
+            //.password = (uint8_t *)wifiDataParm[WIFI_TAB_PASS].val,
             /* Setting a password implies station will connect to all security modes including WEP/WPA.
              * However these modes are deprecated and not advisable to be used. Incase your Access point
              * doesn't support WPA2, these mode can be enabled by commenting below line */
@@ -153,6 +153,9 @@ err_t wifi_init_sta(void)
             },
         },
     };
+    strcpy((char *)wifi_config.sta.ssid,wifiDataParm[WIFI_TAB_SSID].val);
+    strcpy((char *)wifi_config.sta.password,wifiDataParm[WIFI_TAB_PASS].val);
+
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config) );
     ESP_ERROR_CHECK(esp_wifi_start() );
@@ -171,14 +174,15 @@ err_t wifi_init_sta(void)
      * happened. */
     if (bits & WIFI_CONNECTED_BIT) {
         ESP_LOGI(TAG, "connected to ap SSID:%s password:%s",
-                 STA_ESP_WIFI_SSID, STA_ESP_WIFI_PASS);
+                 wifiDataParm[WIFI_TAB_SSID].val, wifiDataParm[WIFI_TAB_PASS].val);
                  err = ESP_OK;
     } else if (bits & WIFI_FAIL_BIT) {
         ESP_LOGI(TAG, "Failed to connect to SSID:%s, password:%s",
-                 STA_ESP_WIFI_SSID, STA_ESP_WIFI_PASS);
+                 wifiDataParm[WIFI_TAB_SSID].val, wifiDataParm[WIFI_TAB_PASS].val);
                  err = ESP_FAIL;
     } else {
         ESP_LOGE(TAG, "UNEXPECTED EVENT");
+        err = ESP_FAIL;
     }
 
     /* The event will not be processed after unregister */

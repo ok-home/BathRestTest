@@ -13,13 +13,9 @@
 
 #include "Bath.h"
 #include "BathInitGlobal.h"
-void initSoftAp();
-/*
-ota test
-*/
 
 #define MAX_OTA_SIZE 4096 * 2 + 20
-//static uint8_t buff[MAX_OTA_SIZE];
+
 /* A simple example that demonstrates using websocket echo server
  */
 static const char *TAG = "ws_echo_server";
@@ -98,14 +94,14 @@ static esp_err_t echo_handler(httpd_req_t *req)
     */
     int val = JsonDigitBool((char *)ws_pkt.payload, NameField, sizeof(NameField));
     int idx = FindIdxFromDataParmTable(NameField);
-    if(idx<0)  // not found on table
+    if (idx < 0) // not found on table
     {
         //ESP_LOGI("WIFI DATA","%s  ",(char *)ws_pkt.payload);
         read_wifiDataParm_from_socket((char *)ws_pkt.payload);
         free(buf);
         return ESP_OK;
     }
-    
+
     // данные в таблицу параметров
     xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
     DataParmTable[idx].val = val;
@@ -205,7 +201,8 @@ static esp_err_t ota_handler(httpd_req_t *req)
 
         ESP_LOGI(TAG, "Prepare to restart system!");
         vTaskDelay(2000 / portTICK_PERIOD_MS);
-        esp_restart_noos_dig();
+        //esp_restart_noos_dig();
+        esp_restart();
     }
     else if (ws_pkt.type == HTTPD_WS_TYPE_BINARY) //check bin ota data
     {
@@ -340,90 +337,45 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 
-    /* This helper function configures Wi-Fi or Ethernet, as selected in menuconfig.
-     * Read "Establishing Wi-Fi or Ethernet Connection" section in
-     * examples/protocols/README.md for more information about this function.
-     */
-    //ESP_ERROR_CHECK(example_connect());
-    
-    //initSoftAp();
-    
-    /* Register event handlers to stop the server when Wi-Fi or Ethernet is disconnected,
-     * and re-start it upon connection.
-     * for STA
-     */
-    //ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &connect_handler, &server));
-    //ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &disconnect_handler, &server));
-    /*
-    * for softAP
-    */
-    //ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_AP_STACONNECTED, &connect_handler, &server));
-    //ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_AP_STADISCONNECTED, &disconnect_handler, &server));
+    // read connection data from nvs
+    read_wifiDataParm_from_nvs();
 
-    int wifimode = 0 // 0-AP 1 -STA
-
-    if(wifimode == 0) // AP
+    // connect wifi - AP or STA
+    while (1)
     {
-        wifi_init_softap();
-        ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_AP_STACONNECTED, &connect_handler, &server));
-        ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_AP_STADISCONNECTED, &disconnect_handler, &server));
-
-    }
-    else
-    {
-        wifi_init_sta();
-        ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &connect_handler, &server));
-        ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &disconnect_handler, &server));
+        if (strcmp(wifiDataParm[WIFI_TAB_STA_AP].val, WIFI_TAB_MODE_AP) == 0) // AP
+        {
+            wifi_init_softap();
+            ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_AP_STACONNECTED, &connect_handler, &server));
+            ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_AP_STADISCONNECTED, &disconnect_handler, &server));
+            break;
+        }
+        else
+        {
+            err = wifi_init_sta();
+            if (err == ESP_OK)
+            {
+                ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &connect_handler, &server));
+                ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &disconnect_handler, &server));
+                break;
+            }
+            else
+            {
+                ESP_LOGI("WIFI STA", "NOT CONNECT");
+                strcpy(wifiDataParm[WIFI_TAB_STA_AP].val, WIFI_TAB_MODE_AP);
+                esp_wifi_stop();
+                continue;
+            }
+        }
     }
 
-  
-    
-    
+    //initialize mDNS service
+    mdns_init();
+    //set hostname
+    mdns_hostname_set("ok-home");
+    //set default instance
+    mdns_instance_name_set("BathRest");
+
     /* Start the server for the first time */
     server = start_webserver();
-
-    
 }
-/*
-    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_AP_STACONNECTED, &connect_handler, &server));
-    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_AP_STADISCONNECTED, &disconnect_handler, &server));
-*/
-
-/*
-1. прочитать ssid/pass/start_ap/sta
-2. нет - softap
-    - старт сервер
-    - зачитать ssid/pass/restart - записать в нвс+ start_ap/sta - перезагрузить
-3. да - пробуем sta
-    - 5 реконнектов - записать в нвс start_ap/sta - перезагрузить
-
-4. 
-*/
-/*
-void initSoftAp()
-{
-	
-	esp_netif_create_default_wifi_ap();
-
-    wifi_init_config_t wifiConfiguration = WIFI_INIT_CONFIG_DEFAULT();
-    ESP_ERROR_CHECK(esp_wifi_init(&wifiConfiguration));
-    
-    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
-
-    wifi_config_t apConfiguration = {
-        .ap = {
-            .ssid = "BathRestWifi_AP",
-            .password = "",
-            .ssid_len = 0,
-            //.channel = default,
-            .authmode = WIFI_AUTH_OPEN,
-            .ssid_hidden = 0,
-            .max_connection = 1,
-            .beacon_interval = 150,
-        },
-    };
-    ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_AP, &apConfiguration));
-    ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
-    ESP_ERROR_CHECK(esp_wifi_start());
-}
-*/

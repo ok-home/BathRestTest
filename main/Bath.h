@@ -5,6 +5,7 @@
 #include <freertos/task.h>
 #include <freertos/queue.h>
 #include <freertos/semphr.h>
+#include <freertos/event_groups.h>
 #include <driver/gpio.h>
 #include <nvs_flash.h>
 #include <nvs.h>
@@ -27,7 +28,7 @@ int start_ota(void);
 int write_ota(int data_read, uint8_t *ota_write_data);
 int end_ota(void);
 
-err_t wifi_init_sta(void);
+esp_err_t wifi_init_sta(void);
 void wifi_init_softap(void);
 
 void SendWsData ( void*p);
@@ -242,6 +243,9 @@ extern int RestLightDelay;
 #define WIFI_TAB_PASS 1
 #define WIFI_TAB_STA_AP 2
 #define WIFI_TAB_RESTART 3
+
+#define WIFI_TAB_MODE_AP "wifi_ap"
+#define WIFI_TAB_MODE_STA "wifi_sta"
 
 
 /*

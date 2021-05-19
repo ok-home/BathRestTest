@@ -60,15 +60,17 @@ int read_wifiDataParm_from_socket(char *jsonstr)
             {
                 // new wifi data, write to nvs & restart
                 ESP_LOGI("READ WIFI DATA FROM SOCKET", "RESTART");
-            //    if (write_wifiDataParm_to_nvs() != ESP_OK)
-            //        ESP_LOGI("READ WIFI DATA FROM SOCKET", "ERR RESTART");
+                if (write_wifiDataParm_to_nvs() != ESP_OK)
+                    ESP_LOGI("READ WIFI DATA FROM SOCKET", "ERR RESTART");
+            esp_restart();
             }
             else if (strcmp(val, "false")==0)
             {
                 // new wifi data, write to nvs & send to socket
                 ESP_LOGI("READ WIFI DATA FROM SOCKET", "WRITE ONLY");
-            //    if (write_wifiDataParm_to_nvs() != ESP_OK)
-            //        ESP_LOGI("READ WIFI DATA FROM SOCKET", "ERR WRITE ONLY");
+                if (write_wifiDataParm_to_nvs() != ESP_OK)
+                    ESP_LOGI("READ WIFI DATA FROM SOCKET", "ERR WRITE ONLY");
+                read_wifiDataParm_from_nvs(); // reread data from nvs
                 send_wifiDataParm_to_socket();
             }
         }
@@ -86,7 +88,7 @@ int read_wifiDataParm_from_nvs()
     esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
     if (err != ESP_OK)
     {
-        printf("Error (%s) opening NVS handle!\n", esp_err_to_name(err));
+        ESP_LOGI("READ NVS ","Error (%s) opening NVS handle!\n", esp_err_to_name(err));
         return err;
     }
     for (int idx = 0; idx < WIFI_TAB_RESTART; idx++)
@@ -96,7 +98,7 @@ int read_wifiDataParm_from_nvs()
         xSemaphoreGive(wifiDataParmMutex);
         if (err != ESP_OK) // при инициализации всегда ошибки
         {
-            printf("Error (%s) read NVS data!\n", esp_err_to_name(err));
+            ESP_LOGI("READ NVS ","Error (%s) read NVS data!\n", esp_err_to_name(err));
         }
     }
     nvs_close(my_handle);
