@@ -4,10 +4,10 @@
 */
 httpNameParm_t DataParmTable[MAX_IDX_PARM_TABLE] = {
 
-    {"BathLightStatus", 0, 0, Q_NO_IDX},
-    {"RestLightStatus", 0, 0, Q_NO_IDX},
-    {"BathVentStatus", 0, 0, Q_NO_IDX},
-    {"RestVentStatus", 0, 0, Q_NO_IDX},
+    {"B_L_Status", 0, 0, Q_NO_IDX},
+    {"R_L_Status", 0, 0, Q_NO_IDX},
+    {"B_V_Status", 0, 0, Q_NO_IDX},
+    {"R_V_Status", 0, 0, Q_NO_IDX},
 
     {"TempVol", 56, 1, Q_NO_IDX},
     {"HumVol", 68, 1, Q_NO_IDX},
@@ -15,31 +15,31 @@ httpNameParm_t DataParmTable[MAX_IDX_PARM_TABLE] = {
     {"IrVol", 1, 0, Q_NO_IDX},
     {"MvVol", 1, 0, Q_NO_IDX},
 
-    {"BathLightAutoEnable", 1, 0, Q_BATHLIGHT_IDX},
-    {"RestLightAutoEnable", 1, 0, Q_RESTLIGHT_IDX},
-    {"BathVentAutoEnable", 1, 0, Q_BATHVENT_IDX},
-    {"RestVentAutoEnable", 1, 0, Q_RESTVENT_IDX},
+    {"B_L_AutoEnable", 1, 0, Q_BATHLIGHT_IDX},
+    {"R_L_AutoEnable", 1, 0, Q_RESTLIGHT_IDX},
+    {"B_V_AutoEnable", 1, 0, Q_BATHVENT_IDX},
+    {"R_V_AutoEnable", 1, 0, Q_RESTVENT_IDX},
 
-    {"BathLightOnOff", 0, 0, Q_BATHLIGHT_IDX},
-    {"RestLightOnOff", 0, 0, Q_RESTLIGHT_IDX},
-    {"BathVentOnOff", 0, 0, Q_BATHVENT_IDX},
-    {"RestVentOnOff", 0, 0, Q_RESTVENT_IDX},
+    {"B_L_OnOff", 0, 0, Q_BATHLIGHT_IDX},
+    {"R_L_OnOff", 0, 0, Q_RESTLIGHT_IDX},
+    {"B_V_OnOff", 0, 0, Q_BATHVENT_IDX},
+    {"R_V_OnOff", 0, 0, Q_RESTVENT_IDX},
 
-    {"BathVentUseHum", 1, 0, Q_BATHVENT_IDX},
-    {"BathVentUseMove", 1, 0, Q_BATHVENT_IDX},
-    {"BathLightIrUse", 1, 0, Q_BATHLIGHT_IDX},
-    {"BathLightMvUse", 1, 0, Q_BATHLIGHT_IDX},
+    {"B_V_UseHum", 1, 0, Q_BATHVENT_IDX},
+    {"B_V_UseMove", 1, 0, Q_BATHVENT_IDX},
+    {"B_L_IrUse", 1, 0, Q_BATHLIGHT_IDX},
+    {"B_L_MvUse", 1, 0, Q_BATHLIGHT_IDX},
 
-    {"BathHumOnParm", 50, 1, Q_BATHVENT_IDX},
-    {"BathHumOffParm", 50, 1, Q_BATHVENT_IDX},
-    {"BathVentOnDelay", 1, 1, Q_BATHVENT_IDX},
-    {"BathVentOffDelay", 10, 1, Q_BATHVENT_IDX},
-    {"BathLightOnDelay", 0, 1, Q_BATHLIGHT_IDX},
-    {"BathLightOffDelay", 10, 1, Q_BATHLIGHT_IDX},
-    {"RestLightOnDist", 120, 1, Q_RESTLIGHT_IDX},
-    {"RestLightOffDist", 120, 1, Q_RESTLIGHT_IDX},
-    {"RestVentOnDelay", 1, 1, Q_RESTVENT_IDX},
-    {"RestVentOffDelay", 10, 1, Q_RESTVENT_IDX}};
+    {"B_HumOnParm", 50, 1, Q_BATHVENT_IDX},
+    {"B_HumOffParm", 50, 1, Q_BATHVENT_IDX},
+    {"B_V_OnDelay", 1, 1, Q_BATHVENT_IDX},
+    {"B_V_OffDelay", 10, 1, Q_BATHVENT_IDX},
+    {"B_L_OnDelay", 0, 1, Q_BATHLIGHT_IDX},
+    {"B_L_OffDelay", 10, 1, Q_BATHLIGHT_IDX},
+    {"R_L_OnDist", 120, 1, Q_RESTLIGHT_IDX},
+    {"R_L_OffDist", 120, 1, Q_RESTLIGHT_IDX},
+    {"R_V_OnDelay", 1, 1, Q_RESTVENT_IDX},
+    {"R_V_OffDelay", 10, 1, Q_RESTVENT_IDX}};
 
 /*
 *  таблица открытых ws сокетов

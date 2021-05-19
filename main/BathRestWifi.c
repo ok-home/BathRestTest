@@ -40,16 +40,13 @@ int read_wifiDataParm_from_socket(char *jsonstr)
     {
         return ESP_FAIL; // str no json
     }
-    ESP_LOGI("Data Parm", "Write %s name %s %s", jsonstr, name, DATA_PARM_TO_NVS);
     if (strcmp(name, DATA_PARM_TO_NVS) == 0) // записать данные в нфс
     {
-        ESP_LOGI("Data Parm", "Write %s", name);
         write_DataParm_to_nvs();
         return ESP_OK;
     }
     for (idx = 0; idx <= WIFI_TAB_RESTART + 1; idx++)
     {
-        printf("IDX %d\n",idx);
         if (idx > WIFI_TAB_RESTART)
         {
             return ESP_FAIL; // not found
@@ -59,7 +56,6 @@ int read_wifiDataParm_from_socket(char *jsonstr)
         if (strcmp(wifiDataParm[idx].name, name) == 0)
         {
             strcpy(wifiDataParm[idx].val, val);
-            printf("name %s\n",name);
         }
         xSemaphoreGive(wifiDataParmMutex);
 
@@ -124,7 +120,7 @@ int write_wifiDataParm_to_nvs()
     esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
     if (err != ESP_OK)
     {
-        printf("Error (%s) opening NVS handle!\n", esp_err_to_name(err));
+        ESP_LOGI("Write nvs","Error (%s) opening NVS handle!\n", esp_err_to_name(err));
         return err;
     }
     for (int idx = 0; idx < WIFI_TAB_RESTART; idx++)
@@ -136,7 +132,7 @@ int write_wifiDataParm_to_nvs()
         xSemaphoreGive(wifiDataParmMutex);
         if (err != ESP_OK) // при инициализации всегда ошибки
         {
-            printf("Error (%s) write NVS data!\n", esp_err_to_name(err));
+            ESP_LOGI("Write nvs","Error (%s) write NVS data!\n", esp_err_to_name(err));
         }
     }
     nvs_close(my_handle);
@@ -149,7 +145,7 @@ int write_DataParm_to_nvs()
     esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
     if (err != ESP_OK)
     {
-        printf("Error (%s) opening NVS handle!\n", esp_err_to_name(err));
+        ESP_LOGI("Write nvs","Error (%s) opening NVS handle!\n", esp_err_to_name(err));
         return err;
     }
     for (int idx = IDX_BATHVENTUSEHUM; idx < MAX_IDX_PARM_TABLE; idx++)
@@ -162,7 +158,7 @@ int write_DataParm_to_nvs()
         xSemaphoreGive(DataParmTableMutex);
         if (err != ESP_OK) // при инициализации всегда ошибки
         {
-            printf("Error (%s) write NVS data!\n", esp_err_to_name(err));
+            ESP_LOGI("Write nvs","Error (%s) write NVS data!\n", esp_err_to_name(err));
         }
     }
     nvs_close(my_handle);
