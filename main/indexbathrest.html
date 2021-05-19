@@ -94,6 +94,7 @@
 <body>
 	<div class="tab">
 		<button class="tablinks" onclick="openTab(event, 'Data')" id="defaultOpenTab">Данные</button>
+		<button class="tablinks" onclick="openTab(event, 'Param')">Параметры</button>
 		<button class="tablinks" onclick="openTab(event, 'OTA')">Обновление</button>
 		<button class="tablinks" onclick="openTab(event, 'WiFi')">Подключение</button>
 	</div>
@@ -196,6 +197,8 @@
 				</tbody>
 			</table>
 		</form>
+	</div>
+	<div id="Param" class="tabcontent">
 		<form action="AutoSetForm" enctype="text/plain" id="AutoSetId" method="get" name="AutoSetForm">&nbsp;
 			<table border="1" cellpadding="1" cellspacing="1" style="width:500px">
 				<tbody>
@@ -267,8 +270,10 @@
 				</tbody>
 			</table>
 		</form>
-	</div>
+		<button class="btn default" id="WriteDataParm">Сохранить параметры</button>
 
+	</div>
+	</div>
 	<div id="OTA" class="tabcontent">
 		<h3>Выберите файл обновления</h3>
 		<div id="OtaString"></div>
@@ -285,7 +290,8 @@
 		<label for="WiFi_STA_AP">Режим при загрузке</label>
 		<select id="WiFi_STA_AP" name="wifi_sta_ap">
 			<option value="wifi_sta">Подключение к сети</option>
-			<option value="wifi_ap">Точка доступа BathRestWifi_AP 192.168.4.1</BathRestWifi_AP></option>
+			<option value="wifi_ap">Точка доступа BathRestWifi_AP 192.168.4.1</BathRestWifi_AP>
+			</option>
 		</select>
 		<button class="btn default" id="Wifi_Upload">Записать данные WiFi </button>
 		<button class="btn default" id="Wifi_Restart">Рестарт</button>
@@ -724,7 +730,10 @@
 					socket.send(JSON.stringify({ name: sta_ap.name, msg: sta_ap.value }));
 					socket.send(JSON.stringify({ name: "Wifi_Restart", msg: "false" }));
 				}
-
+			});
+			document.getElementById("WriteDataParm").addEventListener("click", function (e) {
+				socket.send(JSON.stringify({ name: "WriteDatаParm", msg: "false" }));
+				console.log("WriteDataParm");
 			});
 
 			/*********************/

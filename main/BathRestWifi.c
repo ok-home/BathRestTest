@@ -32,16 +32,24 @@ int read_wifiDataParm_from_socket(char *jsonstr)
 {
     char name[32];
     char val[32];
-    memset(name,0,sizeof(name));
-    memset(val,0,sizeof(val));
-    
+    memset(name, 0, sizeof(name));
+    memset(val, 0, sizeof(val));
+
     int idx;
     if (json_to_str_parm(jsonstr, name, val) != ESP_OK)
     {
         return ESP_FAIL; // str no json
     }
+    ESP_LOGI("Data Parm", "Write %s name %s %s", jsonstr, name, DATA_PARM_TO_NVS);
+    if (strcmp(name, DATA_PARM_TO_NVS) == 0) // записать данные в нфс
+    {
+        ESP_LOGI("Data Parm", "Write %s", name);
+        write_DataParm_to_nvs();
+        return ESP_OK;
+    }
     for (idx = 0; idx <= WIFI_TAB_RESTART + 1; idx++)
     {
+        printf("IDX %d\n",idx);
         if (idx > WIFI_TAB_RESTART)
         {
             return ESP_FAIL; // not found
@@ -51,20 +59,21 @@ int read_wifiDataParm_from_socket(char *jsonstr)
         if (strcmp(wifiDataParm[idx].name, name) == 0)
         {
             strcpy(wifiDataParm[idx].val, val);
+            printf("name %s\n",name);
         }
         xSemaphoreGive(wifiDataParmMutex);
 
-        if (idx == WIFI_TAB_RESTART)
+        if ((idx == WIFI_TAB_RESTART)&&(strcmp(wifiDataParm[idx].name, name) == 0))
         {
-            if (strcmp(val, "true")==0)
+            if (strcmp(val, "true") == 0)
             {
                 // new wifi data, write to nvs & restart
                 ESP_LOGI("READ WIFI DATA FROM SOCKET", "RESTART");
                 if (write_wifiDataParm_to_nvs() != ESP_OK)
                     ESP_LOGI("READ WIFI DATA FROM SOCKET", "ERR RESTART");
-            esp_restart();
+                esp_restart();
             }
-            else if (strcmp(val, "false")==0)
+            else if (strcmp(val, "false") == 0)
             {
                 // new wifi data, write to nvs & send to socket
                 ESP_LOGI("READ WIFI DATA FROM SOCKET", "WRITE ONLY");
@@ -88,17 +97,19 @@ int read_wifiDataParm_from_nvs()
     esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
     if (err != ESP_OK)
     {
-        ESP_LOGI("READ NVS ","Error (%s) opening NVS handle!\n", esp_err_to_name(err));
+        ESP_LOGI("READ NVS ", "Error (%s) opening NVS handle!\n", esp_err_to_name(err));
         return err;
     }
     for (int idx = 0; idx < WIFI_TAB_RESTART; idx++)
     {
         xSemaphoreTake(wifiDataParmMutex, portMAX_DELAY);
+        xSemaphoreTake(NvsMutex, portMAX_DELAY);
         err = nvs_get_str(my_handle, wifiDataParm[idx].name, wifiDataParm[idx].val, &required_size);
+        xSemaphoreGive(NvsMutex);
         xSemaphoreGive(wifiDataParmMutex);
         if (err != ESP_OK) // при инициализации всегда ошибки
         {
-            ESP_LOGI("READ NVS ","Error (%s) read NVS data!\n", esp_err_to_name(err));
+            ESP_LOGI("READ NVS ", "Error (%s) read NVS data!\n", esp_err_to_name(err));
         }
     }
     nvs_close(my_handle);
@@ -119,11 +130,69 @@ int write_wifiDataParm_to_nvs()
     for (int idx = 0; idx < WIFI_TAB_RESTART; idx++)
     {
         xSemaphoreTake(wifiDataParmMutex, portMAX_DELAY);
+        xSemaphoreTake(NvsMutex, portMAX_DELAY);
         err = nvs_set_str(my_handle, wifiDataParm[idx].name, wifiDataParm[idx].val);
+        xSemaphoreGive(NvsMutex);
         xSemaphoreGive(wifiDataParmMutex);
         if (err != ESP_OK) // при инициализации всегда ошибки
         {
             printf("Error (%s) write NVS data!\n", esp_err_to_name(err));
+        }
+    }
+    nvs_close(my_handle);
+    return ESP_OK;
+}
+int write_DataParm_to_nvs()
+{
+    nvs_handle_t my_handle;
+    uint16_t data;
+    esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
+    if (err != ESP_OK)
+    {
+        printf("Error (%s) opening NVS handle!\n", esp_err_to_name(err));
+        return err;
+    }
+    for (int idx = IDX_BATHVENTUSEHUM; idx < MAX_IDX_PARM_TABLE; idx++)
+    {
+        xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
+        xSemaphoreTake(NvsMutex, portMAX_DELAY);
+        data = (uint16_t)DataParmTable[idx].val;
+        err = nvs_set_u16(my_handle, DataParmTable[idx].name, data);
+        xSemaphoreGive(NvsMutex);
+        xSemaphoreGive(DataParmTableMutex);
+        if (err != ESP_OK) // при инициализации всегда ошибки
+        {
+            printf("Error (%s) write NVS data!\n", esp_err_to_name(err));
+        }
+    }
+    nvs_close(my_handle);
+    return ESP_OK;
+}
+int read_DataParm_from_nvs()
+{
+    nvs_handle_t my_handle;
+    //size_t required_size;
+    uint16_t data;
+    esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
+    if (err != ESP_OK)
+    {
+        ESP_LOGI("READ DATA ", "Error (%s) opening NVS handle!\n", esp_err_to_name(err));
+        return err;
+    }
+    for (int idx = IDX_BATHVENTUSEHUM; idx < MAX_IDX_PARM_TABLE; idx++)
+    {
+        xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
+        xSemaphoreTake(NvsMutex, portMAX_DELAY);
+        err = nvs_get_u16(my_handle, DataParmTable[idx].name, &data);
+        if (err == ESP_OK)
+        {
+            DataParmTable[idx].val = (int)data;
+        }
+        xSemaphoreGive(NvsMutex);
+        xSemaphoreGive(DataParmTableMutex);
+        if (err != ESP_OK) // при инициализации всегда ошибки
+        {
+            ESP_LOGI("READ DATA ", "Error (%s) read NVS data!\n", esp_err_to_name(err));
         }
     }
     nvs_close(my_handle);

@@ -181,6 +181,8 @@ void RestVentControl(void *p);
 
 SemaphoreHandle_t DataParmTableMutex;
 SemaphoreHandle_t wifiDataParmMutex;
+SemaphoreHandle_t NvsMutex;
+
 
 
 /*
@@ -247,6 +249,8 @@ extern int RestLightDelay;
 #define WIFI_TAB_MODE_AP "wifi_ap"
 #define WIFI_TAB_MODE_STA "wifi_sta"
 
+#define DATA_PARM_TO_NVS "WriteDatаParm"
+
 
 /*
 *  wifi nvs definition
@@ -256,3 +260,5 @@ int read_wifiDataParm_from_socket(char *);
 int read_wifiDataParm_from_nvs();
 int write_wifiDataParm_to_nvs();
 void send_wifiDataParm_to_socket();
+int write_DataParm_to_nvs();
+int read_DataParm_from_nvs();

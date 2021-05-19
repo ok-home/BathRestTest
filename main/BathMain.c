@@ -9,7 +9,6 @@
 #include <esp_http_server.h>
 #include <mdns.h>
 #include "esp_private/system_internal.h"
-//#include "jsmn.h"
 
 #include "Bath.h"
 #include "BathInitGlobal.h"
@@ -339,6 +338,9 @@ void app_main(void)
 
     // read connection data from nvs
     read_wifiDataParm_from_nvs();
+    // read data parm
+    read_DataParm_from_nvs();
+
 
     // connect wifi - AP or STA
     while (1)
@@ -369,13 +371,7 @@ void app_main(void)
         }
     }
 
-    //initialize mDNS service
-    mdns_init();
-    //set hostname
-    mdns_hostname_set("ok-home");
-    //set default instance
-    mdns_instance_name_set("BathRest");
-
     /* Start the server for the first time */
     server = start_webserver();
+
 }

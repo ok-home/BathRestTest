@@ -305,6 +305,8 @@ void CreateTaskAndQueue()
     DataParmTableMutex = xSemaphoreCreateMutex();
     // ограничение доступа к таблице wifiDataParm
     wifiDataParmMutex = xSemaphoreCreateMutex();
+    // ограничение доступа к nvs
+    NvsMutex = xSemaphoreCreateMutex();
 
     // очереди передачи данных на контроллеры включения/выключения света/вентиляции
     BathLightSendToCtrl = xQueueCreate(2, sizeof(union QueueHwData));
