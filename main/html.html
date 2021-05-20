@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial;
+        }
+
+        /* Style the tab Navi */
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+        }
+
+        /* Style the buttons inside the tab */
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 14px;
+            transition: 0.3s;
+            font-size: 17px;
+        }
+
+        /* Change background color of buttons on hover */
+        .tab button:hover {
+            background-color: #ddd;
+        }
+
+        /* Create an active/current tablink class */
+        .tab button.active {
+            background-color: #ccc;
+        }
+
+        /* Style the tab content */
+        .tabcontent {
+            display: none;
+            padding: 14px 14px;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
+
+        /* Style inputs with type="text", select elements and textareas */
+        .logstr,
+        input[type=text],
+        input[type=file],
+        select,
+        textarea {
+            width: 100%;
+            /* Full width */
+            font-size: 14px;
+            padding: 14px 14px;
+            /* Some padding */
+            border: 1px solid #ccc;
+            /* Gray border */
+            border-radius: 4px;
+            /* Rounded borders */
+            box-sizing: border-box;
+            /* Make sure that padding and width stays in place */
+            margin-top: 6px;
+            /* Add a top margin */
+            margin-bottom: 6px;
+            /* Bottom margin */
+            resize: none;
+            /* vertical*/
+            /* Allow the user to vertically resize the textarea (not horizontally) */
+        }
+
+        .btn {
+            border: none;
+            color: white;
+            padding: 4px 14px;
+            font-size: 14px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .default {
+            background-color: #e7e7e7;
+            color: black;
+        }
+
+        /* Gray */
+        .default:hover {
+            background: #ddd;
+        }
+
+        table {
+            border: 1px solid grey;
+        }
+
+        /* границы ячеек первого ряда таблицы */
+        th {
+            border: 1px solid grey;
+        }
+
+        /* границы ячеек тела таблицы */
+        td {
+            border: 1px solid grey;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="tab">
+        <!-- верхнее меню -->
+        <button class="tablinks" onclick="openTab(event, 'Data')" id="defaultOpenTab">Данные</button>
+        <button class="tablinks" onclick="openTab(event, 'Param')">Параметры</button>
+        <button class="tablinks" onclick="openTab(event, 'OTA')">Обновление</button>
+        <button class="tablinks" onclick="openTab(event, 'WiFi')">Подключение</button>
+
+        <script> /* js меню */
+            function openTab(evt, tabName) {
+                var i, tabcontent, tablinks;
+                tabcontent = document.getElementsByClassName("tabcontent");
+                for (i = 0; i < tabcontent.length; i++) {
+                    tabcontent[i].style.display = "none";
+                }
+                tablinks = document.getElementsByClassName("tablinks");
+                for (i = 0; i < tablinks.length; i++) {
+                    tablinks[i].className = tablinks[i].className.replace(" active", "");
+                }
+                document.getElementById(tabName).style.display = "block";
+                evt.currentTarget.className += " active";
+            }
+        </script>
+
+    </div>
+
+    <div id="Data" class="tabcontent">
+        <h3>Данные</h3>
+        <table>
+            <caption>Перечень продуктов</caption>
+            <tr>
+                <th>№ п/п</th>
+                <th>Наименование товара</th>
+                <th>Ед. изм.</th>
+                <th>Количество</th>
+                <th>Цена за ед. изм., руб.</th>
+                <th>Стоимость, руб.</th>
+            </tr>
+            <tr>
+                <td>1.</td>
+                <td><div id="B_L_Status" name="b-l-name" b-l-stat  4566544654 > еееееее </div></td>
+                <td>кг</td>
+                <td>15,20</td>
+                <td>69,00</td>
+                <td>1048,80</td>
+            </tr>
+            <tr>
+                <td>2.</td>
+                <td>Огурцы свежие</td>
+                <td>кг</td>
+                <td>2,50</td>
+                <td>48,00</td>
+                <td>120,00</td>
+            </tr>
+            <tr>
+                <td colspan="5" style="text-align:right">ИТОГО:</td>
+                <td>1168,80</td>
+            </tr>
+        </table>
+    </div>
+    <div id="Param" class="tabcontent">
+        <h3>Параметры</h3>
+        <button class="btn default" id="WriteDataParm">Сохранить параметры</button>
+        <script>
+            document.getElementById("WriteDataParm").addEventListener("click", function (e) {
+                socket.send(JSON.stringify({ name: "WriteDatаParm", msg: "false" }));
+            });
+        </script>
+    </div>
+    <div id="OTA" class="tabcontent">
+        <h3>Выберите файл обновления</h3>
+        <div id="OtaString" class="logstr"></div>
+        <input type="file" id="files" name="file" />
+        <button class="btn default" id="OTA_start">Обновить ПО</button>
+
+        <script id="worker1" type="javascript/worker">
+
+		var wsHost = 0;
+		self.onmessage = function(e) {
+
+		if(wsHost == 0)
+		{
+		if(e.data.indexOf("ws") != -1)
+			{
+			wsHost = e.data;	
+			}
+			return;
+		}
+
+		var otasocket = new WebSocket(wsHost);
+		//var otasocket = new WebSocket("ws://echo.websocket.org");
+
+		otasocket.binaryType = 'blob';
+
+		var file = e.data;
+		var size = file.size;
+		var reader = new FileReaderSync();
+		var start;
+		var end;
+		var offset = 1024;
+		var data =  new Uint8Array(offset);
+
+		otasocket.onopen = function () {
+			otasocket.send("start");
+			
+		}
+		otasocket.onclose = function (event) {
+			if (end == size)
+				postMessage("transfer END - Restart");
+			else
+				postMessage("transfer ABORTED - ERROR");
+
+		}
+		otasocket.onerror = function (event) {
+			};
+				
+		otasocket.onmessage = function (event) {
+
+				switch(event.data){
+				case "err":
+					postMessage("transfer ERR");
+					otasocket.close();
+					break;
+				case "end":
+					postMessage("transfer end");
+					otasocket.close();
+					break;
+				case "start":
+					postMessage("transfer start");
+					start = 0;
+					end = start+offset;
+					if ( end > size )
+						end = size;
+					blob = file.slice(start,end);
+					//data = reader.readAsBinaryString(blob);
+					data = reader.readAsArrayBuffer(blob);
+					postMessage("transfer from "+start+" to "+end);
+					otasocket.send(data);
+					break;
+				case "next":
+				//default :
+					if(end == size)
+					{
+						otasocket.send("end");
+						break;
+					}
+					start = end;
+					end = start+offset;
+					if ( end > size )
+					end = size;
+					blob = file.slice(start,end);
+					//data = reader.readAsBinaryString(blob);
+					data = reader.readAsArrayBuffer(blob);
+					postMessage("transfer from "+start+" to "+end );
+					otasocket.send(data);
+			}
+			}
+		  };
+	</script>
+        <script> /* load ota data */
+            var bb = new Blob([document.querySelector('#worker1').textContent]);
+            var worker = new Worker(window.webkitURL.createObjectURL(bb));
+            var otastr = document.getElementById("OtaString");
+
+            worker.postMessage("ws://" + document.location.host + "/otaws");
+
+            worker.onmessage = function (e) {
+                otastr.innerHTML = e.data;
+            }
+
+            const fileSelector = document.getElementById('files');
+            var fileList;
+            fileSelector.addEventListener('change', (event) => {
+                fileList = event.target.files;
+            });
+
+            document.getElementById("OTA_start").addEventListener("click", function (e) {
+                if (fileList !== undefined) {
+                    if (fileList[0] !== undefined) {
+                        otastr.innerHTML = "Обновление начато";
+                        worker.postMessage(fileList[0]);
+                        //fileList = 0;
+                    }
+                    else {
+                        otastr.innerHTML = "Файл обновления не выбран";
+                    }
+                }
+                else {
+                    otastr.innerHTML = "Файл обновления не выбран";
+                }
+            });
+
+        </script>
+    </div>
+    <div id="WiFi" class="tabcontent">
+        <!--WIFI обновление-->
+        <h3>Подключение WiFi</h3>
+        <label for="WiFi_SSID">Имя сети</label>
+        <input type="text" id="WiFi_SSID" name="wifi_ssid" placeholder="SSID..">
+        <label for="WiFi_Pass">Пароль</label>
+        <input type="text" id="WiFi_Pass" name="wifi_pass" placeholder="Pass..">
+        <label for="WiFi_STA_AP">Режим при загрузке</label>
+        <select id="WiFi_STA_AP" name="wifi_sta_ap">
+            <option value="wifi_sta">Подключение к сети</option>
+            <option value="wifi_ap">Точка доступа BathRestWifi_AP 192.168.4.1</option>
+        </select>
+        <button class="btn default" id="Wifi_Upload">Записать данные WiFi </button>
+        <button class="btn default" id="Wifi_Restart">Рестарт</button>
+
+        <script>/*WIFI обновление*/
+            function check_Wifi_SSID_Pass() {
+                var ssid = document.getElementById("WiFi_SSID");
+                if (ssid.value.length == 0) {
+                    ssid.placeholder = "не может быть пустым";
+                    ssid.focus();
+                    return false;
+                }
+                var pass = document.getElementById("WiFi_Pass");
+                if (pass.value.length < 8) {
+                    pass.value = "";
+                    pass.placeholder = "Пароль должен быть больше 8 символов";
+                    pass.focus();
+                    return false;
+                }
+                return true;
+            }
+            document.getElementById("WiFi_SSID").addEventListener("change", function (e) {
+                if (e.target.value.length == 0) {
+                    e.target.placeholder = "не может быть пустым";
+                    e.target.focus();
+                }
+            });
+            document.getElementById("WiFi_Pass").addEventListener("change", function (e) {
+                if (e.target.value.length < 8) {
+                    e.target.value = '';
+                    e.target.placeholder = "Пароль должен быть больше 8 символов";
+                    e.target.focus();
+                }
+            });
+            document.getElementById("Wifi_Restart").addEventListener("click", function (e) {
+                var ssid = document.getElementById("WiFi_SSID");
+                var pass = document.getElementById("WiFi_Pass");
+                var sta_ap = document.getElementById("WiFi_STA_AP");
+                if (check_Wifi_SSID_Pass()) {
+                    socket.send(JSON.stringify({ name: ssid.name, msg: ssid.value }));
+                    socket.send(JSON.stringify({ name: pass.name, msg: pass.value }));
+                    socket.send(JSON.stringify({ name: sta_ap.name, msg: sta_ap.value }));
+                    socket.send(JSON.stringify({ name: "Wifi_Restart", msg: "true" }));
+                }
+            });
+            document.getElementById("Wifi_Upload").addEventListener("click", function (e) {
+                var ssid = document.getElementById("WiFi_SSID");
+                var pass = document.getElementById("WiFi_Pass");
+                var sta_ap = document.getElementById("WiFi_STA_AP");
+                if (check_Wifi_SSID_Pass()) {
+                    socket.send(JSON.stringify({ name: ssid.name, msg: ssid.value }));
+                    socket.send(JSON.stringify({ name: pass.name, msg: pass.value }));
+                    socket.send(JSON.stringify({ name: sta_ap.name, msg: sta_ap.value }));
+                    socket.send(JSON.stringify({ name: "Wifi_Restart", msg: "false" }));
+                }
+            });
+        </script>
+    </div>
+
+    <script>/* common script*/
+        // Get the element with id="defaultOpen" and click on it
+        document.getElementById("defaultOpenTab").click();
+    </script>
+
+</body>
+
+</html>
