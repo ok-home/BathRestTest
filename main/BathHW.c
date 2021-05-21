@@ -420,6 +420,7 @@ void CheckDistMove(void *p)
         //ESP_LOGI("DIST", "cm %d sender %d", dist, ud.DistData.sender);
         xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
         distOn = DataParmTable[IDX_RESTLIGHTONDIST].val;
+        lightOnOff  = DataParmTable[IDX_RESTLIGHTSTATUS].val;
         DataParmTable[IDX_DISTVOL].val = (int)dist;
         xSemaphoreGive(DataParmTableMutex);
         if (dist < distOn)
@@ -473,6 +474,7 @@ void CheckBathHum(void *p)
         xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
         humOn = DataParmTable[IDX_BATHHUMONPARM].val;
         humOff = DataParmTable[IDX_BATHHUMOFFPARM].val;
+        ventOnOff = DataParmTable[IDX_BATHVENTSTATUS].val;
         DataParmTable[IDX_HUMVOL].val = (int)hum;
         if (humOn <= humOff)
         {
@@ -525,6 +527,7 @@ void CheckBathLightOnOff(void *p)
         xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
         ventOnDelay = DataParmTable[IDX_BATHVENTONDELAY].val;
         ventOffDelay = DataParmTable[IDX_BATHVENTOFFDELAY].val;
+        ventOnOff = DataParmTable[IDX_BATHVENTSTATUS].val;
         xSemaphoreGive(DataParmTableMutex);
         if (timeout == pdTRUE) // есть данные в очереди
         {
@@ -580,6 +583,7 @@ void CheckRestLightOnOff(void *p)
         xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
         ventOnDelay = DataParmTable[IDX_RESTVENTONDELAY].val;
         ventOffDelay = DataParmTable[IDX_RESTVENTOFFDELAY].val;
+        ventOnOff = DataParmTable[IDX_BATHVENTSTATUS].val;
         xSemaphoreGive(DataParmTableMutex);
         if (timeout == pdTRUE) // есть данные в очереди
         {

@@ -217,9 +217,9 @@
 		}
 		otasocket.onclose = function (event) {
 			if (end == size)
-				postMessage("transfer END - Restart");
+				postMessage("обновление завершено - перезагрузка");
 			else
-				postMessage("transfer ABORTED - ERROR");
+				postMessage("обновление прервано - ошибка");
 
 		}
 		otasocket.onerror = function (event) {
@@ -229,15 +229,15 @@
 
 				switch(event.data){
 				case "err":
-					postMessage("transfer ERR");
+					postMessage("ошибка при передаче обновления");
 					otasocket.close();
 					break;
 				case "end":
-					postMessage("transfer end");
+					postMessage("передача окончена передано "+end " из "+size);
 					otasocket.close();
 					break;
 				case "start":
-					postMessage("transfer start");
+					postMessage("передача начата размер обновления "+size);
 					start = 0;
 					end = start+offset;
 					if ( end > size )
@@ -245,7 +245,7 @@
 					blob = file.slice(start,end);
 					//data = reader.readAsBinaryString(blob);
 					data = reader.readAsArrayBuffer(blob);
-					postMessage("transfer from "+start+" to "+end);
+					postMessage("передается "+start+" из "+size);
 					otasocket.send(data);
 					break;
 				case "next":
@@ -262,7 +262,7 @@
 					blob = file.slice(start,end);
 					//data = reader.readAsBinaryString(blob);
 					data = reader.readAsArrayBuffer(blob);
-					postMessage("transfer from "+start+" to "+end );
+					postMessage("передается "+start+" из "+size );
 					otasocket.send(data);
 			}
 			}
