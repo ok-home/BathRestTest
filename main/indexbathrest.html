@@ -426,7 +426,7 @@
 		MaxDelay = 300;
 		MinDelay = 0;
 		MaxDistance = 400;
-		MinDistance = 50;
+		MinDistance = 10;
 
 		EnableHandOnOff();
 		EnableInputParm();
@@ -558,33 +558,33 @@
 			/*StatusForm CheckBox*/
 			document.StatusForm.B_L_AutoEnable.addEventListener("click", function (e) {
 				EnableHandOnOff();
-				SendPairCheckBox(e)
+				SendPairCheckBox(e);
 			});
 			document.StatusForm.B_L_OnOff.addEventListener("click", function (e) { SendPairCheckBox(e) });
 			document.StatusForm.R_L_AutoEnable.addEventListener("click", function (e) {
 				EnableHandOnOff();
-				SendPairCheckBox(e)
+				SendPairCheckBox(e);
 			});
 			document.StatusForm.R_L_OnOff.addEventListener("click", function (e) { SendPairCheckBox(e) });
 			document.StatusForm.B_V_AutoEnable.addEventListener("click", function (e) {
 				EnableHandOnOff();
-				SendPairCheckBox(e)
+				SendPairCheckBox(e);
 			});
 			document.StatusForm.B_V_OnOff.addEventListener("click", function (e) { SendPairCheckBox(e) });
 			document.StatusForm.R_V_AutoEnable.addEventListener("click", function (e) {
 				EnableHandOnOff();
-				SendPairCheckBox(e)
+				SendPairCheckBox(e);
 			});
 			document.StatusForm.R_V_OnOff.addEventListener("click", function (e) { SendPairCheckBox(e) });
 
 			/* AutoSetForm CheckBox*/
 			document.AutoSetForm.B_V_UseHum.addEventListener("click", function (e) {
 				EnableInputParm();
-				SendPairCheckBox(e)
+				SendPairCheckBox(e);
 			});
 			document.AutoSetForm.B_V_UseMove.addEventListener("click", function (e) {
 				EnableInputParm();
-				SendPairCheckBox(e)
+				SendPairCheckBox(e);
 			});
 			document.AutoSetForm.B_L_IrUse.addEventListener("click", function (e) { SendPairCheckBox(e) });
 			document.AutoSetForm.B_L_MvUse.addEventListener("click", function (e) { SendPairCheckBox(e) });

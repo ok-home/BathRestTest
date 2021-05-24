@@ -92,18 +92,24 @@
             background: #ddd;
         }
 
-        table {
-            border: 1px solid grey;
+        .table {
+            width: 100%;
+            margin-bottom: 20px;
+            border: 1px solid #dddddd;
+            border-collapse: collapse;
         }
 
-        /* границы ячеек первого ряда таблицы */
-        th {
-            border: 1px solid grey;
+        .table th {
+            font-weight: bold;
+            padding: 5px;
+            background: #efefef;
+            border: 1px solid #dddddd;
         }
 
-        /* границы ячеек тела таблицы */
-        td {
-            border: 1px solid grey;
+        .table td {
+            border: 1px solid #dddddd;
+            padding: 5px;
+            text-align:center
         }
     </style>
 </head>
@@ -136,42 +142,169 @@
     </div>
 
     <div id="Data" class="tabcontent">
-        <h3>Данные</h3>
-        <table>
-            <caption>Перечень продуктов</caption>
-            <tr>
-                <th>№ п/п</th>
-                <th>Наименование товара</th>
-                <th>Ед. изм.</th>
-                <th>Количество</th>
-                <th>Цена за ед. изм., руб.</th>
-                <th>Стоимость, руб.</th>
-            </tr>
-            <tr>
-                <td>1.</td>
-                <td><div id="B_L_Status" name="b-l-name" b-l-stat  4566544654 > еееееее </div></td>
-                <td>кг</td>
-                <td>15,20</td>
-                <td>69,00</td>
-                <td>1048,80</td>
-            </tr>
-            <tr>
-                <td>2.</td>
-                <td>Огурцы свежие</td>
-                <td>кг</td>
-                <td>2,50</td>
-                <td>48,00</td>
-                <td>120,00</td>
-            </tr>
-            <tr>
-                <td colspan="5" style="text-align:right">ИТОГО:</td>
-                <td>1168,80</td>
-            </tr>
+        <table class="table">
+            <tbody>
+                <tr>
+                    <th colspan="2">Данные Датчиков</th>
+                </tr>
+                <tr>
+                    <td>Температура</td>
+                    <td>
+                        <div id="TempVol" ></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td >Влажность</td>
+                    <td>
+                        <div id="HumVol" ></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td >Расстояние</td>
+                    <td>
+                        <div id="DistVol" ></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td >Ик Датчик Движения</td>
+                    <td>
+                        <div id="IrVol" ></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td >Мв Датчик Движения</td>
+                    <td>
+                        <div id="MvVol" ></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" >
+                        <div id="EchoString" class="logstr"></div>
+                    </td>
+                </tr>
+            </tbody>
         </table>
+        <form action="DisplayStatus" enctype="text/plain" id="Status" method="get" name="StatusForm">
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <th></th>
+                        <th >Состояние</th>
+                        <th>Автомат</th>
+                        <th >Ручное включение</th>
+                    </tr>
+                    <tr>
+                        <td>Свет Ванная</td>
+                        <td>
+                            <div id="B_L_Status" > </div>
+                        </td>
+                        <td ><input checked="checked" name="B_L_AutoEnable" type="checkbox"
+                                value="On">&nbsp;Разрешить</td>
+                        <td ><input checked="checked" name="B_L_OnOff" type="checkbox"
+                                value="On">&nbsp;Вкл/Выкл</td>
+                    </tr>
+                    <tr>
+                        <td>Свет Туалет</td>
+                        <td>
+                            <div id="R_L_Status" > </div>
+                        </td>
+                        <td ><input checked="checked" name="R_L_AutoEnable" type="checkbox"
+                                value="On">&nbsp;Разрешить</td>
+                        <td ><input checked="checked" name="R_L_OnOff" type="checkbox"
+                                value="On">&nbsp;Вкл/Выкл</td>
+                    </tr>
+                    <tr>
+                        <td>Вентиляция Ванная</td>
+                        <td>
+                            <div id="B_V_Status" > </div>
+                        </td>
+                        <td ><input checked="checked" name="B_V_AutoEnable" type="checkbox"
+                                value="On">&nbsp;Разрешить</td>
+                        <td ><input checked="checked" name="B_V_OnOff" type="checkbox"
+                                value="On">&nbsp;Вкл/Выкл</td>
+                    </tr>
+                    <tr>
+                        <td>Вентиляция Туалет</td>
+                        <td>
+                            <div id="R_V_Status" > </div>
+                        </td>
+                        <td ><input checked="checked" name="R_V_AutoEnable" type="checkbox"
+                                value="On">&nbsp;Разрешить</td>
+                        <td ><input checked="checked" name="R_V_OnOff" type="checkbox"
+                                value="On">&nbsp;Вкл/Выкл</td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
     </div>
     <div id="Param" class="tabcontent">
-        <h3>Параметры</h3>
-        <button class="btn default" id="WriteDataParm">Сохранить параметры</button>
+		<form action="AutoSetForm" enctype="text/plain" id="AutoSetId" method="get" name="AutoSetForm">&nbsp;
+			<table class="table">
+				<tbody>
+					<tr>
+						<th colspan="3" >Настройка параметров</th>
+					</tr>
+					<tr>
+						<th colspan="3">Вентиляция Ванна Влажность</th>
+						
+					</tr>
+					<tr>
+						<td><input checked="checked"
+                            name="B_V_UseHum" type="checkbox" />Разрешить</td>
+						<td >Включение больше<input name="B_HumOnParm" type="text"
+								value="70"  /></td>
+						<td >Выключение меньше<input name="B_HumOffParm" type="text"
+								value="50"  />
+						</td>
+					</tr>
+					<tr>
+						<th colspan="3">Вентиляция Ванна Присутствие</th>
+					</tr>
+					<tr>
+						<td><input checked="checked"
+                            name="B_V_UseMove" type="checkbox" />Разрешить</td>
+						<td >Задержка Включения<input name="B_V_OnDelay" type="text"
+								value="0"  /></td>
+						<td >Задержка выключения<input name="B_V_OffDelay" type="text"
+								value="120"  /></td>
+					</tr>
+					<tr>
+						<th colspan="3" >Датчики движения Ванная</th>
+					</tr>
+					<tr>
+						<td>
+                            <input checked="checked" name="B_L_IrUse" type="checkbox" />Разрешить ИК
+                            <p></p>
+                            <input checked="checked" name="B_L_MvUse" type="checkbox" />Разрешить МВ 
+                        </td>
+                        <td>
+                            Одновременно/по любому датчику <input checked="checked" name="IrMvAnyAll" type="checkbox" />
+                        </td>    
+						<td >Задержка Выключения<input name="B_L_OffDelay" type="text"
+								value="120" /></td>
+					</tr>
+					<tr>
+						<th colspan="3" >Туалет</th>
+					</tr>
+					<tr>
+						<td>Свет</td>
+						<td >Расстояние Включения Света<input name="R_L_OnDist" type="text"
+								value="200" /></td>
+						<td >Задержка Выключения Света<input name="R_L_Delay" type="text"
+								value="250" /></td>
+					</tr>
+					<tr>
+						<td>Вентиляция</td>
+						<td >Задержка включения Вентиляции<input name="R_V_OnDelay" type="text"
+								value="30" /></td>
+						<td >Задержка Выключения Вентиляции <input name="R_V_OffDelay" type="text"
+								value="120" /></td>
+					</tr>
+				</tbody>
+			</table>
+		</form>
+		<button class="btn default" id="WriteDataParm">Сохранить параметры</button>
+
         <script>
             document.getElementById("WriteDataParm").addEventListener("click", function (e) {
                 socket.send(JSON.stringify({ name: "WriteDatаParm", msg: "false" }));
@@ -186,88 +319,89 @@
 
         <script id="worker1" type="javascript/worker">
 
-		var wsHost = 0;
-		self.onmessage = function(e) {
+            var wsHost = 0;
+            self.onmessage = function(e) {
+    
+            if(wsHost == 0)
+            {
+            if(e.data.indexOf("ws") != -1)
+                {
+                wsHost = e.data;	
+                }
+                return;
+            }
+    
+            var otasocket = new WebSocket(wsHost);
+            //var otasocket = new WebSocket("ws://echo.websocket.org");
+    
+            otasocket.binaryType = 'blob';
+    
+            var file = e.data;
+            var size = file.size;
+            var reader = new FileReaderSync();
+            var start;
+            var end;
+            var offset = 1024;
+            var data =  new Uint8Array(offset);
+    
+            otasocket.onopen = function () {
+                otasocket.send("start");
+                
+            }
+            otasocket.onclose = function (event) {
+                if (end == size)
+                    postMessage("transfer END - Restart");
+                else
+                    postMessage("transfer ABORTED - ERROR");
+    
+            }
+            otasocket.onerror = function (event) {
+                };
+                    
+            otasocket.onmessage = function (event) {
+    
+                    switch(event.data){
+                    case "err":
+                        postMessage("transfer ERR");
+                        otasocket.close();
+                        break;
+                    case "end":
+                        postMessage("transfer end");
+                        otasocket.close();
+                        break;
+                    case "start":
+                        postMessage("transfer start");
+                        start = 0;
+                        end = start+offset;
+                        if ( end > size )
+                            end = size;
+                        blob = file.slice(start,end);
+                        //data = reader.readAsBinaryString(blob);
+                        data = reader.readAsArrayBuffer(blob);
+                        postMessage("transfer from "+start+" to "+end);
+                        otasocket.send(data);
+                        break;
+                    case "next":
+                    //default :
+                        if(end == size)
+                        {
+                            otasocket.send("end");
+                            break;
+                        }
+                        start = end;
+                        end = start+offset;
+                        if ( end > size )
+                        end = size;
+                        blob = file.slice(start,end);
+                        //data = reader.readAsBinaryString(blob);
+                        data = reader.readAsArrayBuffer(blob);
+                        postMessage("transfer from "+start+" to "+end );
+                        otasocket.send(data);
+                }
+                }
+              };
+        </script>
 
-		if(wsHost == 0)
-		{
-		if(e.data.indexOf("ws") != -1)
-			{
-			wsHost = e.data;	
-			}
-			return;
-		}
-
-		var otasocket = new WebSocket(wsHost);
-		//var otasocket = new WebSocket("ws://echo.websocket.org");
-
-		otasocket.binaryType = 'blob';
-
-		var file = e.data;
-		var size = file.size;
-		var reader = new FileReaderSync();
-		var start;
-		var end;
-		var offset = 1024;
-		var data =  new Uint8Array(offset);
-
-		otasocket.onopen = function () {
-			otasocket.send("start");
-			
-		}
-		otasocket.onclose = function (event) {
-			if (end == size)
-				postMessage("обновление завершено - перезагрузка");
-			else
-				postMessage("обновление прервано - ошибка");
-
-		}
-		otasocket.onerror = function (event) {
-			};
-				
-		otasocket.onmessage = function (event) {
-
-				switch(event.data){
-				case "err":
-					postMessage("ошибка при передаче обновления");
-					otasocket.close();
-					break;
-				case "end":
-					postMessage("передача окончена передано "+end " из "+size);
-					otasocket.close();
-					break;
-				case "start":
-					postMessage("передача начата размер обновления "+size);
-					start = 0;
-					end = start+offset;
-					if ( end > size )
-						end = size;
-					blob = file.slice(start,end);
-					//data = reader.readAsBinaryString(blob);
-					data = reader.readAsArrayBuffer(blob);
-					postMessage("передается "+start+" из "+size);
-					otasocket.send(data);
-					break;
-				case "next":
-				//default :
-					if(end == size)
-					{
-						otasocket.send("end");
-						break;
-					}
-					start = end;
-					end = start+offset;
-					if ( end > size )
-					end = size;
-					blob = file.slice(start,end);
-					//data = reader.readAsBinaryString(blob);
-					data = reader.readAsArrayBuffer(blob);
-					postMessage("передается "+start+" из "+size );
-					otasocket.send(data);
-			}
-			}
-		  };
-	</script>
         <script> /* load ota data */
             var bb = new Blob([document.querySelector('#worker1').textContent]);
             var worker = new Worker(window.webkitURL.createObjectURL(bb));
@@ -374,6 +508,14 @@
     </div>
 
     <script>/* common script*/
+
+    /*data range*/
+		MaxHum = 90;
+		MinHum = 10;
+		MaxDelay = 300;
+		MinDelay = 0;
+		MaxDistance = 400;
+		MinDistance = 10;
         // Get the element with id="defaultOpen" and click on it
         document.getElementById("defaultOpenTab").click();
     </script>

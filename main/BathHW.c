@@ -583,7 +583,7 @@ void CheckRestLightOnOff(void *p)
         xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
         ventOnDelay = DataParmTable[IDX_RESTVENTONDELAY].val;
         ventOffDelay = DataParmTable[IDX_RESTVENTOFFDELAY].val;
-        ventOnOff = DataParmTable[IDX_BATHVENTSTATUS].val;
+        ventOnOff = DataParmTable[IDX_RESTVENTSTATUS].val;
         xSemaphoreGive(DataParmTableMutex);
         if (timeout == pdTRUE) // есть данные в очереди
         {
