@@ -137,7 +137,6 @@ inline void AddSocket(struct WsDataToSend req)
 // убрать сокет из таблицы сокетов
 inline void RemoveSocket(struct WsDataToSend req)
 {
-
     for (int i = 0; i < CONFIG_LWIP_MAX_SOCKETS; i++)
         if (SocketArgDb[i].fd == req.fd)
         { // сокет закрыт - убрать из таблицы
@@ -151,7 +150,7 @@ inline void SendSocket(struct WsDataToSend req)
 {
     httpd_ws_frame_t ws_pkt;
     uint8_t buff[64];
-    memset(buff,0,sizeof(buff));
+    memset(buff, 0, sizeof(buff));
     memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
     if (req.idx < MAX_IDX_PARM_TABLE)
     {
@@ -170,8 +169,10 @@ inline void SendSocket(struct WsDataToSend req)
     if (httpd_ws_send_frame_async(req.hd, req.fd, &ws_pkt) != ESP_OK)
     {
         // отправлено с ошибкой - убрать сокет из таблицы сокетов
-
-        RemoveSocket(req);
+        if (req.fd != 0)
+        {
+            RemoveSocket(req);
+        }
     }
 }
 /*
@@ -250,7 +251,7 @@ void SendWsData(void *p)
                 // всю таблицу параметров wifi в этот сокет
                 for (int p = 0; p < WIFI_TAB_RESTART; p++)
                 {
-                    req.idx = p+WIFI_TAB_OFFSET;
+                    req.idx = p + WIFI_TAB_OFFSET;
                     SendSocket(req);
                 }
 

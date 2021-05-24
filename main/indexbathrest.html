@@ -2,787 +2,806 @@
 <html lang="en">
 
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<style>
-		body {
-			font-family: Arial;
-		}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial;
+        }
 
-		/* Style the tab */
-		.tab {
-			overflow: hidden;
-			border: 1px solid #ccc;
-			background-color: #f1f1f1;
-		}
+        /* Style the tab Navi */
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+        }
 
-		/* Style the buttons inside the tab */
-		.tab button {
-			background-color: inherit;
-			float: left;
-			border: none;
-			outline: none;
-			cursor: pointer;
-			padding: 14px 14px;
-			transition: 0.3s;
-			font-size: 17px;
-		}
+        /* Style the buttons inside the tab */
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 14px;
+            transition: 0.3s;
+            font-size: 17px;
+        }
 
-		/* Change background color of buttons on hover */
-		.tab button:hover {
-			background-color: #ddd;
-		}
+        /* Change background color of buttons on hover */
+        .tab button:hover {
+            background-color: #ddd;
+        }
 
-		/* Create an active/current tablink class */
-		.tab button.active {
-			background-color: #ccc;
-		}
+        /* Create an active/current tablink class */
+        .tab button.active {
+            background-color: #ccc;
+        }
 
-		/* Style the tab content */
-		.tabcontent {
-			display: none;
-			padding: 14px 14px;
-			border: 1px solid #ccc;
-			border-top: none;
-		}
+        /* Style the tab content */
+        .tabcontent {
+            display: none;
+            padding: 14px 14px;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
 
-		/* Style inputs with type="text", select elements and textareas */
-		input[type=text],
-		input[type=file],
-		select,
-		textarea {
-			width: 100%;
-			/* Full width */
-			font-size: 14px;
-			padding: 14px 14px;
-			/* Some padding */
-			border: 1px solid #ccc;
-			/* Gray border */
-			border-radius: 4px;
-			/* Rounded borders */
-			box-sizing: border-box;
-			/* Make sure that padding and width stays in place */
-			margin-top: 6px;
-			/* Add a top margin */
-			margin-bottom: 6px;
-			/* Bottom margin */
-			resize: vertical
-				/* Allow the user to vertically resize the textarea (not horizontally) */
-		}
+        /* Style inputs with type="text", select elements and textareas */
+        .logstr,
+        input[type=text],
+        input[type=file],
+        select,
+        textarea {
+            width: 100%;
+            /* Full width */
+            font-size: 14px;
+            padding: 14px 14px;
+            /* Some padding */
+            border: 1px solid #ccc;
+            /* Gray border */
+            border-radius: 4px;
+            /* Rounded borders */
+            box-sizing: border-box;
+            /* Make sure that padding and width stays in place */
+            margin-top: 6px;
+            /* Add a top margin */
+            margin-bottom: 6px;
+            /* Bottom margin */
+            resize: none;
+            /* vertical*/
+            /* Allow the user to vertically resize the textarea (not horizontally) */
+        }
 
-		.btn {
-			border: none;
-			color: white;
-			padding: 14px 14px;
-			font-size: 14px;
-			cursor: pointer;
-		}
+        .btn {
+            border: none;
+            color: white;
+            padding: 4px 14px;
+            font-size: 14px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
 
-		.default {
-			background-color: #e7e7e7;
-			color: black;
-		}
+        .default {
+            background-color: #e7e7e7;
+            color: black;
+        }
 
-		/* Gray */
-		.default:hover {
-			background: #ddd;
-		}
-	</style>
+        /* Gray */
+        .default:hover {
+            background: #ddd;
+        }
 
+        .table {
+            width: 100%;
+            margin-bottom: 20px;
+            border: 1px solid #dddddd;
+            border-collapse: collapse;
+        }
+
+        .table th {
+            font-weight: bold;
+            padding: 5px;
+            background: #efefef;
+            border: 1px solid #dddddd;
+        }
+
+        .table td {
+            border: 1px solid #dddddd;
+            padding: 5px;
+            text-align: center
+        }
+    </style>
 </head>
 
 <body>
-	<div class="tab">
-		<button class="tablinks" onclick="openTab(event, 'Data')" id="defaultOpenTab">Данные</button>
-		<button class="tablinks" onclick="openTab(event, 'Param')">Параметры</button>
-		<button class="tablinks" onclick="openTab(event, 'OTA')">Обновление</button>
-		<button class="tablinks" onclick="openTab(event, 'WiFi')">Подключение</button>
-	</div>
+    <div class="tab">
+        <!-- верхнее меню -->
+        <button class="tablinks" onclick="openTab(event, 'Data')" id="defaultOpenTab">Данные</button>
+        <button class="tablinks" onclick="openTab(event, 'Param')">Параметры</button>
+        <button class="tablinks" onclick="openTab(event, 'OTA')">Обновление</button>
+        <button class="tablinks" onclick="openTab(event, 'WiFi')">Подключение</button>
 
-	<div id="Data" class="tabcontent">
-		<table border="1" cellpadding="1" cellspacing="1" id="CtrlData" style="width: 500px">
-			<tbody>
-				<tr>
-					<td colspan="2" style="text-align: center;">Данные Датчиков</td>
-				</tr>
-				<tr>
-					<td style="text-align: center;">Температура</td>
-					<td>
-						<div id="TempVol" style="text-align: center;"></div>
-					</td>
-				</tr>
-				<tr>
-					<td style="text-align: center;">Влажность</td>
-					<td>
-						<div id="HumVol" style="text-align: center;"></div>
-					</td>
-				</tr>
-				<tr>
-					<td style="text-align: center;">Расстояние</td>
-					<td>
-						<div id="DistVol" style="text-align: center;"></div>
-					</td>
-				</tr>
-				<tr>
-					<td style="text-align: center;">Ик Датчик Движения</td>
-					<td>
-						<div id="IrVol" style="text-align: center;"></div>
-					</td>
-				</tr>
-				<tr>
-					<td style="text-align: center;">Мв Датчик Движения</td>
-					<td>
-						<div id="MvVol" style="text-align: center;"></div>
-					</td>
-				</tr>
-				<tr>
-					<td colspan="2" style="text-align: center;">
-						<div id="EchoString" style="text-align: center;"></div>
-					</td>
-				</tr>
-			</tbody>
-		</table>
-		<form action="DisplayStatus" enctype="text/plain" id="Status" method="get" name="StatusForm">&nbsp;
-			<table border="1" cellpadding="1" cellspacing="1" style="width: 500px">
-				<tbody>
-					<tr>
-						<td>&nbsp;</td>
-						<td style="text-align: center;">Состояние</td>
-						<td>
-							<p align="center">Разрешить</p>
-							<p align="center">Автомат</p>
-						</td>
-						<td style="text-align: center;">Ручное включение</td>
-					</tr>
-					<tr>
-						<td>Свет Ванная</td>
-						<td>
-							<div id="B_L_Status" style="text-align: center;"> </div>
-						</td>
-						<td style="text-align: center;"><input checked="checked" name="B_L_AutoEnable"
-								type="checkbox" value="On">&nbsp;Разрешить</td>
-						<td style="text-align: center;"><input checked="checked" name="B_L_OnOff" type="checkbox"
-								value="On">&nbsp;Вкл/Выкл</td>
-					</tr>
-					<tr>
-						<td>Свет Туалет</td>
-						<td>
-							<div id="R_L_Status" style="text-align: center;"> </div>
-						</td>
-						<td style="text-align: center;"><input checked="checked" name="R_L_AutoEnable"
-								type="checkbox" value="On">&nbsp;Разрешить</td>
-						<td style="text-align: center;"><input checked="checked" name="R_L_OnOff" type="checkbox"
-								value="On">&nbsp;Вкл/Выкл</td>
-					</tr>
-					<tr>
-						<td>Вентиляция Ванная</td>
-						<td>
-							<div id="B_V_Status" style="text-align: center;"> </div>
-						</td>
-						<td style="text-align: center;"><input checked="checked" name="B_V_AutoEnable"
-								type="checkbox" value="On">&nbsp;Разрешить</td>
-						<td style="text-align: center;"><input checked="checked" name="B_V_OnOff" type="checkbox"
-								value="On">&nbsp;Вкл/Выкл</td>
-					</tr>
-					<tr>
-						<td>Вентиляция Туалет</td>
-						<td>
-							<div id="R_V_Status" style="text-align: center;"> </div>
-						</td>
-						<td style="text-align: center;"><input checked="checked" name="R_V_AutoEnable"
-								type="checkbox" value="On">&nbsp;Разрешить</td>
-						<td style="text-align: center;"><input checked="checked" name="R_V_OnOff" type="checkbox"
-								value="On">&nbsp;Вкл/Выкл</td>
-					</tr>
-				</tbody>
-			</table>
-		</form>
-	</div>
-	<div id="Param" class="tabcontent">
-		<form action="AutoSetForm" enctype="text/plain" id="AutoSetId" method="get" name="AutoSetForm">&nbsp;
-			<table border="1" cellpadding="1" cellspacing="1" style="width:500px">
-				<tbody>
-					<tr>
-						<td colspan="3" style="text-align:center">Настройка параметров</td>
-					</tr>
-					<tr>
-						<td>Вентиляция Ванна Влажность</td>
-						<td colspan="2" rowspan="1" style="text-align:center"><input checked="checked"
-								name="B_V_UseHum" type="checkbox" />&nbsp;Разрешить</td>
-					</tr>
-					<tr>
-						<td>Вентиляция Ванна Влажность Параметры</td>
-						<td style="text-align:center">Включение &gt;&nbsp;<input name="B_HumOnParm" type="text"
-								value="70" required pattern="[0-9]{2}" /></td>
-						<td style="text-align:center">Выключение &lt;<input name="B_HumOffParm" type="text"
-								value="50" />
-						</td>
-					</tr>
-					<tr>
-						<td>Вентиляция Ванна Присутствие</td>
-						<td colspan="2" rowspan="1" style="text-align:center"><input checked="checked"
-								name="B_V_UseMove" type="checkbox" />&nbsp;Разрешить</td>
-					</tr>
-					<tr>
-						<td>Вентиляция Ванна Присутствие Параметры</td>
-						<td style="text-align:center">Задержка Включения<input name="B_V_OnDelay" type="text"
-								value="0" /></td>
-						<td style="text-align:center">Задержка выключения<input name="B_V_OffDelay" type="text"
-								value="120" /></td>
-					</tr>
-					<tr>
-						<td colspan="3" style="text-align:center">&nbsp;</td>
-					</tr>
-					<tr>
-						<td>Свет Ванна ИК датчик</td>
-						<td colspan="2" rowspan="1" style="text-align:center"><input checked="checked"
-								name="B_L_IrUse" type="checkbox" />&nbsp;Разрешить</td>
-					</tr>
-					<tr>
-						<td>Свет Ванна МВ Датчик</td>
-						<td colspan="2" rowspan="1" style="text-align:center"><input checked="checked"
-								name="B_L_MvUse" type="checkbox" />&nbsp;Разрешить</td>
-					</tr>
-					<tr>
-						<td>Свет Ванна Параметры</td>
-						<td style="text-align:center">Задержка включения<input name="B_L_OnDelay" type="text"
-								value="10" /></td>
-						<td style="text-align:center">Задержка Выключения<input name="B_L_OffDelay" type="text"
-								value="120" /></td>
-					</tr>
-					<tr>
-						<td colspan="3" style="text-align:center">&nbsp;</td>
-					</tr>
-					<tr>
-						<td>Свет Туалет Параметры</td>
-						<td style="text-align:center">Расстояние Включения<input name="R_L_OnDist" type="text"
-								value="200" /></td>
-						<td style="text-align:center">Расстояние Выключения<input name="R_L_OffDist" type="text"
-								value="250" /></td>
-					</tr>
-					<tr>
-						<td>Вентиляция Туалет Параметры</td>
-						<td style="text-align:center">Задержка включения<input name="R_V_OnDelay" type="text"
-								value="30" /></td>
-						<td style="text-align:center">Задержка Выключения<input name="R_V_OffDelay" type="text"
-								value="120" /></td>
-					</tr>
-				</tbody>
-			</table>
-		</form>
-		<button class="btn default" id="WriteDataParm">Сохранить параметры</button>
+        <script> /* js меню */
+            function openTab(evt, tabName) {
+                var i, tabcontent, tablinks;
+                tabcontent = document.getElementsByClassName("tabcontent");
+                for (i = 0; i < tabcontent.length; i++) {
+                    tabcontent[i].style.display = "none";
+                }
+                tablinks = document.getElementsByClassName("tablinks");
+                for (i = 0; i < tablinks.length; i++) {
+                    tablinks[i].className = tablinks[i].className.replace(" active", "");
+                }
+                document.getElementById(tabName).style.display = "block";
+                evt.currentTarget.className += " active";
+            }
+        </script>
 
-	</div>
+    </div>
 
-	<div id="OTA" class="tabcontent">
-		<h3>Выберите файл обновления</h3>
-		<div id="OtaString"></div>
-		<input type="file" id="files" name="file" />
-		<button class="btn default" id="OTA_start">Обновить ПО</button>
-	</div>
+    <div id="Data" class="tabcontent">
+        <table class="table">
+            <tbody>
+                <tr>
+                    <th colspan="2">Данные Датчиков</th>
+                </tr>
+                <tr>
+                    <td>Температура</td>
+                    <td>
+                        <div id="TempVol"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Влажность</td>
+                    <td>
+                        <div id="HumVol"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Расстояние</td>
+                    <td>
+                        <div id="DistVol"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Ик Датчик Движения</td>
+                    <td>
+                        <div id="IrVol"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Мв Датчик Движения</td>
+                    <td>
+                        <div id="MvVol"></div>
+                    </td>
+                </tr>
+<!--
+                <tr>
+                    <td colspan="2">
+                        <div id="EchoString" class="logstr"></div>
+                    </td>
+                </tr>
+-->
+            </tbody>
+        </table>
+        <form action="DisplayStatus" enctype="text/plain" id="Status" method="get" name="StatusForm">
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <th></th>
+                        <th>Состояние</th>
+                        <th>Автомат</th>
+                        <th>Ручное включение</th>
+                    </tr>
+                    <tr>
+                        <td>Свет Ванная</td>
+                        <td>
+                            <div id="B_L_Status"> </div>
+                        </td>
+                        <td><input checked="checked" name="B_L_AutoEnable" type="checkbox" value="On">&nbsp;Разрешить
+                        </td>
+                        <td><input checked="checked" name="B_L_OnOff" type="checkbox" value="On">&nbsp;Вкл/Выкл</td>
+                    </tr>
+                    <tr>
+                        <td>Свет Туалет</td>
+                        <td>
+                            <div id="R_L_Status"> </div>
+                        </td>
+                        <td><input checked="checked" name="R_L_AutoEnable" type="checkbox" value="On">&nbsp;Разрешить
+                        </td>
+                        <td><input checked="checked" name="R_L_OnOff" type="checkbox" value="On">&nbsp;Вкл/Выкл</td>
+                    </tr>
+                    <tr>
+                        <td>Вентиляция Ванная</td>
+                        <td>
+                            <div id="B_V_Status"> </div>
+                        </td>
+                        <td><input checked="checked" name="B_V_AutoEnable" type="checkbox" value="On">&nbsp;Разрешить
+                        </td>
+                        <td><input checked="checked" name="B_V_OnOff" type="checkbox" value="On">&nbsp;Вкл/Выкл</td>
+                    </tr>
+                    <tr>
+                        <td>Вентиляция Туалет</td>
+                        <td>
+                            <div id="R_V_Status"> </div>
+                        </td>
+                        <td><input checked="checked" name="R_V_AutoEnable" type="checkbox" value="On">&nbsp;Разрешить
+                        </td>
+                        <td><input checked="checked" name="R_V_OnOff" type="checkbox" value="On">&nbsp;Вкл/Выкл</td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+        <script>
+            /*StatusForm CheckBox*/
+            document.StatusForm.B_L_AutoEnable.addEventListener("click", function (e) {
+                EnableHandOnOff();
+                SendPairCheckBox(e);
+            });
+            document.StatusForm.B_L_OnOff.addEventListener("click", function (e) { SendPairCheckBox(e) });
+            document.StatusForm.R_L_AutoEnable.addEventListener("click", function (e) {
+                EnableHandOnOff();
+                SendPairCheckBox(e);
+            });
+            document.StatusForm.R_L_OnOff.addEventListener("click", function (e) { SendPairCheckBox(e) });
+            document.StatusForm.B_V_AutoEnable.addEventListener("click", function (e) {
+                EnableHandOnOff();
+                SendPairCheckBox(e);
+            });
+            document.StatusForm.B_V_OnOff.addEventListener("click", function (e) { SendPairCheckBox(e) });
+            document.StatusForm.R_V_AutoEnable.addEventListener("click", function (e) {
+                EnableHandOnOff();
+                SendPairCheckBox(e);
+            });
+            document.StatusForm.R_V_OnOff.addEventListener("click", function (e) { SendPairCheckBox(e) });
 
-	<div id="WiFi" class="tabcontent">
-		<h3>Подключение WiFi</h3>
-		<label for="WiFi_SSID">Имя сети</label>
-		<input type="text" id="WiFi_SSID" name="wifi_ssid" placeholder="SSID..">
-		<label for="WiFi_Pass">Пароль</label>
-		<input type="text" id="WiFi_Pass" name="wifi_pass" placeholder="Pass..">
-		<label for="WiFi_STA_AP">Режим при загрузке</label>
-		<select id="WiFi_STA_AP" name="wifi_sta_ap">
-			<option value="wifi_sta">Подключение к сети</option>
-			<option value="wifi_ap">Точка доступа BathRestWifi_AP 192.168.4.1</option>
+        </script>
+    </div>
+    <div id="Param" class="tabcontent">
+        <form action="AutoSetForm" enctype="text/plain" id="AutoSetId" method="get" name="AutoSetForm">
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <th colspan="3">Настройка параметров</th>
+                    </tr>
+                    <tr>
+                        <th colspan="3">Вентиляция Ванна Влажность</th>
 
-		</select>
-		<button class="btn default" id="Wifi_Upload">Записать данные WiFi </button>
-		<button class="btn default" id="Wifi_Restart">Рестарт</button>
-	</div>
+                    </tr>
+                    <tr>
+                        <td><input checked="checked" name="B_V_UseHum" type="checkbox" />Разрешить</td>
+                        <td>Включение больше<input name="B_HumOnParm" type="text" value="70" /></td>
+                        <td>Выключение меньше<input name="B_HumOffParm" type="text" value="50" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th colspan="3">Вентиляция Ванна Присутствие</th>
+                    </tr>
+                    <tr>
+                        <td><input checked="checked" name="B_V_UseMove" type="checkbox" />Разрешить</td>
+                        <td>Задержка Включения<input name="B_V_OnDelay" type="text" value="0" /></td>
+                        <td>Задержка выключения<input name="B_V_OffDelay" type="text" value="120" /></td>
+                    </tr>
+                    <tr>
+                        <th colspan="3">Датчики движения Ванная</th>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input checked="checked" name="B_L_IrUse" type="checkbox" />Разрешить ИК
+                            <p></p>
+                            <input checked="checked" name="B_L_MvUse" type="checkbox" />Разрешить МВ
+                        </td>
+                        <td>
+                            Одновременно/по любому датчику <input checked="checked" name="B_L_IrMvAnyAll" type="checkbox" />
+                        </td>
+                        <td>Задержка Выключения<input name="B_L_OffDelay" type="text" value="120" /></td>
+                    </tr>
+                    <tr>
+                        <th colspan="3">Туалет</th>
+                    </tr>
+                    <tr>
+                        <td>Свет</td>
+                        <td>Расстояние Включения Света<input name="R_L_OnDist" type="text" value="200" /></td>
+                        <td>Задержка Выключения Света<input name="R_L_OffDelay" type="text" value="2" /></td>
+                    </tr>
+                    <tr>
+                        <td>Вентиляция</td>
+                        <td>Задержка включения Вентиляции<input name="R_V_OnDelay" type="text" value="30" /></td>
+                        <td>Задержка Выключения Вентиляции <input name="R_V_OffDelay" type="text" value="120" /></td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+        <button class="btn default" id="WriteDataParm">Сохранить параметры</button>
 
-	<script id="worker1" type="javascript/worker">
+        <script>
+            // сохранить данные в контроллере
+            document.getElementById("WriteDataParm").addEventListener("click", function (e) {
+                socket.send(JSON.stringify({ name: "WriteDatаParm", msg: "false" }));
+            });
 
-		var wsHost = 0;
-		self.onmessage = function(e) {
-
-		if(wsHost == 0)
-		{
-		if(e.data.indexOf("ws") != -1)
-			{
-			wsHost = e.data;	
-			}
-			return;
-		}
-
-		var otasocket = new WebSocket(wsHost);
-		//var otasocket = new WebSocket("ws://echo.websocket.org");
-
-		otasocket.binaryType = 'blob';
-
-		var file = e.data;
-		var size = file.size;
-		var reader = new FileReaderSync();
-		var start;
-		var end;
-		var offset = 1024;
-		var data =  new Uint8Array(offset);
-
-		otasocket.onopen = function () {
-			otasocket.send("start");
-			
-		}
-		otasocket.onclose = function (event) {
-			if (end == size)
-				postMessage("transfer END - Restart");
-			else
-				postMessage("transfer ABORTED - ERROR");
-
-		}
-		otasocket.onerror = function (event) {
-			};
-				
-		otasocket.onmessage = function (event) {
-
-				switch(event.data){
-				case "err":
-					postMessage("transfer ERR");
-					otasocket.close();
-					break;
-				case "end":
-					postMessage("transfer end");
-					otasocket.close();
-					break;
-				case "start":
-					postMessage("transfer start");
-					start = 0;
-					end = start+offset;
-					if ( end > size )
-						end = size;
-					blob = file.slice(start,end);
-					//data = reader.readAsBinaryString(blob);
-					data = reader.readAsArrayBuffer(blob);
-					postMessage("transfer from "+start+" to "+end);
-					otasocket.send(data);
-					break;
-				case "next":
-				//default :
-					if(end == size)
-					{
-						otasocket.send("end");
-						break;
-					}
-					start = end;
-					end = start+offset;
-					if ( end > size )
-					end = size;
-					blob = file.slice(start,end);
-					//data = reader.readAsBinaryString(blob);
-					data = reader.readAsArrayBuffer(blob);
-					postMessage("transfer from "+start+" to "+end );
-					otasocket.send(data);
-			}
-			}
-		  };
-	</script>
-
-	<script>
-
-		var bb = new Blob([document.querySelector('#worker1').textContent]);
-		var worker = new Worker(window.webkitURL.createObjectURL(bb));
-		var otastr = document.getElementById("OtaString");
-
-		worker.postMessage("ws://" + document.location.host + "/otaws");
-
-		worker.onmessage = function (e) {
-			otastr.innerHTML = e.data;
-		}
-
-		const fileSelector = document.getElementById('files');
-		var fileList;
-		fileSelector.addEventListener('change', (event) => {
-			fileList = event.target.files;
-			//	worker.postMessage(fileList[0]); // Start the worker.
-		});
-		document.getElementById("OTA_start").addEventListener("click", function (e) {
-			if (fileList !== undefined) {
-				if (fileList[0] !== undefined) {
-					otastr.innerHTML = "Обновление начато";
-					worker.postMessage(fileList[0]);
-					//fileList = 0;
-				}
-				else {
-					otastr.innerHTML = "Файл обновления не выбран";
-				}
-			}
-			else {
-				otastr.innerHTML = "Файл обновления не выбран";
-			}
-		});
+            /* AutoSetForm CheckBox*/
+            document.AutoSetForm.B_V_UseHum.addEventListener("click", function (e) {
+                EnableInputParm();
+                SendPairCheckBox(e);
+            });
+            document.AutoSetForm.B_V_UseMove.addEventListener("click", function (e) {
+                EnableInputParm();
+                SendPairCheckBox(e);
+            });
+            document.AutoSetForm.B_L_IrUse.addEventListener("click", function (e) { SendPairCheckBox(e) });
+            document.AutoSetForm.B_L_MvUse.addEventListener("click", function (e) { SendPairCheckBox(e) });
+            document.AutoSetForm.B_L_IrMvAnyAll.addEventListener("click", function (e) { SendPairCheckBox(e) });
+            
+            /*AutoSetForm input field */
+            document.AutoSetForm.B_HumOnParm.addEventListener("change", function (e) {
+                if (e.target.value >= MinHum && e.target.value <= MaxHum)
+                    SendPairInputData(e);
+                else {
+                    e.target.value = null;
+                    e.target.placeholder = "Интервал " + MinHum + "-" + MaxHum;
+                    e.target.focus();
+                }
+            });
+            document.AutoSetForm.B_HumOffParm.addEventListener("change", function (e) {
+                if (e.target.value >= MinHum && e.target.value <= MaxHum)
+                    SendPairInputData(e);
+                else {
+                    e.target.value = null;
+                    e.target.placeholder = "Интервал " + MinHum + "-" + MaxHum;
+                    e.target.focus();
+                }
+            });
+            document.AutoSetForm.B_V_OnDelay.addEventListener("change", function (e) {
+                if (e.target.value >= MinDelay && e.target.value <= MaxDelay)
+                    SendPairInputData(e);
+                else {
+                    e.target.value = null;
+                    e.target.placeholder = "Интервал " + MinDelay + "-" + MaxDelay;
+                    e.target.focus();
+                }
+            });
+            document.AutoSetForm.B_V_OffDelay.addEventListener("change", function (e) {
+                if (e.target.value >= MinDelay && e.target.value <= MaxDelay)
+                    SendPairInputData(e);
+                else {
+                    e.target.value = null;
+                    e.target.placeholder = "Интервал " + MinDelay + "-" + MaxDelay;
+                    e.target.focus();
+                }
+            });
+           document.AutoSetForm.B_L_OffDelay.addEventListener("change", function (e) {
+                if (e.target.value >= MinDelay && e.target.value <= MaxDelay)
+                    SendPairInputData(e);
+                else {
+                    e.target.value = null;
+                    e.target.placeholder = "Интервал " + MinDelay + "-" + MaxDelay;
+                    e.target.focus();
+                }
+            });
+            document.AutoSetForm.R_L_OnDist.addEventListener("change", function (e) {
+                if (e.target.value >= MinDistance && e.target.value <= MaxDistance)
+                    SendPairInputData(e);
+                else {
+                    e.target.value = null;
+                    e.target.placeholder = "Интервал " + MinDistance + "-" + MaxDistance;
+                    e.target.focus();
+                }
+            });
+            document.AutoSetForm.R_L_OffDelay.addEventListener("change", function (e) {
+                if (e.target.value >= MinDistance && e.target.value <= MaxDistance)
+                    SendPairInputData(e);
+                else {
+                    e.target.value = null;
+                    e.target.placeholder = "Интервал " + MinDelay + "-" + MaxDelay;
+                    e.target.focus();
+                }
+            });
+            document.AutoSetForm.R_V_OnDelay.addEventListener("change", function (e) {
+                if (e.target.value >= MinDelay && e.target.value <= MaxDelay)
+                    SendPairInputData(e);
+                else {
+                    e.target.value = null;
+                    e.target.placeholder = "Интервал " + MinDelay + "-" + MaxDelay;
+                    e.target.focus();
+                }
+            });
+            document.AutoSetForm.R_V_OffDelay.addEventListener("change", function (e) {
+                if (e.target.value >= MinDelay && e.target.value <= MaxDelay)
+                    SendPairInputData(e);
+                else {
+                    e.target.value = null;
+                    e.target.placeholder = "Интервал " + MinDelay + "-" + MaxDelay;
+                    e.target.focus();
+                }
+            });
 
 
+        </script>
+    </div>
+    <div id="OTA" class="tabcontent">
+        <h3>Выберите файл обновления</h3>
+        <div id="OtaString" class="logstr"></div>
+        <input type="file" id="files" name="file" />
+        <button class="btn default" id="OTA_start">Обновить ПО</button>
 
-		/*--------------------------------------------------------------*/
+        <script id="worker1" type="javascript/worker">
 
-		/*data range*/
-		MaxHum = 90;
-		MinHum = 10;
-		MaxDelay = 300;
-		MinDelay = 0;
-		MaxDistance = 400;
-		MinDistance = 10;
+            var wsHost = 0;
+            self.onmessage = function(e) {
+    
+            if(wsHost == 0)
+            {
+            if(e.data.indexOf("ws") != -1)
+                {
+                wsHost = e.data;	
+                }
+                return;
+            }
+    
+            var otasocket = new WebSocket(wsHost);
+            //var otasocket = new WebSocket("ws://echo.websocket.org");
+    
+            otasocket.binaryType = 'blob';
+    
+            var file = e.data;
+            var size = file.size;
+            var reader = new FileReaderSync();
+            var start;
+            var end;
+            var offset = 1024;
+            var data =  new Uint8Array(offset);
+    
+            otasocket.onopen = function () {
+                otasocket.send("start");
+                
+            }
+            otasocket.onclose = function (event) {
+                if (end == size)
+                    postMessage("transfer END - Restart");
+                else
+                    postMessage("transfer ABORTED - ERROR");
+    
+            }
+            otasocket.onerror = function (event) {
+                };
+                    
+            otasocket.onmessage = function (event) {
+    
+                    switch(event.data){
+                    case "err":
+                        postMessage("transfer ERR");
+                        otasocket.close();
+                        break;
+                    case "end":
+                        postMessage("transfer end");
+                        otasocket.close();
+                        break;
+                    case "start":
+                        postMessage("transfer start");
+                        start = 0;
+                        end = start+offset;
+                        if ( end > size )
+                            end = size;
+                        blob = file.slice(start,end);
+                        //data = reader.readAsBinaryString(blob);
+                        data = reader.readAsArrayBuffer(blob);
+                        postMessage("transfer from "+start+" to "+end);
+                        otasocket.send(data);
+                        break;
+                    case "next":
+                    //default :
+                        if(end == size)
+                        {
+                            otasocket.send("end");
+                            break;
+                        }
+                        start = end;
+                        end = start+offset;
+                        if ( end > size )
+                        end = size;
+                        blob = file.slice(start,end);
+                        //data = reader.readAsBinaryString(blob);
+                        data = reader.readAsArrayBuffer(blob);
+                        postMessage("transfer from "+start+" to "+end );
+                        otasocket.send(data);
+                }
+                }
+              };
+        </script>
 
-		EnableHandOnOff();
-		EnableInputParm();
-		var wsHostStr = "ws://" + document.location.host + "/ws"
-		window.onload = function () {
-			//var otasocket = new WebSocket("ws://echo.websocket.org");
-			//var socket = new WebSocket("ws://192.168.1.61/ws");
-			var socket = new WebSocket(wsHostStr);
-			var status = document.getElementById("EchoString");
+        <script> /* load ota data */
+            var bb = new Blob([document.querySelector('#worker1').textContent]);
+            var worker = new Worker(window.webkitURL.createObjectURL(bb));
+            var otastr = document.getElementById("OtaString");
 
-			socket.onopen = function () {
-				status.innerHTML = "cоединение установлено";
-				socket.send("sstrt");
-			};
+            worker.postMessage("ws://" + document.location.host + "/otaws");
 
-			socket.onclose = function (event) {
-				if (event.wasClean) {
-					status.innerHTML = 'cоединение закрыто';
-				} else {
-					status.innerHTML = 'соединения как-то закрыто';
-				}
-				status.innerHTML += ' код: ' + event.code + ' причина: ' + event.reason;
-			};
+            worker.onmessage = function (e) {
+                otastr.innerHTML = e.data;
+            }
 
-			/*чтение данных сокета с сервера*/
+            const fileSelector = document.getElementById('files');
+            var fileList;
+            fileSelector.addEventListener('change', (event) => {
+                fileList = event.target.files;
+            });
 
-			socket.onmessage = function (event) {
-				let message = JSON.parse(event.data);
-				status.innerHTML = `пришли данные: <b>${message.name}</b>: ${message.msg}`;
-				/*
-			  /* Инликация включения света и вентиляции ( пока в режиме эхо), 
-			  /*в дальнейшем заменить Case переменные"
-			  */
-				switch (message.name) {
-					/* показать состояние включения света и вентиляции */
-					case "B_L_Status":
-						if (message.msg == true) document.getElementById("B_L_Status").innerHTML = "Вкл";
-						else document.getElementById("B_L_Status").innerHTML = "Выкл";
-						break;
-					case "R_L_Status":
-						if (message.msg == true) document.getElementById("R_L_Status").innerHTML = "Вкл";
-						else document.getElementById("R_L_Status").innerHTML = "Выкл";
-						break;
-					case "B_V_Status":
-						if (message.msg == true) document.getElementById("B_V_Status").innerHTML = "Вкл";
-						else document.getElementById("B_V_Status").innerHTML = "Выкл";
-						break;
-					case "R_V_Status":
-						if (message.msg == true) document.getElementById("R_V_Status").innerHTML = "Вкл";
-						else document.getElementById("R_V_Status").innerHTML = "Выкл";
-						break;
-					/* показать состояние датчиков */
-					case "TempVol":
-					case "HumVol":
-					case "DistVol":
-						document.getElementById(message.name).innerHTML = message.msg;
-						break;
-					case "IrVol":
-					case "MvVol":
-						if (message.msg == true) message.msg = "Вкл"; else message.msg = "Выкл";
-						document.getElementById(message.name).innerHTML = message.msg;
-						break;
+            document.getElementById("OTA_start").addEventListener("click", function (e) {
+                if (fileList !== undefined) {
+                    if (fileList[0] !== undefined) {
+                        otastr.innerHTML = "Обновление начато";
+                        worker.postMessage(fileList[0]);
+                        //fileList = 0;
+                    }
+                    else {
+                        otastr.innerHTML = "Файл обновления не выбран";
+                    }
+                }
+                else {
+                    otastr.innerHTML = "Файл обновления не выбран";
+                }
+            });
 
-					/* Status FormField */
-					case "B_L_AutoEnable":
-					case "R_L_AutoEnable":
-					case "R_V_AutoEnable":
-					case "B_V_AutoEnable":
-					case "B_L_OnOff":
-					case "R_L_OnOff":
-					case "B_V_OnOff":
-					case "R_V_OnOff":
-						document.StatusForm.elements[message.name].checked = message.msg;
-						EnableHandOnOff();
-						break;
+        </script>
+    </div>
+    <div id="WiFi" class="tabcontent">
+        <!--WIFI обновление-->
+        <h3>Подключение WiFi</h3>
+        <label for="WiFi_SSID">Имя сети</label>
+        <input type="text" id="WiFi_SSID" name="wifi_ssid" placeholder="SSID..">
+        <label for="WiFi_Pass">Пароль</label>
+        <input type="text" id="WiFi_Pass" name="wifi_pass" placeholder="Pass..">
+        <label for="WiFi_STA_AP">Режим при загрузке</label>
+        <select id="WiFi_STA_AP" name="wifi_sta_ap">
+            <option value="wifi_sta">Подключение к сети</option>
+            <option value="wifi_ap">Точка доступа BathRestWifi_AP 192.168.4.1</option>
+        </select>
+        <button class="btn default" id="Wifi_Upload">Записать данные WiFi </button>
+        <button class="btn default" id="Wifi_Restart">Рестарт</button>
 
-					/*Data Sw Autoset Forms*/
-					case "B_V_UseHum":
-					case "B_V_UseMove":
-					case "B_L_IrUse":
-					case "B_L_MvUse":
-						document.AutoSetForm.elements[message.name].checked = message.msg;
-						EnableInputParm();
-						break;
+        <script>/*WIFI обновление*/
+            function check_Wifi_SSID_Pass() {
+                var ssid = document.getElementById("WiFi_SSID");
+                if (ssid.value.length == 0) {
+                    ssid.placeholder = "не может быть пустым";
+                    ssid.focus();
+                    return false;
+                }
+                var pass = document.getElementById("WiFi_Pass");
+                if (pass.value.length < 8) {
+                    pass.value = "";
+                    pass.placeholder = "Пароль должен быть больше 8 символов";
+                    pass.focus();
+                    return false;
+                }
+                return true;
+            }
+            document.getElementById("WiFi_SSID").addEventListener("change", function (e) {
+                if (e.target.value.length == 0) {
+                    e.target.placeholder = "не может быть пустым";
+                    e.target.focus();
+                }
+            });
+            document.getElementById("WiFi_Pass").addEventListener("change", function (e) {
+                if (e.target.value.length < 8) {
+                    e.target.value = '';
+                    e.target.placeholder = "Пароль должен быть больше 8 символов";
+                    e.target.focus();
+                }
+            });
+            document.getElementById("Wifi_Restart").addEventListener("click", function (e) {
+                var ssid = document.getElementById("WiFi_SSID");
+                var pass = document.getElementById("WiFi_Pass");
+                var sta_ap = document.getElementById("WiFi_STA_AP");
+                if (check_Wifi_SSID_Pass()) {
+                    socket.send(JSON.stringify({ name: ssid.name, msg: ssid.value }));
+                    socket.send(JSON.stringify({ name: pass.name, msg: pass.value }));
+                    socket.send(JSON.stringify({ name: sta_ap.name, msg: sta_ap.value }));
+                    socket.send(JSON.stringify({ name: "Wifi_Restart", msg: "true" }));
+                }
+            });
+            document.getElementById("Wifi_Upload").addEventListener("click", function (e) {
+                var ssid = document.getElementById("WiFi_SSID");
+                var pass = document.getElementById("WiFi_Pass");
+                var sta_ap = document.getElementById("WiFi_STA_AP");
+                if (check_Wifi_SSID_Pass()) {
+                    socket.send(JSON.stringify({ name: ssid.name, msg: ssid.value }));
+                    socket.send(JSON.stringify({ name: pass.name, msg: pass.value }));
+                    socket.send(JSON.stringify({ name: sta_ap.name, msg: sta_ap.value }));
+                    socket.send(JSON.stringify({ name: "Wifi_Restart", msg: "false" }));
+                }
+            });
+        </script>
+    </div>
 
-					/*Data Param Autoset Form */
-					case "B_HumOnParm":
-					case "B_HumOffParm":
-					case "B_V_OnDelay":
-					case "B_V_OffDelay":
-					case "B_L_OnDelay":
-					case "B_L_OffDelay":
-					case "R_L_OnDist":
-					case "R_L_OffDist":
-					case "R_V_OnDelay":
-					case "R_V_OffDelay":
-						document.AutoSetForm.elements[message.name].value = message.msg;
-						break;
-					case "wifi_ssid":
-						document.getElementById("WiFi_SSID").value = message.msg;
-						break;
-					case "wifi_pass":
-						document.getElementById("WiFi_Pass").value = message.msg;
-						break;
-					case "wifi_sta_ap":
-						document.getElementById("WiFi_STA_AP").value = message.msg;
-						break;
-				}
+    <div id="EchoString" class="logstr"></div>
+    
+    <script>/* common script*/
 
-			};
+        /*data range*/
+        const MaxHum = 90;
+        const MinHum = 10;
+        const MaxDelay = 300;
+        const MinDelay = 0;
+        const MaxDistance = 400;
+        const MinDistance = 10;
 
-			socket.onerror = function (event) {
-				status.innerHTML = "ошибка " + event.message;
-			};
 
-			/*Отправить параметры поля CheckBox в формате Json*/
-			function SendPairCheckBox(e) {
-				socket.send(JSON.stringify({ name: e.target.name, msg: e.target.checked }));
-				return false;
-			}
 
-			/*Отправить параметры поля InputText в формате Json*/
-			function SendPairInputData(e) {
-				socket.send(JSON.stringify({ name: e.target.name, msg: e.target.value }));
-				return false;
-			}
+        EnableHandOnOff();
+        EnableInputParm();
+        //var otasocket = new WebSocket("ws://echo.websocket.org");
+        //var socket = new WebSocket("ws://192.168.1.61/ws");
+        // создать сокет по адресу
+        var wsHostStr = "ws://" + document.location.host + "/ws";
+        var socket = new WebSocket(wsHostStr);
+        // инфо с контроллера
+        
+        var statusstr = document.getElementById("EchoString");
+        document.getElementById("EchoString").innerHTML = "test test test";
+        statusstr.innerHTML = " statu status ";
+        // Get the element with id="defaultOpen" and click on it
+        document.getElementById("defaultOpenTab").click();
 
-			/* Обработчик CheckBox */
-			/*StatusForm CheckBox*/
-			document.StatusForm.B_L_AutoEnable.addEventListener("click", function (e) {
-				EnableHandOnOff();
-				SendPairCheckBox(e);
-			});
-			document.StatusForm.B_L_OnOff.addEventListener("click", function (e) { SendPairCheckBox(e) });
-			document.StatusForm.R_L_AutoEnable.addEventListener("click", function (e) {
-				EnableHandOnOff();
-				SendPairCheckBox(e);
-			});
-			document.StatusForm.R_L_OnOff.addEventListener("click", function (e) { SendPairCheckBox(e) });
-			document.StatusForm.B_V_AutoEnable.addEventListener("click", function (e) {
-				EnableHandOnOff();
-				SendPairCheckBox(e);
-			});
-			document.StatusForm.B_V_OnOff.addEventListener("click", function (e) { SendPairCheckBox(e) });
-			document.StatusForm.R_V_AutoEnable.addEventListener("click", function (e) {
-				EnableHandOnOff();
-				SendPairCheckBox(e);
-			});
-			document.StatusForm.R_V_OnOff.addEventListener("click", function (e) { SendPairCheckBox(e) });
 
-			/* AutoSetForm CheckBox*/
-			document.AutoSetForm.B_V_UseHum.addEventListener("click", function (e) {
-				EnableInputParm();
-				SendPairCheckBox(e);
-			});
-			document.AutoSetForm.B_V_UseMove.addEventListener("click", function (e) {
-				EnableInputParm();
-				SendPairCheckBox(e);
-			});
-			document.AutoSetForm.B_L_IrUse.addEventListener("click", function (e) { SendPairCheckBox(e) });
-			document.AutoSetForm.B_L_MvUse.addEventListener("click", function (e) { SendPairCheckBox(e) });
+        // открыть сокет в контроллере
+        socket.onopen = function () {
+            statusstr.innerHTML = "cоединение установлено";
+            socket.send("sstrt");
+        };
+        // сокет закрыт
+        socket.onclose = function (event) {
+            if (event.wasClean) {
+                statusstr.innerHTML = 'cоединение закрыто';
+            } else {
+                statusstr.innerHTML = 'соединения как-то закрыто';
+            }
+            statusstr.innerHTML += ' код: ' + event.code + ' причина: ' + event.reason;
+        };
 
-			/* Обработчик InputFields */
-			/*AutoSetForm input field */
-			document.AutoSetForm.B_HumOnParm.addEventListener("change", function (e) {
-				if (e.target.value > MinHum && e.target.value < MaxHum)
-					SendPairInputData(e);
-				else {
-					e.target.value = "Интервал " + MinHum + "-" + MaxHum;
-					e.target.focus();
-				}
-			});
-			document.AutoSetForm.B_HumOffParm.addEventListener("change", function (e) {
-				if (e.target.value > MinHum && e.target.value < MaxHum)
-					SendPairInputData(e);
-				else {
-					e.target.value = "Интервал " + MinHum + "-" + MaxHum;
-					e.target.focus();
-				}
-			});
-			document.AutoSetForm.B_V_OnDelay.addEventListener("change", function (e) {
-				if (e.target.value > MinDelay && e.target.value < MaxDelay)
-					SendPairInputData(e);
-				else {
-					e.target.value = "Интервал " + MinDelay + "-" + MaxDelay;
-					e.target.focus();
-				}
-			});
-			document.AutoSetForm.B_V_OffDelay.addEventListener("change", function (e) {
-				if (e.target.value > MinDelay && e.target.value < MaxDelay)
-					SendPairInputData(e);
-				else {
-					e.target.value = "Интервал " + MinDelay + "-" + MaxDelay;
-					e.target.focus();
-				}
-			});
-			document.AutoSetForm.B_L_OnDelay.addEventListener("change", function (e) {
-				if (e.target.value > MinDelay && e.target.value < MaxDelay)
-					SendPairInputData(e);
-				else {
-					e.target.value = "Интервал " + MinDelay + "-" + MaxDelay;
-					e.target.focus();
-				}
-			});
-			document.AutoSetForm.B_L_OffDelay.addEventListener("change", function (e) {
-				if (e.target.value > MinDelay && e.target.value < MaxDelay)
-					SendPairInputData(e);
-				else {
-					e.target.value = "Интервал " + MinDelay + "-" + MaxDelay;
-					e.target.focus();
-				}
-			});
-			document.AutoSetForm.R_L_OnDist.addEventListener("change", function (e) {
-				if (e.target.value > MinDistance && e.target.value < MaxDistance)
-					SendPairInputData(e);
-				else {
-					e.target.value = "Интервал " + MinDistance + "-" + MaxDistance;
-					e.target.focus();
-				}
-			});
-			document.AutoSetForm.R_L_OffDist.addEventListener("change", function (e) {
-				if (e.target.value > MinDistance && e.target.value < MaxDistance)
-					SendPairInputData(e);
-				else {
-					e.target.value = "Интервал " + MinDistance + "-" + MaxDistance;
-					e.target.focus();
-				}
-			});
-			document.AutoSetForm.R_V_OnDelay.addEventListener("change", function (e) {
-				if (e.target.value > MinDelay && e.target.value < MaxDelay)
-					SendPairInputData(e);
-				else {
-					e.target.value = "Интервал " + MinDelay + "-" + MaxDelay;
-					e.target.focus();
-				}
-			});
-			document.AutoSetForm.R_V_OffDelay.addEventListener("change", function (e) {
-				if (e.target.value > MinDelay && e.target.value < MaxDelay)
-					SendPairInputData(e);
-				else {
-					e.target.value = "Интервал " + MinDelay + "-" + MaxDelay;
-					e.target.focus();
-				}
-			});
-			/*********************/
-			function check_Wifi_SSID_Pass() {
-				var ssid = document.getElementById("WiFi_SSID");
-				if (ssid.value.length == 0) {
-					ssid.placeholder = "не может быть пустым";
-					ssid.focus();
-					return false;
-				}
+        //чтение данных сокета с сервера
 
-				var pass = document.getElementById("WiFi_Pass");
-				if (pass.value.length < 8) {
-					pass.value = "";
-					pass.placeholder = "Пароль должен быть больше 8 символов";
-					pass.focus();
-					return false;
-				}
-				return true;
-			}
+        socket.onmessage = function (event) {
+            let message = JSON.parse(event.data);
+            statusstr.innerHTML = `пришли данные: <b>${message.name}</b>: ${message.msg}`;
+            /*
+          /* Инликация включения света и вентиляции ( пока в режиме эхо), 
+          /*в дальнейшем заменить Case переменные"
+          */
+            switch (message.name) {
+                /* показать состояние включения света и вентиляции */
+                case "B_L_Status":
+                    if (message.msg == true) document.getElementById("B_L_Status").innerHTML = "Вкл";
+                    else document.getElementById("B_L_Status").innerHTML = "Выкл";
+                    break;
+                case "R_L_Status":
+                    if (message.msg == true) document.getElementById("R_L_Status").innerHTML = "Вкл";
+                    else document.getElementById("R_L_Status").innerHTML = "Выкл";
+                    break;
+                case "B_V_Status":
+                    if (message.msg == true) document.getElementById("B_V_Status").innerHTML = "Вкл";
+                    else document.getElementById("B_V_Status").innerHTML = "Выкл";
+                    break;
+                case "R_V_Status":
+                    if (message.msg == true) document.getElementById("R_V_Status").innerHTML = "Вкл";
+                    else document.getElementById("R_V_Status").innerHTML = "Выкл";
+                    break;
+                /* показать состояние датчиков */
+                case "TempVol":
+                case "HumVol":
+                case "DistVol":
+                    document.getElementById(message.name).innerHTML = message.msg;
+                    break;
+                case "IrVol":
+                case "MvVol":
+                    if (message.msg == true) message.msg = "Вкл"; else message.msg = "Выкл";
+                    document.getElementById(message.name).innerHTML = message.msg;
+                    break;
 
-			document.getElementById("WiFi_SSID").addEventListener("change", function (e) {
-				if (e.target.value.length == 0) {
-					e.target.placeholder = "не может быть пустым";
-					e.target.focus();
-				}
-			});
-			document.getElementById("WiFi_Pass").addEventListener("change", function (e) {
-				if (e.target.value.length < 8) {
-					e.target.value = '';
-					e.target.placeholder = "Пароль должен быть больше 8 символов";
-					e.target.focus();
-				}
-			});
-			document.getElementById("Wifi_Restart").addEventListener("click", function (e) {
-				var ssid = document.getElementById("WiFi_SSID");
-				var pass = document.getElementById("WiFi_Pass");
-				var sta_ap = document.getElementById("WiFi_STA_AP");
-				if (check_Wifi_SSID_Pass()) {
-					socket.send(JSON.stringify({ name: ssid.name, msg: ssid.value }));
-					socket.send(JSON.stringify({ name: pass.name, msg: pass.value }));
-					socket.send(JSON.stringify({ name: sta_ap.name, msg: sta_ap.value }));
-					socket.send(JSON.stringify({ name: "Wifi_Restart", msg: "true" }));
-				}
+                /* Status FormField */
+                case "B_L_AutoEnable":
+                case "R_L_AutoEnable":
+                case "R_V_AutoEnable":
+                case "B_V_AutoEnable":
+                case "B_L_OnOff":
+                case "R_L_OnOff":
+                case "B_V_OnOff":
+                case "R_V_OnOff":
+                    document.StatusForm.elements[message.name].checked = message.msg;
+                    EnableHandOnOff();
+                    break;
 
-			});
-			document.getElementById("Wifi_Upload").addEventListener("click", function (e) {
-				var ssid = document.getElementById("WiFi_SSID");
-				var pass = document.getElementById("WiFi_Pass");
-				var sta_ap = document.getElementById("WiFi_STA_AP");
-				if (check_Wifi_SSID_Pass()) {
-					socket.send(JSON.stringify({ name: ssid.name, msg: ssid.value }));
-					socket.send(JSON.stringify({ name: pass.name, msg: pass.value }));
-					socket.send(JSON.stringify({ name: sta_ap.name, msg: sta_ap.value }));
-					socket.send(JSON.stringify({ name: "Wifi_Restart", msg: "false" }));
-				}
-			});
-			document.getElementById("WriteDataParm").addEventListener("click", function (e) {
-				socket.send(JSON.stringify({ name: "WriteDatаParm", msg: "false" }));
-			});
+                /*Data Sw Autoset Forms*/
+                case "B_V_UseHum":
+                case "B_V_UseMove":
+                case "B_L_IrUse":
+                case "B_L_MvUse":
+                case "B_L_IrMvAnyAll":                  // add any/all - any = false, all = true
+                    document.AutoSetForm.elements[message.name].checked = message.msg;
+                    EnableInputParm();
+                    break;
 
-			/*********************/
-		}
-		/* 
-		/*инициализация формы разрешение ручного включения света и вентиляции
-		/*установка / снятие разрешения ручного ввода
-		*/
-		function EnableHandOnOff() {
-			if (document.StatusForm.B_L_AutoEnable.checked == true) document.StatusForm.B_L_OnOff.disabled = true;
-			else document.StatusForm.B_L_OnOff.disabled = false;
-			if (document.StatusForm.R_L_AutoEnable.checked == true) document.StatusForm.R_L_OnOff.disabled = true;
-			else document.StatusForm.R_L_OnOff.disabled = false;
-			if (document.StatusForm.B_V_AutoEnable.checked == true) document.StatusForm.B_V_OnOff.disabled = true;
-			else document.StatusForm.B_V_OnOff.disabled = false;
-			if (document.StatusForm.R_V_AutoEnable.checked == true) document.StatusForm.R_V_OnOff.disabled = true;
-			else document.StatusForm.R_V_OnOff.disabled = false;
-		}
+                /*Data Param Autoset Form */
+                case "B_HumOnParm":
+                case "B_HumOffParm":
+                case "B_V_OnDelay":
+                case "B_V_OffDelay":
+//                case "B_L_OnDelay": // delete not use
+                case "B_L_OffDelay":
+                case "R_L_OnDist":
+                case "R_L_OffDelay": // изменено
+                case "R_V_OnDelay":
+                case "R_V_OffDelay":
+                    document.AutoSetForm.elements[message.name].value = message.msg;
+                    break;
+                case "wifi_ssid":
+                    document.getElementById("WiFi_SSID").value = message.msg;
+                    break;
+                case "wifi_pass":
+                    document.getElementById("WiFi_Pass").value = message.msg;
+                    break;
+                case "wifi_sta_ap":
+                    document.getElementById("WiFi_STA_AP").value = message.msg;
+                    break;
+            }
 
-		function EnableInputParm() {
-			if (document.AutoSetForm.B_V_UseHum.checked == true) {
-				document.AutoSetForm.B_HumOnParm.disabled = false;
-				document.AutoSetForm.B_HumOffParm.disabled = false;
-			} else {
-				document.AutoSetForm.B_HumOnParm.disabled = true;
-				document.AutoSetForm.B_HumOffParm.disabled = true;
-			};
-			if (document.AutoSetForm.B_V_UseMove.checked == true) {
-				document.AutoSetForm.B_V_OnDelay.disabled = false;
-				document.AutoSetForm.B_V_OffDelay.disabled = false;
-			} else {
-				document.AutoSetForm.B_V_OnDelay.disabled = true;
-				document.AutoSetForm.B_V_OffDelay.disabled = true;
-			};
+        };
 
-		}
-		/*-------------------------------------------------*/
-		function openTab(evt, tabName) {
-			var i, tabcontent, tablinks;
-			tabcontent = document.getElementsByClassName("tabcontent");
-			for (i = 0; i < tabcontent.length; i++) {
-				tabcontent[i].style.display = "none";
-			}
-			tablinks = document.getElementsByClassName("tablinks");
-			for (i = 0; i < tablinks.length; i++) {
-				tablinks[i].className = tablinks[i].className.replace(" active", "");
-			}
-			document.getElementById(tabName).style.display = "block";
-			evt.currentTarget.className += " active";
-		}
-		// Get the element with id="defaultOpen" and click on it
-		document.getElementById("defaultOpenTab").click();
+        socket.onerror = function (event) {
+            status.innerHTML = "ошибка " + event.message;
+        };
 
-		/*-------------------------------------------------*/
-	</script>
+
+
+
+
+        /*Отправить параметры поля CheckBox в формате Json*/
+        function SendPairCheckBox(e) {
+            socket.send(JSON.stringify({ name: e.target.name, msg: e.target.checked }));
+            return false;
+        }
+
+        /*Отправить параметры поля InputText в формате Json*/
+        function SendPairInputData(e) {
+            socket.send(JSON.stringify({ name: e.target.name, msg: e.target.value }));
+            return false;
+        }
+        /*инициализация формы разрешение ручного включения света и вентиляции
+        /*установка / снятие разрешения ручного ввода
+        */
+        function EnableHandOnOff() {
+            if (document.StatusForm.B_L_AutoEnable.checked == true) document.StatusForm.B_L_OnOff.disabled = true;
+            else document.StatusForm.B_L_OnOff.disabled = false;
+            if (document.StatusForm.R_L_AutoEnable.checked == true) document.StatusForm.R_L_OnOff.disabled = true;
+            else document.StatusForm.R_L_OnOff.disabled = false;
+            if (document.StatusForm.B_V_AutoEnable.checked == true) document.StatusForm.B_V_OnOff.disabled = true;
+            else document.StatusForm.B_V_OnOff.disabled = false;
+            if (document.StatusForm.R_V_AutoEnable.checked == true) document.StatusForm.R_V_OnOff.disabled = true;
+            else document.StatusForm.R_V_OnOff.disabled = false;
+        }
+
+        function EnableInputParm() {
+            if (document.AutoSetForm.B_V_UseHum.checked == true) {
+                document.AutoSetForm.B_HumOnParm.disabled = false;
+                document.AutoSetForm.B_HumOffParm.disabled = false;
+            } else {
+                document.AutoSetForm.B_HumOnParm.disabled = true;
+                document.AutoSetForm.B_HumOffParm.disabled = true;
+            };
+            if (document.AutoSetForm.B_V_UseMove.checked == true) {
+                document.AutoSetForm.B_V_OnDelay.disabled = false;
+                document.AutoSetForm.B_V_OffDelay.disabled = false;
+            } else {
+                document.AutoSetForm.B_V_OnDelay.disabled = true;
+                document.AutoSetForm.B_V_OffDelay.disabled = true;
+            };
+        }
+
+
+    </script>
+
 </body>
 
 </html>
