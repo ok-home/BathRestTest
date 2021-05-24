@@ -9,6 +9,7 @@ void BathLightControl(void *p)
     int LightOnOff = 0;
     int autolight = 0;
     int flag;
+    int IrMvAnyAll;
     struct WsDataToSend req;
 
     for (;;)
@@ -19,6 +20,7 @@ void BathLightControl(void *p)
             xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
             autolight = DataParmTable[IDX_BATHLIGHTAUTOENABLE].val;
             LightOnOff = DataParmTable[IDX_BATHLIGHTSTATUS].val;
+            IrMvAnyAll = DataParmTable[IDX_BATHLIGHTIRMVANYALL].val;
             switch (unidata.HttpData.sender)
             {
             case IDX_QHD_HTTP:
@@ -413,7 +415,7 @@ void CheckDistMove(void *p)
     ud.DistData.sender = IDX_QHD_DistData;
     lightOnOff = 0;
     flag = 0;
-    distDelay = RestLightDelay;
+//    distDelay = RestLightDelay;
     for (;;)
     {
         xQueueReceive(DistIsrQueue, &dist, portMAX_DELAY);
@@ -421,6 +423,7 @@ void CheckDistMove(void *p)
         xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
         distOn = DataParmTable[IDX_RESTLIGHTONDIST].val;
         lightOnOff  = DataParmTable[IDX_RESTLIGHTSTATUS].val;
+        distDelay = DataParmTable[IDX_RESTLIGHTOFFDELAY].val;
         DataParmTable[IDX_DISTVOL].val = (int)dist;
         xSemaphoreGive(DataParmTableMutex);
         if (dist < distOn)

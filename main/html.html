@@ -115,7 +115,6 @@
 </head>
 
 <body>
-
     <div class="tab">
         <!-- верхнее меню -->
         <button class="tablinks" onclick="openTab(event, 'Data')" id="defaultOpenTab">Данные</button>
@@ -177,11 +176,13 @@
                         <div id="MvVol"></div>
                     </td>
                 </tr>
+<!--
                 <tr>
                     <td colspan="2">
                         <div id="EchoString" class="logstr"></div>
                     </td>
                 </tr>
+-->
             </tbody>
         </table>
         <form action="DisplayStatus" enctype="text/plain" id="Status" method="get" name="StatusForm">
@@ -232,6 +233,30 @@
                 </tbody>
             </table>
         </form>
+        <script>
+            /*StatusForm CheckBox*/
+            document.StatusForm.B_L_AutoEnable.addEventListener("click", function (e) {
+                EnableHandOnOff();
+                SendPairCheckBox(e);
+            });
+            document.StatusForm.B_L_OnOff.addEventListener("click", function (e) { SendPairCheckBox(e) });
+            document.StatusForm.R_L_AutoEnable.addEventListener("click", function (e) {
+                EnableHandOnOff();
+                SendPairCheckBox(e);
+            });
+            document.StatusForm.R_L_OnOff.addEventListener("click", function (e) { SendPairCheckBox(e) });
+            document.StatusForm.B_V_AutoEnable.addEventListener("click", function (e) {
+                EnableHandOnOff();
+                SendPairCheckBox(e);
+            });
+            document.StatusForm.B_V_OnOff.addEventListener("click", function (e) { SendPairCheckBox(e) });
+            document.StatusForm.R_V_AutoEnable.addEventListener("click", function (e) {
+                EnableHandOnOff();
+                SendPairCheckBox(e);
+            });
+            document.StatusForm.R_V_OnOff.addEventListener("click", function (e) { SendPairCheckBox(e) });
+
+        </script>
     </div>
     <div id="Param" class="tabcontent">
         <form action="AutoSetForm" enctype="text/plain" id="AutoSetId" method="get" name="AutoSetForm">&nbsp;
@@ -268,7 +293,7 @@
                             <input checked="checked" name="B_L_MvUse" type="checkbox" />Разрешить МВ
                         </td>
                         <td>
-                            Одновременно/по любому датчику <input checked="checked" name="IrMvAnyAll" type="checkbox" />
+                            Одновременно/по любому датчику <input checked="checked" name="B_L_IrMvAnyAll" type="checkbox" />
                         </td>
                         <td>Задержка Выключения<input name="B_L_OffDelay" type="text" value="120" /></td>
                     </tr>
@@ -278,7 +303,7 @@
                     <tr>
                         <td>Свет</td>
                         <td>Расстояние Включения Света<input name="R_L_OnDist" type="text" value="200" /></td>
-                        <td>Задержка Выключения Света<input name="R_L_Delay" type="text" value="250" /></td>
+                        <td>Задержка Выключения Света<input name="R_L_OffDelay" type="text" value="2" /></td>
                     </tr>
                     <tr>
                         <td>Вентиляция</td>
@@ -291,9 +316,108 @@
         <button class="btn default" id="WriteDataParm">Сохранить параметры</button>
 
         <script>
+            // сохранить данные в контроллере
             document.getElementById("WriteDataParm").addEventListener("click", function (e) {
                 socket.send(JSON.stringify({ name: "WriteDatаParm", msg: "false" }));
             });
+
+            /* AutoSetForm CheckBox*/
+            document.AutoSetForm.B_V_UseHum.addEventListener("click", function (e) {
+                EnableInputParm();
+                SendPairCheckBox(e);
+            });
+            document.AutoSetForm.B_V_UseMove.addEventListener("click", function (e) {
+                EnableInputParm();
+                SendPairCheckBox(e);
+            });
+            document.AutoSetForm.B_L_IrUse.addEventListener("click", function (e) { SendPairCheckBox(e) });
+            document.AutoSetForm.B_L_MvUse.addEventListener("click", function (e) { SendPairCheckBox(e) });
+            document.AutoSetForm.B_L_IrMvAnyAll.addEventListener("click", function (e) { SendPairCheckBox(e) });
+            
+            /*AutoSetForm input field */
+            document.AutoSetForm.B_HumOnParm.addEventListener("change", function (e) {
+                if (e.target.value >= MinHum && e.target.value <= MaxHum)
+                    SendPairInputData(e);
+                else {
+                    e.target.value = null;
+                    e.target.placeholder = "Интервал " + MinHum + "-" + MaxHum;
+                    e.target.focus();
+                }
+            });
+            document.AutoSetForm.B_HumOffParm.addEventListener("change", function (e) {
+                if (e.target.value >= MinHum && e.target.value <= MaxHum)
+                    SendPairInputData(e);
+                else {
+                    e.target.value = null;
+                    e.target.placeholder = "Интервал " + MinHum + "-" + MaxHum;
+                    e.target.focus();
+                }
+            });
+            document.AutoSetForm.B_V_OnDelay.addEventListener("change", function (e) {
+                if (e.target.value >= MinDelay && e.target.value <= MaxDelay)
+                    SendPairInputData(e);
+                else {
+                    e.target.value = null;
+                    e.target.placeholder = "Интервал " + MinDelay + "-" + MaxDelay;
+                    e.target.focus();
+                }
+            });
+            document.AutoSetForm.B_V_OffDelay.addEventListener("change", function (e) {
+                if (e.target.value >= MinDelay && e.target.value <= MaxDelay)
+                    SendPairInputData(e);
+                else {
+                    e.target.value = null;
+                    e.target.placeholder = "Интервал " + MinDelay + "-" + MaxDelay;
+                    e.target.focus();
+                }
+            });
+           document.AutoSetForm.B_L_OffDelay.addEventListener("change", function (e) {
+                if (e.target.value >= MinDelay && e.target.value <= MaxDelay)
+                    SendPairInputData(e);
+                else {
+                    e.target.value = null;
+                    e.target.placeholder = "Интервал " + MinDelay + "-" + MaxDelay;
+                    e.target.focus();
+                }
+            });
+            document.AutoSetForm.R_L_OnDist.addEventListener("change", function (e) {
+                if (e.target.value >= MinDistance && e.target.value <= MaxDistance)
+                    SendPairInputData(e);
+                else {
+                    e.target.value = null;
+                    e.target.placeholder = "Интервал " + MinDistance + "-" + MaxDistance;
+                    e.target.focus();
+                }
+            });
+            document.AutoSetForm.R_L_OffDelay.addEventListener("change", function (e) {
+                if (e.target.value >= MinDistance && e.target.value <= MaxDistance)
+                    SendPairInputData(e);
+                else {
+                    e.target.value = null;
+                    e.target.placeholder = "Интервал " + MinDistance + "-" + MaxDistance;
+                    e.target.focus();
+                }
+            });
+            document.AutoSetForm.R_V_OnDelay.addEventListener("change", function (e) {
+                if (e.target.value >= MinDelay && e.target.value <= MaxDelay)
+                    SendPairInputData(e);
+                else {
+                    e.target.value = null;
+                    e.target.placeholder = "Интервал " + MinDelay + "-" + MaxDelay;
+                    e.target.focus();
+                }
+            });
+            document.AutoSetForm.R_V_OffDelay.addEventListener("change", function (e) {
+                if (e.target.value >= MinDelay && e.target.value <= MaxDelay)
+                    SendPairInputData(e);
+                else {
+                    e.target.value = null;
+                    e.target.placeholder = "Интервал " + MinDelay + "-" + MaxDelay;
+                    e.target.focus();
+                }
+            });
+
+
         </script>
     </div>
     <div id="OTA" class="tabcontent">
@@ -491,18 +615,140 @@
             });
         </script>
     </div>
-
+    <div id="EchoString" class="logstr"></div>
     <script>/* common script*/
 
         /*data range*/
-        MaxHum = 90;
-        MinHum = 10;
-        MaxDelay = 300;
-        MinDelay = 0;
-        MaxDistance = 400;
-        MinDistance = 10;
+        const MaxHum = 90;
+        const MinHum = 10;
+        const MaxDelay = 300;
+        const MinDelay = 0;
+        const MaxDistance = 400;
+        const MinDistance = 10;
+
+
+
+        EnableHandOnOff();
+        EnableInputParm();
+        //var otasocket = new WebSocket("ws://echo.websocket.org");
+        //var socket = new WebSocket("ws://192.168.1.61/ws");
+        // создать сокет по адресу
+        var wsHostStr = "ws://" + document.location.host + "/ws";
+        var socket = new WebSocket(wsHostStr);
+        // инфо с контроллера
+        var status = document.getElementById("EchoString");
         // Get the element with id="defaultOpen" and click on it
         document.getElementById("defaultOpenTab").click();
+
+
+        // открыть сокет в контроллере
+        socket.onopen = function () {
+            status.innerHTML = "cоединение установлено";
+            socket.send("sstrt");
+        };
+        // сокет закрыт
+        socket.onclose = function (event) {
+            if (event.wasClean) {
+                status.innerHTML = 'cоединение закрыто';
+            } else {
+                status.innerHTML = 'соединения как-то закрыто';
+            }
+            status.innerHTML += ' код: ' + event.code + ' причина: ' + event.reason;
+        };
+
+        //чтение данных сокета с сервера
+
+        socket.onmessage = function (event) {
+            let message = JSON.parse(event.data);
+            status.innerHTML = `пришли данные: <b>${message.name}</b>: ${message.msg}`;
+            /*
+          /* Инликация включения света и вентиляции ( пока в режиме эхо), 
+          /*в дальнейшем заменить Case переменные"
+          */
+            switch (message.name) {
+                /* показать состояние включения света и вентиляции */
+                case "B_L_Status":
+                    if (message.msg == true) document.getElementById("B_L_Status").innerHTML = "Вкл";
+                    else document.getElementById("B_L_Status").innerHTML = "Выкл";
+                    break;
+                case "R_L_Status":
+                    if (message.msg == true) document.getElementById("R_L_Status").innerHTML = "Вкл";
+                    else document.getElementById("R_L_Status").innerHTML = "Выкл";
+                    break;
+                case "B_V_Status":
+                    if (message.msg == true) document.getElementById("B_V_Status").innerHTML = "Вкл";
+                    else document.getElementById("B_V_Status").innerHTML = "Выкл";
+                    break;
+                case "R_V_Status":
+                    if (message.msg == true) document.getElementById("R_V_Status").innerHTML = "Вкл";
+                    else document.getElementById("R_V_Status").innerHTML = "Выкл";
+                    break;
+                /* показать состояние датчиков */
+                case "TempVol":
+                case "HumVol":
+                case "DistVol":
+                    document.getElementById(message.name).innerHTML = message.msg;
+                    break;
+                case "IrVol":
+                case "MvVol":
+                    if (message.msg == true) message.msg = "Вкл"; else message.msg = "Выкл";
+                    document.getElementById(message.name).innerHTML = message.msg;
+                    break;
+
+                /* Status FormField */
+                case "B_L_AutoEnable":
+                case "R_L_AutoEnable":
+                case "R_V_AutoEnable":
+                case "B_V_AutoEnable":
+                case "B_L_OnOff":
+                case "R_L_OnOff":
+                case "B_V_OnOff":
+                case "R_V_OnOff":
+                    document.StatusForm.elements[message.name].checked = message.msg;
+                    EnableHandOnOff();
+                    break;
+
+                /*Data Sw Autoset Forms*/
+                case "B_V_UseHum":
+                case "B_V_UseMove":
+                case "B_L_IrUse":
+                case "B_L_MvUse":
+                case "B_L_IrMvAnyAll":                  // add any/all - any = false, all = true
+                    document.AutoSetForm.elements[message.name].checked = message.msg;
+                    EnableInputParm();
+                    break;
+
+                /*Data Param Autoset Form */
+                case "B_HumOnParm":
+                case "B_HumOffParm":
+                case "B_V_OnDelay":
+                case "B_V_OffDelay":
+//                case "B_L_OnDelay": // delete not use
+                case "B_L_OffDelay":
+                case "R_L_OnDist":
+                case "R_L_OffDelay": // изменено
+                case "R_V_OnDelay":
+                case "R_V_OffDelay":
+                    document.AutoSetForm.elements[message.name].value = message.msg;
+                    break;
+                case "wifi_ssid":
+                    document.getElementById("WiFi_SSID").value = message.msg;
+                    break;
+                case "wifi_pass":
+                    document.getElementById("WiFi_Pass").value = message.msg;
+                    break;
+                case "wifi_sta_ap":
+                    document.getElementById("WiFi_STA_AP").value = message.msg;
+                    break;
+            }
+
+        };
+
+        socket.onerror = function (event) {
+            status.innerHTML = "ошибка " + event.message;
+        };
+
+
 
 
 

@@ -1,6 +1,56 @@
+<style>
+        .logstr,
+        textarea {
+            width: 100%;
+            height: 100%;
+            resize: none;
+            /* vertical*/
+            /* Allow the user to vertically resize the textarea (not horizontally) */
+            overflow-y: scroll;
+        }
+</style>
 
 
- <script> location.href = "http://" + "192.168.1.61";</script>
+
+<div id="EchoString" class="logstr"></div>
+
+ <script>
+    var maxArr = 20;
+    logIdx = 0;
+  var logArr = [''];
+  /*for(i=0; i<200;i++)
+  {
+    logArr.push(logArr.length +' Echo '+ "<br>");
+  }  
+  //location.href = "http://" + "192.168.1.61";
+  var log = document.getElementById("EchoString");
+  //log.innerText = "123321123321123 \n kjhgkjhgkjhgkjhg";
+  */
+  var log = document.getElementById("EchoString");
+  setInterval(inlog,1000);
+  //setInterval(outlog,1000);
+
+  function  outlog(){
+    log.innerHTML = "";
+  for(i=0; i< logArr.length; i++)
+  {
+      log.innerHTML += logArr[i];
+      
+      //logArr.push(logArr.length +' Echo '+ "<br>");
+  }
+}
+function inlog()
+{
+    if(logArr.length >= maxArr ){
+        logArr.shift();
+    }
+    logArr.push(logArr.length + "  " + logIdx +' Echo '+ "<br>");
+    logIdx++;
+    outlog();
+
+}
+  //log.innerText = "123321123321123 \n kjhgkjhgkjhgkjhg";
+  </script>
  <!--var wsHostStr = "ws://" + document.location.host + "/ws"-->
 
 

@@ -34,10 +34,10 @@ httpNameParm_t DataParmTable[MAX_IDX_PARM_TABLE] = {
     {"B_HumOffParm", 50, 1, Q_BATHVENT_IDX},
     {"B_V_OnDelay", 1, 1, Q_BATHVENT_IDX},
     {"B_V_OffDelay", 10, 1, Q_BATHVENT_IDX},
-    {"B_L_OnDelay", 0, 1, Q_BATHLIGHT_IDX},
+    {"B_L_IrMvAnyAll", 0, 0, Q_BATHLIGHT_IDX}, // изменено
     {"B_L_OffDelay", 10, 1, Q_BATHLIGHT_IDX},
     {"R_L_OnDist", 120, 1, Q_RESTLIGHT_IDX},
-    {"R_L_OffDist", 120, 1, Q_RESTLIGHT_IDX},
+    {"R_L_OffDelay", 2, 1, Q_RESTLIGHT_IDX}, //изменено на задержку выключения света в туалете
     {"R_V_OnDelay", 1, 1, Q_RESTVENT_IDX},
     {"R_V_OffDelay", 10, 1, Q_RESTVENT_IDX}};
 
@@ -50,8 +50,8 @@ struct async_resp_arg SocketArgDb[CONFIG_LWIP_MAX_SOCKETS] = {{NULL}, {0}};
 */
 QueueHandle_t CtrlQueueTab[Q_MAX_TABLE_IDX];
 
-uint8_t IrMvAnyAll = 0 ; // 0 - Any, 1 - All - пока нет в таблице параметров
-int RestLightDelay = 2 ;// нет в таблице параметров - задержка выключения света по датчику расстояния
+//uint8_t IrMvAnyAll = 0 ; // 0 - Any, 1 - All - пока нет в таблице параметров
+//int RestLightDelay = 2 ;// нет в таблице параметров - задержка выключения света по датчику расстояния
 
 /*
 * таблица параметров wifi

@@ -135,10 +135,10 @@ union QueueHwData
 #define IDX_BATHHUMOFFPARM 22    // влажность для выключения
 #define IDX_BATHVENTONDELAY 23   // задержка включения вентиляции в ванной
 #define IDX_BATHVENTOFFDELAY 24  // задержка выключения вентиляции в ванной
-#define IDX_BATHLIGHTONDELAY 25  // задержка включения света в ванной // не используем
+#define IDX_BATHLIGHTIRMVANYALL 25  // задержка включения света в ванной // не используем IDX_BATHLIGHTONDELAY - один/оба датчика
 #define IDX_BATHLIGHTOFFDELAY 26 // задержка выключения света в ванной
 #define IDX_RESTLIGHTONDIST 27   // расстояние включения света в туалете
-#define IDX_RESTLIGHTOFFDIST 28  // расстояние выключения света в туалете // не используем
+#define IDX_RESTLIGHTOFFDELAY 28  // расстояние выключения света в туалете // не используем - ИЗМЕНЕНО НА ЗАДЕРЖКУ ВЫКЛЮЧЕНИЯ ВЕНТИЛЯЦИИ
 #define IDX_RESTVENTONDELAY 29   // задержка включения вентиляции в туалете
 #define IDX_RESTVENTOFFDELAY 30   // задержка выключения вентиляции в туалете
 
@@ -231,8 +231,8 @@ QueueHandle_t RestVentSendToCtrl;
 */
 extern QueueHandle_t CtrlQueueTab[];
 
-extern uint8_t IrMvAnyAll; // 0 - Any, 1 - All - пока нет в таблице параметров
-extern int RestLightDelay;
+//extern uint8_t IrMvAnyAll; // 0 - Any, 1 - All - пока нет в таблице параметров
+//extern int RestLightDelay;
 
 
 #define OTA_IDX_MSG_START 64
