@@ -298,6 +298,7 @@ static void disconnect_handler(void *arg, esp_event_base_t event_base,
         ESP_LOGI(TAG, "Stopping webserver");
         stop_webserver(*server);
         *server = NULL;
+        esp_restart(); //перейти на AP после рестарта. - потеряно соединение с wifi
     }
 }
 

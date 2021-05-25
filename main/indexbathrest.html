@@ -93,6 +93,7 @@
         }
 
         .table {
+            max-width: 500px;
             width: 100%;
             margin-bottom: 20px;
             border: 1px solid #dddddd;
@@ -110,6 +111,79 @@
             border: 1px solid #dddddd;
             padding: 5px;
             text-align: center
+        }
+
+        /*progress bar*/
+        .dataPB {
+            width: 100%;
+            background-color: grey;
+        }
+
+        .dataVol {
+            width: 10%;
+            height: 20px;
+            background-color: #03f50b;
+            text-align: left;
+            /* To center it horizontally (if you want) */
+            line-height: 20px;
+            /* To center it vertically */
+            color: white;
+        }
+
+        .dataLBL {
+            width: 150px;
+        }
+
+        /*switch*/
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 20px;
+        }
+
+        /* Hide default HTML checkbox */
+        .switch input {
+            display: none;
+        }
+
+        /* The slider */
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 22px;
+            left: 4px;
+            bottom: 3px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked+.slider {
+            background-color: #2cff02;
+        }
+
+        input:focus+.slider {
+            box-shadow: 0 0 1px #2cff02;
+        }
+
+        input:checked+.slider:before {
+            -webkit-transform: translateX(20px);
+            -ms-transform: translateX(20px);
+            transform: translateX(20px);
         }
     </style>
 </head>
@@ -147,42 +221,45 @@
                     <th colspan="2">Данные Датчиков</th>
                 </tr>
                 <tr>
-                    <td>Температура</td>
+                    <td class="dataLBL"> Температура</td>
                     <td>
-                        <div id="TempVol"></div>
+                        <div id="tempPB" class="dataPB">
+                            <div id="TempVol" class="dataVol"></div>
+                        </div>
                     </td>
                 </tr>
                 <tr>
-                    <td>Влажность</td>
+                    <td class="dataLBL">Влажность</td>
                     <td>
-                        <div id="HumVol"></div>
+                        <div id="humPB" class="dataPB">
+                            <div id="HumVol" class="dataVol"></div>
+                        </div>
                     </td>
                 </tr>
                 <tr>
-                    <td>Расстояние</td>
+                    <td class="dataLBL">Расстояние</td>
                     <td>
-                        <div id="DistVol"></div>
+                        <div id="distPB" class="dataPB">
+                            <div id="DistVol" class="dataVol"></div>
+                        </div>
                     </td>
                 </tr>
                 <tr>
-                    <td>Ик Датчик Движения</td>
+                    <td class="dataLBL">Ик Датчик</td>
                     <td>
-                        <div id="IrVol"></div>
+                        <div id="irtPB" class="dataPB">
+                            <div id="IrVol" class="dataVol"></div>
+                        </div>
                     </td>
                 </tr>
                 <tr>
-                    <td>Мв Датчик Движения</td>
+                    <td class="dataLBL">Мв Датчик</td>
                     <td>
-                        <div id="MvVol"></div>
+                        <div id="mvPB" class="dataPB">
+                            <div id="MvVol" class="dataVol"></div>
+                        </div>
                     </td>
                 </tr>
-<!--
-                <tr>
-                    <td colspan="2">
-                        <div id="EchoString" class="logstr"></div>
-                    </td>
-                </tr>
--->
             </tbody>
         </table>
         <form action="DisplayStatus" enctype="text/plain" id="Status" method="get" name="StatusForm">
@@ -195,40 +272,85 @@
                         <th>Ручное включение</th>
                     </tr>
                     <tr>
-                        <td>Свет Ванная</td>
+                        <td class="dataLBL">Свет Ванная</td>
                         <td>
-                            <div id="B_L_Status"> </div>
+                            <div id="blPB" class="dataPB">
+                                <div id="B_L_Status" class="dataVol"></div>
+                            </div>
                         </td>
-                        <td><input checked="checked" name="B_L_AutoEnable" type="checkbox" value="On">&nbsp;Разрешить
+                        <td>
+                            <label class="switch">
+                                <input checked="checked" name="B_L_AutoEnable" type="checkbox" value="On">
+                                <span class="slider"></span>
+                            </label>
                         </td>
-                        <td><input checked="checked" name="B_L_OnOff" type="checkbox" value="On">&nbsp;Вкл/Выкл</td>
+                        <td>
+                            <label class="switch">
+                                <input checked="checked" name="B_L_OnOff" type="checkbox" value="On">
+                                <span class="slider"></span>
+                            </label>
+
+                        </td>
                     </tr>
                     <tr>
-                        <td>Свет Туалет</td>
+                        <td class="dataLBL">Свет Туалет</td>
                         <td>
-                            <div id="R_L_Status"> </div>
+                            <div id="rlPB" class="dataPB">
+                                <div id="R_L_Status" class="dataVol"></div>
+                            </div>
                         </td>
-                        <td><input checked="checked" name="R_L_AutoEnable" type="checkbox" value="On">&nbsp;Разрешить
+                        <td>
+                            <label class="switch">
+                                <input checked="checked" name="R_L_AutoEnable" type="checkbox" value="On">
+                                <span class="slider"></span>
+                            </label>
                         </td>
-                        <td><input checked="checked" name="R_L_OnOff" type="checkbox" value="On">&nbsp;Вкл/Выкл</td>
+                        <td>
+                            <label class="switch">
+                                <input checked="checked" name="R_L_OnOff" type="checkbox" value="On">
+                                <span class="slider"></span>
+                            </label>
+                        </td>
                     </tr>
                     <tr>
-                        <td>Вентиляция Ванная</td>
+                        <td class="dataLBL">Вентиляция Ванная</td>
                         <td>
-                            <div id="B_V_Status"> </div>
+                            <div id="bvPB" class="dataPB">
+                                <div id="B_V_Status" class="dataVol"></div>
+                            </div>
                         </td>
-                        <td><input checked="checked" name="B_V_AutoEnable" type="checkbox" value="On">&nbsp;Разрешить
+                        <td>
+                            <label class="switch">
+                                <input checked="checked" name="B_V_AutoEnable" type="checkbox" value="On">
+                                <span class="slider"></span>
+                            </label>
                         </td>
-                        <td><input checked="checked" name="B_V_OnOff" type="checkbox" value="On">&nbsp;Вкл/Выкл</td>
+                        <td>
+                            <label class="switch">
+                                <input checked="checked" name="B_V_OnOff" type="checkbox" value="On">
+                                <span class="slider"></span>
+                            </label>
+                        </td>
                     </tr>
                     <tr>
-                        <td>Вентиляция Туалет</td>
+                        <td class="dataLBL">Вентиляция Туалет</td>
                         <td>
-                            <div id="R_V_Status"> </div>
+                            <div id="rvPB" class="dataPB">
+                                <div id="R_V_Status" class="dataVol"></div>
+                            </div>
                         </td>
-                        <td><input checked="checked" name="R_V_AutoEnable" type="checkbox" value="On">&nbsp;Разрешить
+                        <td>
+                            <label class="switch">
+                                <input checked="checked" name="R_V_AutoEnable" type="checkbox" value="On">
+                                <span class="slider"></span>
+                            </label>
                         </td>
-                        <td><input checked="checked" name="R_V_OnOff" type="checkbox" value="On">&nbsp;Вкл/Выкл</td>
+                        <td>
+                            <label class="switch">
+                                <input checked="checked" name="R_V_OnOff" type="checkbox" value="On">
+                                <span class="slider"></span>
+                            </label>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -270,7 +392,12 @@
 
                     </tr>
                     <tr>
-                        <td><input checked="checked" name="B_V_UseHum" type="checkbox" />Разрешить</td>
+                        <td>
+                            <label class="switch">
+                                <input checked="checked" name="B_V_UseHum" type="checkbox" />
+                                <span class="slider"></span>
+                            </label>
+                        </td>
                         <td>Включение больше<input name="B_HumOnParm" type="text" value="70" /></td>
                         <td>Выключение меньше<input name="B_HumOffParm" type="text" value="50" />
                         </td>
@@ -279,7 +406,12 @@
                         <th colspan="3">Вентиляция Ванна Присутствие</th>
                     </tr>
                     <tr>
-                        <td><input checked="checked" name="B_V_UseMove" type="checkbox" />Разрешить</td>
+                        <td>
+                            <label class="switch">
+                                <input checked="checked" name="B_V_UseMove" type="checkbox" />
+                                <span class="slider"></span>
+                            </label>
+                        </td>
                         <td>Задержка Включения<input name="B_V_OnDelay" type="text" value="0" /></td>
                         <td>Задержка выключения<input name="B_V_OffDelay" type="text" value="120" /></td>
                     </tr>
@@ -288,12 +420,22 @@
                     </tr>
                     <tr>
                         <td>
-                            <input checked="checked" name="B_L_IrUse" type="checkbox" />Разрешить ИК
+                            <label class="switch">
+                                <input checked="checked" name="B_L_IrUse" type="checkbox" />
+                                <span class="slider"></span>
+                            </label>ИК
                             <p></p>
-                            <input checked="checked" name="B_L_MvUse" type="checkbox" />Разрешить МВ
+                            <label class="switch">
+                                <input checked="checked" name="B_L_MvUse" type="checkbox" />
+                                <span class="slider"></span>
+                            </label>МВ
                         </td>
                         <td>
-                            Одновременно/по любому датчику <input checked="checked" name="B_L_IrMvAnyAll" type="checkbox" />
+                            <label class="switch">
+                                 <input checked="checked" name="B_L_IrMvAnyAll"
+                                type="checkbox" />
+                                <span class="slider"></span>
+                            </label><br>Оба/Любой
                         </td>
                         <td>Задержка Выключения<input name="B_L_OffDelay" type="text" value="120" /></td>
                     </tr>
@@ -307,7 +449,7 @@
                     </tr>
                     <tr>
                         <td>Вентиляция</td>
-                        <td>Задержка включения Вентиляции<input name="R_V_OnDelay" type="text" value="30" /></td>
+                        <td>Задержка Включения Вентиляции<input name="R_V_OnDelay" type="text" value="30" /></td>
                         <td>Задержка Выключения Вентиляции <input name="R_V_OffDelay" type="text" value="120" /></td>
                     </tr>
                 </tbody>
@@ -333,7 +475,7 @@
             document.AutoSetForm.B_L_IrUse.addEventListener("click", function (e) { SendPairCheckBox(e) });
             document.AutoSetForm.B_L_MvUse.addEventListener("click", function (e) { SendPairCheckBox(e) });
             document.AutoSetForm.B_L_IrMvAnyAll.addEventListener("click", function (e) { SendPairCheckBox(e) });
-            
+
             /*AutoSetForm input field */
             document.AutoSetForm.B_HumOnParm.addEventListener("change", function (e) {
                 if (e.target.value >= MinHum && e.target.value <= MaxHum)
@@ -371,7 +513,7 @@
                     e.target.focus();
                 }
             });
-           document.AutoSetForm.B_L_OffDelay.addEventListener("change", function (e) {
+            document.AutoSetForm.B_L_OffDelay.addEventListener("change", function (e) {
                 if (e.target.value >= MinDelay && e.target.value <= MaxDelay)
                     SendPairInputData(e);
                 else {
@@ -617,18 +759,19 @@
     </div>
 
     <div id="EchoString" class="logstr"></div>
-    
+
     <script>/* common script*/
 
         /*data range*/
+        const MaxTemp = 60;
+        const MinTemp = 10;
         const MaxHum = 90;
         const MinHum = 10;
         const MaxDelay = 300;
         const MinDelay = 0;
         const MaxDistance = 400;
         const MinDistance = 10;
-
-
+        /*demo*/
 
         EnableHandOnOff();
         EnableInputParm();
@@ -638,7 +781,7 @@
         var wsHostStr = "ws://" + document.location.host + "/ws";
         var socket = new WebSocket(wsHostStr);
         // инфо с контроллера
-        
+
         var statusstr = document.getElementById("EchoString");
         document.getElementById("EchoString").innerHTML = "test test test";
         statusstr.innerHTML = " statu status ";
@@ -673,33 +816,36 @@
             switch (message.name) {
                 /* показать состояние включения света и вентиляции */
                 case "B_L_Status":
-                    if (message.msg == true) document.getElementById("B_L_Status").innerHTML = "Вкл";
-                    else document.getElementById("B_L_Status").innerHTML = "Выкл";
-                    break;
                 case "R_L_Status":
-                    if (message.msg == true) document.getElementById("R_L_Status").innerHTML = "Вкл";
-                    else document.getElementById("R_L_Status").innerHTML = "Выкл";
-                    break;
                 case "B_V_Status":
-                    if (message.msg == true) document.getElementById("B_V_Status").innerHTML = "Вкл";
-                    else document.getElementById("B_V_Status").innerHTML = "Выкл";
-                    break;
                 case "R_V_Status":
-                    if (message.msg == true) document.getElementById("R_V_Status").innerHTML = "Вкл";
-                    else document.getElementById("R_V_Status").innerHTML = "Выкл";
+                    displayOnOff(message);
                     break;
                 /* показать состояние датчиков */
                 case "TempVol":
+                    document.getElementById(message.name).style.width = (message.msg / (MaxTemp - MinTemp)) * 100 + "%";
+                    document.getElementById(message.name).innerHTML = message.msg;
+                    break;
                 case "HumVol":
+                    document.getElementById(message.name).style.width = (message.msg / (MaxHum - MinHum)) * 100 + "%";
+                    document.getElementById(message.name).innerHTML = message.msg;
+                    break;
                 case "DistVol":
+                    document.getElementById(message.name).style.width = (message.msg / (MaxDistance - MinDistance)) * 100 + "%";
                     document.getElementById(message.name).innerHTML = message.msg;
                     break;
                 case "IrVol":
                 case "MvVol":
-                    if (message.msg == true) message.msg = "Вкл"; else message.msg = "Выкл";
-                    document.getElementById(message.name).innerHTML = message.msg;
+                    displayOnOff(message);
+                    /*                    if (message.msg == true) {
+                                            document.getElementById(message.name).innerHTML = "Вкл";
+                                            document.getElementById(message.name).style.width = 100 + "%";
+                                        }
+                                        else {
+                                            document.getElementById(message.name).innerHTML = "Выкл";
+                                            document.getElementById(message.name).style.width = 0 + "%";
+                                        }*/
                     break;
-
                 /* Status FormField */
                 case "B_L_AutoEnable":
                 case "R_L_AutoEnable":
@@ -728,7 +874,7 @@
                 case "B_HumOffParm":
                 case "B_V_OnDelay":
                 case "B_V_OffDelay":
-//                case "B_L_OnDelay": // delete not use
+                //                case "B_L_OnDelay": // delete not use
                 case "B_L_OffDelay":
                 case "R_L_OnDist":
                 case "R_L_OffDelay": // изменено
@@ -753,6 +899,17 @@
             status.innerHTML = "ошибка " + event.message;
         };
 
+        function displayOnOff(message) {
+            var elem = document.getElementById(message.name);
+            if (message.msg == true) {
+                elem.innerHTML = "Вкл";
+                elem.style.width = 100 + "%";
+            }
+            else {
+                elem.innerHTML = "Выкл";
+                elem.style.width = 0 + "%";
+            }
+        }
 
 
 

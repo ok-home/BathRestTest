@@ -1,22 +1,100 @@
 <style>
-        .logstr,
-        textarea {
-            width: 100%;
-            height: 100%;
-            resize: none;
-            /* vertical*/
-            /* Allow the user to vertically resize the textarea (not horizontally) */
-            overflow-y: scroll;
-        }
+  .logstr,
+  textarea {
+    width: 100%;
+    height: 100%;
+    resize: none;
+    /* vertical*/
+    /* Allow the user to vertically resize the textarea (not horizontally) */
+    overflow-y: scroll;
+  }
+  .slidecontainer {
+    width: 550px; /* Width of the outside container */
+}
+
+.wdt {
+    width: 50px;
+    height: 25px;
+}
+
+/* The slider itself */
+.slider {
+    -webkit-appearance: none;  /* Override default CSS styles */
+    appearance: none;
+    width: 200px; /* Full-width */
+    height: 25px; /* Specified height */
+    background: #d3d3d3; /* Grey background */
+    outline: none; /* Remove outline */
+    opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+    -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+    transition: opacity .2s;
+}
+
+/* Mouse-over effects */
+.slider:hover {
+    opacity: 1; /* Fully shown on mouse-over */
+}
+
+/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Override default look */
+    appearance: none;
+    width: 25px; /* Set a specific slider handle width */
+    height: 25px; /* Slider handle height */
+    background: #4CAF50; /* Green background */
+    cursor: pointer; /* Cursor on hover */
+}
+
+.slider::-moz-range-thumb {
+    width: 25px; /* Set a specific slider handle width */
+    height: 25px; /* Slider handle height */
+    background: #4CAF50; /* Green background */
+    cursor: pointer; /* Cursor on hover */
+}
+  
+
 </style>
 
+<div class="slidecontainer">
+  <input id= "demo" name="demo" type="number" value="50" class = "wdt" />
+  <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
+  <input type="range" min="1" max="100" value="50" class="slider" id="myRange1">
+  <input id= "demo1" name="demo" type="number" value="50" class = "wdt" />
 
+</div>
 
 <div id="EchoString" class="logstr"></div>
 
- <script>
-    var maxArr = 20;
-    logIdx = 0;
+<script>
+var slider = document.getElementById("myRange");
+var output = document.getElementById("demo");
+var slider1 = document.getElementById("myRange1");
+var output1 = document.getElementById("demo1");
+
+// Update the current slider value (each time you drag the slider handle)
+slider.oninput = function() {
+    output.value = this.value;
+    if(output1.value > output.value)
+    slider1.value=output.value;
+    output1.value=output.value;
+      
+}
+demo.oninput = function(){
+  slider.value = this.value;
+}
+slider1.oninput = function() {
+    output1.value = this.value;
+    if(output1.value < output.value)
+      slider.value=output1.value;
+      ounput.value=output1.value;
+
+}
+demo1.oninput = function(){
+  slider1.value = this.value;
+}
+
+  var maxArr = 20;
+  logIdx = 0;
   var logArr = [''];
   /*for(i=0; i<200;i++)
   {
@@ -27,32 +105,26 @@
   //log.innerText = "123321123321123 \n kjhgkjhgkjhgkjhg";
   */
   var log = document.getElementById("EchoString");
-  setInterval(inlog,1000);
+  //setInterval(inlog,1000);
   //setInterval(outlog,1000);
 
-  function  outlog(){
+  function outlog() {
     log.innerHTML = "";
-  for(i=0; i< logArr.length; i++)
-  {
+    for (i = 0; i < logArr.length; i++) {
       log.innerHTML += logArr[i];
-      
+
       //logArr.push(logArr.length +' Echo '+ "<br>");
-  }
-}
-function inlog()
-{
-    if(logArr.length >= maxArr ){
-        logArr.shift();
     }
-    logArr.push(logArr.length + "  " + logIdx +' Echo '+ "<br>");
+  }
+  function inlog() {
+    if (logArr.length >= maxArr) {
+      logArr.shift();
+    }
+    logArr.push(logArr.length + "  " + logIdx + ' Echo ' + "<br>");
     logIdx++;
     outlog();
 
-}
+  }
   //log.innerText = "123321123321123 \n kjhgkjhgkjhgkjhg";
-  </script>
- <!--var wsHostStr = "ws://" + document.location.host + "/ws"-->
-
-
-  
- 
+</script>
+<!--var wsHostStr = "ws://" + document.location.host + "/ws"-->
