@@ -14,6 +14,7 @@
             overflow: hidden;
             border: 1px solid #ccc;
             background-color: #f1f1f1;
+            width: 500px;
         }
 
         /* Style the buttons inside the tab */
@@ -44,6 +45,7 @@
             padding: 14px 14px;
             border: 1px solid #ccc;
             border-top: none;
+            width: 500px;
         }
 
         /* Style inputs with type="text", select elements and textareas */
@@ -52,7 +54,7 @@
         input[type=file],
         select,
         textarea {
-            width: 100%;
+            width: 500px;
             /* Full width */
             font-size: 14px;
             padding: 14px 14px;
@@ -398,8 +400,8 @@
                                 <span class="slider"></span>
                             </label>
                         </td>
-                        <td>Включение больше<input name="B_HumOnParm" type="text" value="70" /></td>
-                        <td>Выключение меньше<input name="B_HumOffParm" type="text" value="50" />
+                        <td>Включение<input name="B_HumOnParm" type="number" value="70" /></td>
+                        <td>Выключение<input name="B_HumOffParm" type="number" value="50" />
                         </td>
                     </tr>
                     <tr>
@@ -412,8 +414,8 @@
                                 <span class="slider"></span>
                             </label>
                         </td>
-                        <td>Задержка Включения<input name="B_V_OnDelay" type="text" value="0" /></td>
-                        <td>Задержка выключения<input name="B_V_OffDelay" type="text" value="120" /></td>
+                        <td>Задержка Включения<input name="B_V_OnDelay" type="number" value="0" /></td>
+                        <td>Задержка Выключения<input name="B_V_OffDelay" type="number" value="120" /></td>
                     </tr>
                     <tr>
                         <th colspan="3">Датчики движения Ванная</th>
@@ -437,20 +439,20 @@
                                 <span class="slider"></span>
                             </label><br>Оба/Любой
                         </td>
-                        <td>Задержка Выключения<input name="B_L_OffDelay" type="text" value="120" /></td>
+                        <td>Задержка Выключения<input name="B_L_OffDelay" type="number" value="120" /></td>
                     </tr>
                     <tr>
                         <th colspan="3">Туалет</th>
                     </tr>
                     <tr>
                         <td>Свет</td>
-                        <td>Расстояние Включения Света<input name="R_L_OnDist" type="text" value="200" /></td>
-                        <td>Задержка Выключения Света<input name="R_L_OffDelay" type="text" value="2" /></td>
+                        <td>Расстояние Включения<input name="R_L_OnDist" type="number" value="200" /></td>
+                        <td>Задержка Выключения<input name="R_L_OffDelay" type="number" value="2" /></td>
                     </tr>
                     <tr>
                         <td>Вентиляция</td>
-                        <td>Задержка Включения Вентиляции<input name="R_V_OnDelay" type="text" value="30" /></td>
-                        <td>Задержка Выключения Вентиляции <input name="R_V_OffDelay" type="text" value="120" /></td>
+                        <td>Задержка Включения<input name="R_V_OnDelay" type="number" value="30" /></td>
+                        <td>Задержка Выключения<input name="R_V_OffDelay" type="number" value="120" /></td>
                     </tr>
                 </tbody>
             </table>
