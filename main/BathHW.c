@@ -411,7 +411,7 @@ void CheckDistMove(void *p)
     uint16_t dist;
     int distOn, distDelay, lightOnOff, flag;
     union QueueHwData ud;
-
+    TickType_t startTick = 0;
     ud.DistData.sender = IDX_QHD_DistData;
     lightOnOff = 0;
     flag = 0;
@@ -428,6 +428,7 @@ void CheckDistMove(void *p)
         xSemaphoreGive(DataParmTableMutex);
         if (dist < distOn)
         {
+            startTick = xTaskGetTickCount();
             if (lightOnOff == 0)
             {
                 lightOnOff = 1;
@@ -440,9 +441,12 @@ void CheckDistMove(void *p)
         {
             if (lightOnOff == 1)
             {
-                vTaskDelay((distDelay * 1000) / portTICK_RATE_MS);
+                if((startTick+(distDelay * 1000) / portTICK_RATE_MS) < xTaskGetTickCount())
+                //vTaskDelay((distDelay * 1000) / portTICK_RATE_MS);
+                {
                 lightOnOff = 0;
                 flag = 1;
+                }
             }
             else
                 flag = 0;

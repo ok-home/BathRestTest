@@ -80,7 +80,7 @@ void DistIsrSetup(void *p)
             {
                 midl_dist = dist;
             }
-            if (++cnt == 4)
+            if (++cnt == 3)
             {
                 xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
                 DataParmTable[IDX_DISTVOL].val = midl_dist;

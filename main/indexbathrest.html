@@ -437,7 +437,7 @@
                                  <input checked="checked" name="B_L_IrMvAnyAll"
                                 type="checkbox" />
                                 <span class="slider"></span>
-                            </label><br>Оба/Любой
+                            </label><br>Любой/Оба
                         </td>
                         <td>Задержка Выключения<input name="B_L_OffDelay" type="number" value="120" /></td>
                     </tr>
@@ -534,7 +534,7 @@
                 }
             });
             document.AutoSetForm.R_L_OffDelay.addEventListener("change", function (e) {
-                if (e.target.value >= MinDistance && e.target.value <= MaxDistance)
+                if (e.target.value >= MinDelay && e.target.value <= MaxDelay)
                     SendPairInputData(e);
                 else {
                     e.target.value = null;
