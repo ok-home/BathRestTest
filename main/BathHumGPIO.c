@@ -311,7 +311,7 @@ void HumIsrSetup(void *p)
 		temp = ht21d_read_temperature();
 		hum = ht21d_read_humidity();
 		//		ESP_LOGI("HUM meshured","HUM %f TEMP %f ", hum, temp);
-		if ((temp > 0) && (hum > 0))
+		if ((temp > 0) && (hum > 0) && (temp < 110) && (hum < 110 ))
 		{
 			xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
 			DataParmTable[IDX_TEMPVOL].val = (int)temp;

@@ -12,8 +12,8 @@ httpNameParm_t DataParmTable[MAX_IDX_PARM_TABLE] = {
     {"TempVol", 56, 1, Q_NO_IDX},
     {"HumVol", 68, 1, Q_NO_IDX},
     {"DistVol", 230, 1, Q_NO_IDX},
-    {"IrVol", 1, 0, Q_NO_IDX},
-    {"MvVol", 1, 0, Q_NO_IDX},
+    {"IrVol", 0, 0, Q_NO_IDX},
+    {"MvVol", 0, 0, Q_NO_IDX},
 
     {"B_L_AutoEnable", 1, 0, Q_BATHLIGHT_IDX},
     {"R_L_AutoEnable", 1, 0, Q_RESTLIGHT_IDX},

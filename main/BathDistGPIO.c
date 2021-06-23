@@ -6,7 +6,7 @@
 #define RMT_RX_CHANNEL 6                      /* RMT channel for receiver */
 #define RMT_RX_GPIO_NUM GPIO_DIST_ECHO_IN     /* GPIO number for receiver */
 #define RMT_CLK_DIV 147                       //1.84 us  -   0,0312 cm
-#define rmt_item32_tIMEOUT 15000              // 468 cm /*!< RMT receiver timeout value(us) */ // 8075 см - ставим 8000 тик= 8000 см
+#define rmt_item32_tIMEOUT 64000              // 468 cm /*!< RMT receiver timeout value(us) */ // 8075 см - ставим 8000 тик= 8000 см
 #define RMT_TRIGG_TICK 6                      // trigg wilth approx 10 us
 
 static void HCSR04_tx_init()
@@ -62,6 +62,8 @@ void DistIsrSetup(void *p)
     //double distance = 0;
     int dist = 0;
     int midl_dist = 0;
+    int max_dist = 0;
+    int min_dist = 0;
     //int size = 0;
     int cnt = 0;
     for (;;)
@@ -76,9 +78,32 @@ void DistIsrSetup(void *p)
             //size = (int)rx_size;
             vRingbufferReturnItem(rb, (void *)rx_item);
             //       ESP_LOGI(NEC_TAG, "Dist is %d tick size %d item %d n ", dist, size,cnt);
-            if (midl_dist < dist)
+            /*            if (midl_dist < dist)
             {
                 midl_dist = dist;
+            }
+*/
+
+            if (cnt == 0)
+            {
+                min_dist = max_dist = midl_dist = dist;
+            }
+            else
+            {
+                if (dist < min_dist)
+                {
+                    midl_dist = min_dist;
+                    min_dist = dist;
+                }
+                else if (dist > max_dist)
+                {
+                    midl_dist = max_dist;
+                    max_dist = dist;
+                }
+                else
+                {
+                    midl_dist = dist;
+                }
             }
             if (++cnt == 3)
             {
@@ -87,8 +112,16 @@ void DistIsrSetup(void *p)
                 xSemaphoreGive(DataParmTableMutex);
                 xQueueSend(DistIsrQueue, &midl_dist, 0);
                 //            ESP_LOGI(NEC_TAG, "MIDL Dist is %d\n ", midl_dist);
+/*
+                struct WsDataToSend req;
+                req.fd = 0;
+                req.hd = NULL;
+                req.idx = IDX_DISTVOL;
+                xQueueSend(SendWsQueue, &req, 0); // датчик расстояния
+
+*/
                 cnt = 0;
-                midl_dist = 0;
+                //midl_dist = 0;
             }
         }
         else
@@ -96,7 +129,7 @@ void DistIsrSetup(void *p)
             ESP_LOGI(NEC_TAG, "Distance is not readable");
         }
 
-        vTaskDelay(100 / portTICK_PERIOD_MS);
+        vTaskDelay(150 / portTICK_PERIOD_MS);
     }
 }
 

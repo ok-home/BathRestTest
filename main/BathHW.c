@@ -105,7 +105,7 @@ void BathVentControl(void *p)
         {
             xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
             autoVent = DataParmTable[IDX_BATHVENTAUTOENABLE].val;
-            ventOnOff = DataParmTable[IDX_BATHVENTONOFF].val;
+            ventOnOff = DataParmTable[IDX_BATHVENTSTATUS].val;
             switch (unidata.HttpData.sender)
             {
             case IDX_QHD_HTTP:
@@ -124,7 +124,8 @@ void BathVentControl(void *p)
                     ventOnOff = unidata.HumData.HumData;
                     break;
                 }
-             __attribute__ ((fallthrough));
+                break;
+             //__attribute__ ((fallthrough));
             case IDX_QHD_LightData:
                 if (autoVent == 0)
                 {
@@ -241,7 +242,7 @@ void RestVentControl(void *p)
         {
             xSemaphoreTake(DataParmTableMutex, portMAX_DELAY);
             autoVent = DataParmTable[IDX_RESTVENTAUTOENABLE].val;
-            ventOnOff = DataParmTable[IDX_RESTVENTONOFF].val;
+            ventOnOff = DataParmTable[IDX_RESTVENTSTATUS].val;
 
             switch (unidata.HttpData.sender)
             {
