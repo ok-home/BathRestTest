@@ -492,7 +492,7 @@ void CheckBathHum(void *p)
         xSemaphoreGive(DataParmTableMutex);
         if (ventOnOff == 0)
         {
-            if (hum > humOn)
+            if (hum >= humOn)
             {
                 ventOnOff = 1;
                 flag = 1;
@@ -500,7 +500,7 @@ void CheckBathHum(void *p)
         }
         else
         {
-            if (hum < humOff)
+            if (hum <= humOff)
             {
                 ventOnOff = 0;
                 flag = 1;
